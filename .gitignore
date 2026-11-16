@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+build/
+dist/
+*.egg-info/
+data/
+cache/
+results/
+resources/modern_codec/
+resources/**/*.pth
+resources/**/*.pt
+resources/**/*.tar
+resources/**/*.whl
+.pytest-tmp/

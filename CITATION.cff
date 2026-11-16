@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use SafeSync in your research, please cite our paper."
+title: "SafeSync: Asymmetric Space-Ground State Synchronization and Evidence-Preserving Co-Construction for Repeated Earth Observation"
+authors:
+  - family-names: "Wu"
+    given-names: "Yonghao"
+license: "MIT"
+repository-code: "https://github.com/WYH302/SafeSync"
