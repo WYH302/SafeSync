@@ -13,7 +13,19 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})
+plt.rcParams.update({
+    "font.family": "serif",
+    "font.serif": ["Times New Roman", "DejaVu Serif"],
+    "font.size": 8.5,
+    "axes.labelsize": 8.5,
+    "axes.titlesize": 9.0,
+    "xtick.labelsize": 8.0,
+    "ytick.labelsize": 8.0,
+    "legend.fontsize": 7.5,
+    "axes.linewidth": 0.65,
+    "pdf.fonttype": 42,
+    "ps.fonttype": 42,
+})
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -52,31 +64,34 @@ def build_figure1_sn7_comm_vs_utility(lowres_analysis: dict, sn7_repaired: dict)
         ("tcm", "LIC-TCM (4.18 GB weights)", "#D55E00", "*", "-", 1.7),
     ]
 
-    fig, axes = plt.subplots(1, 2, figsize=(7.1, 3.0), constrained_layout=True)
+    fig, axes = plt.subplots(1, 2, figsize=(7.16, 2.86))
+    fig.subplots_adjust(left=0.075, right=0.992, bottom=0.175, top=0.69, wspace=0.25)
     for m, label, color, marker, ls, lw in methods_cfg:
         pts = [lookup[m, cap] for cap in (32768, 65536, 131072)]
         xs = [float(r["mean_bytes"]) / 1024.0 for r in pts]
         b_f1 = [float(r["building_f1"]) for r in pts]
         e_f1 = [float(r["event_f1"]) for r in pts]
-        axes[0].plot(xs, b_f1, label=label, color=color, marker=marker, linestyle=ls, linewidth=lw, markersize=4.5)
-        axes[1].plot(xs, e_f1, label=label, color=color, marker=marker, linestyle=ls, linewidth=lw, markersize=4.5)
+        axes[0].plot(xs, b_f1, label=label, color=color, marker=marker, linestyle=ls, linewidth=lw, markersize=4.3)
+        axes[1].plot(xs, e_f1, label=label, color=color, marker=marker, linestyle=ls, linewidth=lw, markersize=4.3)
 
     # Annotate Bootstrap-only (0 update bytes: Building F1 = 0.5475, Event F1 = 0.0000)
     axes[0].axhline(0.5475, color="#333333", linestyle=":", linewidth=1.0, alpha=0.75)
-    axes[0].text(34.0, 0.531, "Bootstrap-only (0 KiB/upd, Event F1 = 0.000)", fontsize=6.4, color="#333333")
+    axes[0].text(33.5, 0.529, "Bootstrap-only (0 KiB/upd, Event F1 = 0.000)", fontsize=7.0, color="#333333")
     axes[0].set_ylim(0.265, 0.568)
 
-    axes[0].set_title("(a) Static Building F1 (Author OOF)", fontsize=8.5)
-    axes[1].set_title("(b) New-Track Change Event F1 (Author OOF)", fontsize=8.5)
+    axes[0].set_title("(a) Static Building F1 (Author-OOF)", loc="left", pad=5, fontsize=8.8, fontweight="bold")
+    axes[1].set_title("(b) New-Track Event F1 (Author-OOF)", loc="left", pad=5, fontsize=8.8, fontweight="bold")
     axes[0].set_ylabel("Building F1")
     axes[1].set_ylabel("New-track Event F1")
     for ax in axes:
-        ax.set_xlabel("Actual mean bidirectional update size (KiB)")
-        ax.grid(alpha=0.22)
+        ax.set_xlabel("Actual bidirectional payload (downlink + ACK, KiB)")
+        ax.set_xlim(20, 130)
+        ax.grid(alpha=0.18, linewidth=0.5)
         ax.spines[["top", "right"]].set_visible(False)
 
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="outside upper center", ncols=3, frameon=False, fontsize=6.8)
+    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(0.51, 0.995), ncol=3,
+               frameon=False, fontsize=7.3, handlelength=2.2, columnspacing=1.1, labelspacing=0.35)
 
     pdf_path = ROOT / "paper/figures/tcm_oof_curves.pdf"
     png_path = ROOT / "results/lowres_reference_sn7/v1/sn7_decision_curves.png"
@@ -119,10 +134,10 @@ def build_figure2_storage_vs_utility(
     ax.set_xticks([1, 4, 8, 12, 16])
     ax.set_xlabel("Monitored geographic areas $N$")
     ax.set_ylabel("Sender historical state (MiB)")
-    ax.set_title("(a) Multi-AOI Onboard State Scaling", fontsize=8.2, fontweight="bold")
-    ax.grid(alpha=0.22, which="both")
+    ax.set_title("(a) Multi-AOI Onboard State Scaling", loc="left", pad=4, fontsize=8.8, fontweight="bold")
+    ax.grid(alpha=0.18, which="both", linewidth=0.5)
     ax.spines[["top", "right"]].set_visible(False)
-    ax.legend(frameon=True, facecolor="white", framealpha=0.88, edgecolor="none", fontsize=5.3, ncol=2, loc="upper left")
+    ax.legend(frameon=True, facecolor="white", framealpha=0.90, edgecolor="none", fontsize=6.5, ncol=2, loc="upper left", columnspacing=0.8, handlelength=1.8)
 
     # Panel (b): Reuse Certificate Violations & Pass-to-Pass Orbital-Drift False Triggers (32 KiB)
     ax = axes[0, 1]
@@ -136,43 +151,43 @@ def build_figure2_storage_vs_utility(
     for rect, v in zip(b1, viol_pct):
         lbl = "0% (0)" if v == 0 else f"{v:.1f}%"
         x_pos = rect.get_x() + rect.get_width() / 2 - (0.04 if v == 0 else 0.0)
-        ax.text(x_pos, v + 1.8, lbl, ha="center", fontsize=6.0, color="#991B1B", fontweight="bold")
+        ax.text(x_pos, v + 2.0, lbl, ha="center", fontsize=6.9, color="#991B1B", fontweight="bold")
     for rect, v in zip(b2, drift_pct):
-        ax.text(rect.get_x() + rect.get_width() / 2, v + 1.8, f"{v:.1f}%", ha="center", fontsize=6.0, color="#1E40AF", fontweight="bold")
-    ax.set_xticks(xb, methods_bar, fontsize=6.8)
+        ax.text(rect.get_x() + rect.get_width() / 2, v + 2.0, f"{v:.1f}%", ha="center", fontsize=6.9, color="#1E40AF", fontweight="bold")
+    ax.set_xticks(xb, methods_bar, fontsize=7.6)
     ax.set_ylim(0, 96.0)
     ax.set_ylabel("Error / False-trigger rate (%)")
-    ax.set_title("(b) Reuse Safety & Orbital-Drift Immunity", fontsize=8.2, fontweight="bold")
-    ax.legend(frameon=False, fontsize=5.8, loc="upper left")
-    ax.grid(axis="y", alpha=0.22)
+    ax.set_title("(b) Reuse Safety & Drift Immunity", loc="left", pad=4, fontsize=8.6, fontweight="bold")
+    ax.legend(frameon=False, fontsize=6.9, loc="upper left")
+    ax.grid(axis="y", alpha=0.18, linewidth=0.5)
     ax.spines[["top", "right"]].set_visible(False)
 
     # Panel (c): N=8 Total Sender Historical State (MiB) vs 32 KiB Event F1 (zero overlap!)
     ax = axes[1, 0]
     pts_b = [
-        ("SafeSync-ZFSS", (8 * 12328) / (1024**2), lookup32["gaussian_20261029"]["event_f1"], "#004488", "o", (0.045, 0.015)),
-        ("SafeSync (cached)", (2359296 + 8 * 12328) / (1024**2), lookup32["gaussian_20261029"]["event_f1"], "#0072B2", "o", (0.28, -0.020)),
+        ("SafeSync-ZFSS", (8 * 12328) / (1024**2), lookup32["gaussian_20261029"]["event_f1"], "#004488", "o", (0.030, 0.015)),
+        ("SafeSync (cached)", (2359296 + 8 * 12328) / (1024**2), lookup32["gaussian_20261029"]["event_f1"], "#0072B2", "o", (0.24, -0.020)),
         ("DCT", (8 * 13864) / (1024**2), lookup32["dct_bound"]["event_f1"], "#E69F00", "s", (1.35, -0.004)),
         ("4x WebP (25dB)", (8 * lookup32["lowres_4x_webp_12k"]["mean_sender_summary_bytes"]) / (1024**2), lookup32["lowres_4x_webp_12k"]["event_f1"], "#56B4E9", "^", (1.38, -0.008)),
-        ("4x WebP (30dB)", (8 * lookup32["lowres_4x_webp_12k_gate30"]["mean_sender_summary_bytes"]) / (1024**2), lookup32["lowres_4x_webp_12k_gate30"]["event_f1"], "#009E73", "v", (1.38, 0.005)),
+        ("4x WebP (30dB)", (8 * lookup32["lowres_4x_webp_12k_gate30"]["mean_sender_summary_bytes"]) / (1024**2), lookup32["lowres_4x_webp_12k_gate30"]["event_f1"], "#009E73", "v", (1.38, 0.004)),
         ("Coarse 16x16", (8 * 12328) / (1024**2), lookup32["lowres_16x16_coarse_only"]["event_f1"], "#777777", "d", (1.35, -0.003)),
-        ("Full PNG Hist.", cap32_png_8aoi / (1024**2), lookup32["full_cache_gate30"]["event_f1"], "#2B9F78", "P", (0.25, 0.011)),
+        ("Full PNG Hist.", cap32_png_8aoi / (1024**2), lookup32["full_cache_gate30"]["event_f1"], "#2B9F78", "P", (0.32, 0.014)),
         ("WebP", 0.002, lookup32["full_webp"]["event_f1"], "#555555", "X", (1.45, -0.003)),
         ("Hyperprior*", 0.002, lookup32["learned_hyperprior_q1_8"]["event_f1"], "#CC79A7", "D", (1.45, -0.003)),
         ("LIC-TCM*", 0.002, lookup32["tcm"]["event_f1"], "#D55E00", "*", (1.45, -0.004)),
     ]
     for name, st_mib, ef1, col, mk, (dx, dy) in pts_b:
-        ax.scatter(st_mib, ef1, color=col, marker=mk, s=38, zorder=3)
-        ap = dict(arrowstyle="-", color=col, lw=0.7, alpha=0.75) if "SafeSync-ZFSS" in name else None
-        ax.annotate(name, (st_mib, ef1), xytext=(st_mib * dx, ef1 + dy), fontsize=5.8, color=col,
+        ax.scatter(st_mib, ef1, color=col, marker=mk, s=40, zorder=3)
+        ap = dict(arrowstyle="-", color=col, lw=0.75, alpha=0.75) if "SafeSync-ZFSS" in name else None
+        ax.annotate(name, (st_mib, ef1), xytext=(st_mib * dx, ef1 + dy), fontsize=6.7, color=col,
                     fontweight="bold" if "SafeSync-ZFSS" in name else "normal", arrowprops=ap)
     ax.set_xscale("log")
-    ax.set_xlim(0.001, 38.0)
+    ax.set_xlim(0.001, 52.0)
     ax.set_ylim(0.088, 0.242)
     ax.set_xlabel("8-AOI sender state (MiB; *excl. 61M/4.18G weights)")
     ax.set_ylabel("32-KiB New-Track Event F1")
-    ax.set_title("(c) SpaceNet 7 State Footprint vs. Event F1", fontsize=8.2, fontweight="bold")
-    ax.grid(alpha=0.22)
+    ax.set_title("(c) SpaceNet 7 State Footprint vs. Event F1", loc="left", pad=4, fontsize=8.6, fontweight="bold")
+    ax.grid(alpha=0.18, linewidth=0.5)
     ax.spines[["top", "right"]].set_visible(False)
 
     # Panel (d): SECOND Cohort 3 Open-World Discovery (U30 Coverage vs. Held-Out Later Building F1)
@@ -182,27 +197,27 @@ def build_figure2_storage_vs_utility(
     rep = _index_sec_repaired(sec_repaired)
     sec_pts = [
         ("WebP", cells["full_webp"]["u30"], cells["full_webp"]["later_f1"], "#555555", "X", (0.008, -0.004)),
-        ("Hyperprior", cells["hyperprior"]["u30"], cells["hyperprior"]["later_f1"], "#CC79A7", "D", (-0.048, 0.005)),
-        ("Abs.+Change", cells["absolute_change"]["u30"], cells["absolute_change"]["later_f1"], "#E69F00", "s", (-0.072, 0.002)),
-        ("Locked Res.", cells["residual_current"]["u30"], cells["residual_current"]["later_f1"], "#56B4E9", "^", (-0.078, 0.003)),
-        ("TC-PCR (4A+4B)", rep["repaired_residual_unknown_sel"]["u30"], rep["repaired_residual_unknown_sel"]["later_f1"], "#004488", "o", (-0.105, -0.008)),
-        ("TC-PCR Refined", rep["repaired_residual_unknown_sel"]["u30"], rep["repaired_residual_unknown_sel_calprobe"]["later_f1"], "#15803D", "P", (-0.115, -0.004)),
+        ("Hyperprior", cells["hyperprior"]["u30"], cells["hyperprior"]["later_f1"], "#CC79A7", "D", (-0.052, 0.005)),
+        ("Abs.+Change", cells["absolute_change"]["u30"], cells["absolute_change"]["later_f1"], "#E69F00", "s", (-0.075, 0.002)),
+        ("Locked Res.", cells["residual_current"]["u30"], cells["residual_current"]["later_f1"], "#56B4E9", "^", (-0.080, 0.003)),
+        ("TC-PCR (4A+4B)", rep["repaired_residual_unknown_sel"]["u30"], rep["repaired_residual_unknown_sel"]["later_f1"], "#004488", "o", (-0.108, -0.008)),
+        ("TC-PCR Refined", rep["repaired_residual_unknown_sel"]["u30"], rep["repaired_residual_unknown_sel_calprobe"]["later_f1"], "#15803D", "P", (-0.118, -0.004)),
         ("LIC-TCM (4.18G)", cells["tcm"]["u30"], cells["tcm"]["later_f1"], "#D55E00", "*", (0.006, 0.003)),
-        ("GT Oracle", ora["oracle_hybrid_with_full_hp"]["u30"], ora["oracle_hybrid_with_full_hp"]["later_f1"], "#666666", "p", (-0.036, -0.009)),
+        ("GT Oracle", ora["oracle_hybrid_with_full_hp"]["u30"], ora["oracle_hybrid_with_full_hp"]["later_f1"], "#666666", "p", (-0.038, -0.009)),
     ]
     for lbl, u30, lf1, col, mk, (ox, oy) in sec_pts:
         ax.scatter(u30, lf1, color=col, marker=mk, s=42, zorder=4)
-        ax.annotate(lbl, (u30, lf1), xytext=(u30 + ox, lf1 + oy), fontsize=5.8, color=col,
+        ax.annotate(lbl, (u30, lf1), xytext=(u30 + ox, lf1 + oy), fontsize=6.7, color=col,
                     fontweight="bold" if "TC-PCR" in lbl else "normal")
     ax.annotate("", xy=(rep["repaired_residual_unknown_sel"]["u30"], rep["repaired_residual_unknown_sel_calprobe"]["later_f1"]),
                 xytext=(rep["repaired_residual_unknown_sel"]["u30"], rep["repaired_residual_unknown_sel"]["later_f1"]),
                 arrowprops=dict(arrowstyle="->", color="#15803D", lw=1.1, ls="--"))
-    ax.set_xlim(0.515, 0.845)
+    ax.set_xlim(0.515, 0.858)
     ax.set_ylim(0.796, 0.858)
     ax.set_xlabel("Held-out building 30-dB coverage $U_{30}$")
     ax.set_ylabel("Held-out building Later F1")
-    ax.set_title("(d) SECOND Open-World Discovery (8 KiB)", fontsize=8.2, fontweight="bold")
-    ax.grid(alpha=0.22)
+    ax.set_title("(d) SECOND Open-World Discovery (8 KiB)", loc="left", pad=4, fontsize=8.6, fontweight="bold")
+    ax.grid(alpha=0.18, linewidth=0.5)
     ax.spines[["top", "right"]].set_visible(False)
 
     pdf_path = ROOT / "paper/figures/storage_utility_tradeoff.pdf"
@@ -594,13 +609,14 @@ def build_tables(
 
     # 2. Supplement table for Low-Res Reference Control & Pseudo-Change Diagnostic
     lowres_lines = [
-        r"\begin{table*}[t]\centering\footnotesize",
+        r"\begin{table*}[t]\centering",
         r"\caption{Matched-storage low-resolution historical reference controls ($\le 12,328$ B/area) and same-protocol comparators on the eight SpaceNet 7 confirmation AOIs under the Author-OOF evaluator. Within each 32/64/128-KiB cap, columns report Building F1, New-track Event F1, and actual mean bidirectional update KiB.}",
         r"\label{tab:lowres-sn7}",
-        r"\setlength{\tabcolsep}{0pt}",
-        r"\renewcommand{\arraystretch}{1.00}",
-        r"\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrrrrrrr@{}}\toprule",
-        r"Method & B32 & E32 & KiB32 & B64 & E64 & KiB64 & B128 & E128 & KiB128" + end,
+        r"\begingroup\fontsize{8}{10.0}\selectfont",
+        r"\setlength{\tabcolsep}{4.8pt}",
+        r"\renewcommand{\arraystretch}{1.06}",
+        r"\begin{tabularx}{\textwidth}{Xrrrrrrrrr}\toprule",
+        r"\rowcolor{tableheadbg} Method & B32 & E32 & KiB32 & B64 & E64 & KiB64 & B128 & E128 & KiB128" + end,
         r"\midrule",
     ]
     lowres_order = [
@@ -608,8 +624,8 @@ def build_tables(
         ("lowres_4x_webp_12k", r"Low-res 4x WebP ref ($\le$12.3 KB, 1,495 viol.)"),
         ("lowres_4x_webp_12k_gate30", r"Low-res 4x WebP ref ($\le$12.3 KB, 30 dB)"),
         ("dct_bound", "DCT bound (13.9 KB, 0 shared)"),
-        ("gaussian_20261029", "SafeSync-ZFSS (12.3 KB, 0B mat., coupled, 0 viol.)"),
-        ("gaussian_decoupled", "SafeSync-DGAD (12.3 KB, 0B mat., decoupled, 0 viol.)"),
+        ("gaussian_20261029", r"\textbf{SafeSync-ZFSS (12.3 KB, 0 B mat., coupled, 0 viol.)}"),
+        ("gaussian_decoupled", r"\textbf{SafeSync-DGAD (12.3 KB, 0 B mat., decoupled, 0 viol.)}"),
         ("full_cache_mse", "Full history (25 dB gate)"),
         ("full_cache_gate30", "Full history (30 dB gate)"),
         ("full_webp", "Full WebP"),
@@ -617,7 +633,8 @@ def build_tables(
         ("tcm", "LIC-TCM (35 candidates)"),
     ]
     for m, label in lowres_order:
-        row_cells = [label]
+        prefix = r"\rowcolor{safesyncbg} " if m.startswith("gaussian_") else ""
+        row_cells = [prefix + label]
         for cap in (32768, 65536, 131072):
             r = lookup[m, cap]
             row_cells += [
@@ -626,7 +643,7 @@ def build_tables(
                 f"{float(r['mean_bytes'])/1024:.1f}",
             ]
         lowres_lines.append(" & ".join(row_cells) + end)
-    lowres_lines += [r"\bottomrule\end{tabular*}\end{table*}"]
+    lowres_lines += [r"\bottomrule\end{tabularx}\endgroup\end{table*}"]
     p_lowres_tex = ROOT / "paper/supplement/generated/lowres_sn7_table.tex"
     p_lowres_tex.write_text("\n".join(lowres_lines) + "\n", encoding="utf-8")
 
@@ -635,22 +652,23 @@ def build_tables(
     o_dict = diag["oracle_diagnostic_h5_b8192"]["contrasts"]
     rc_dict = sec_repaired["paired_bootstrap_contrasts"]
     fact_lines = [
-        r"\begin{table*}[t]\centering\scriptsize",
+        r"\begin{table*}[t]\centering",
         r"\caption{Complete $2\times 2$ four-cell attribution, Threshold-Crossing Prototype-Calibrated Routing (TC-PCR: active-support selector + sender-visible 30-dB threshold-crossing ranking + calibrated known-class emergence + refined-evidence-region probe), and post-hoc Oracle selection diagnostic on the third 256-pair SECOND confirmation cohort (Building held-out, 8-KiB cap).}",
         r"\label{tab:factorial-oracle}",
-        r"\setlength{\tabcolsep}{0pt}",
-        r"\renewcommand{\arraystretch}{1.00}",
-        r"\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}llrrrrr@{}}\toprule",
-        r"Cell / Contrast & Mechanism tested & $U_{30}$ / $\Delta U_{30}$ & 95\% CI (pp) & Later F1 / $\Delta$F1 & Held-out FNR & Mean bytes" + end,
+        r"\begingroup\fontsize{7.8}{9.8}\selectfont",
+        r"\setlength{\tabcolsep}{4.0pt}",
+        r"\renewcommand{\arraystretch}{1.06}",
+        r"\begin{tabularx}{\textwidth}{lXrrrrr}\toprule",
+        r"\rowcolor{tableheadbg} Cell / Contrast & Mechanism tested & $U_{30}$ / $\Delta U_{30}$ & 95\% CI (pp) & Later F1 / $\Delta$F1 & Held-out FNR & Mean bytes" + end,
         r"\midrule",
         f"Cell A (\\texttt{{absolute\\_change}}) & Absolute ROI + Change & {cells['absolute_change']['u30']:.4f} & -- & {cells['absolute_change']['later_f1']:.4f} & {cells['absolute_change']['later_fnr']:.4f} & {cells['absolute_change']['mean_total_bytes']:.1f}" + end,
         f"Cell B (\\texttt{{absolute\\_current}}) & Absolute ROI + Unknown & {cells['absolute_current']['u30']:.4f} & -- & {cells['absolute_current']['later_f1']:.4f} & {cells['absolute_current']['later_fnr']:.4f} & {cells['absolute_current']['mean_total_bytes']:.1f}" + end,
         f"Cell C (\\texttt{{residual\\_change}}) & Residual ROI + Change (locked) & {cells['residual_change']['u30']:.4f} & -- & {cells['residual_change']['later_f1']:.4f} & {cells['residual_change']['later_fnr']:.4f} & {cells['residual_change']['mean_total_bytes']:.1f}" + end,
         f"Cell D (\\texttt{{residual\\_current}}) & Residual ROI + Unknown (locked) & {cells['residual_current']['u30']:.4f} & -- & {cells['residual_current']['later_f1']:.4f} & {cells['residual_current']['later_fnr']:.4f} & {cells['residual_current']['mean_total_bytes']:.1f}" + end,
-        f"TC-PCR Change (4A+4B) & Active-support + 30dB Change & {rep['repaired_residual_change_sel']['u30']:.4f} & -- & {rep['repaired_residual_change_sel']['later_f1']:.4f} & {rep['repaired_residual_change_sel']['later_fnr']:.4f} & {rep['repaired_residual_change_sel']['mean_total_bytes']:.1f}" + end,
-        f"TC-PCR Unknown (4A+4B) & Active-support + 30dB + Cal. Unknown & {rep['repaired_residual_unknown_sel']['u30']:.4f} & -- & {rep['repaired_residual_unknown_sel']['later_f1']:.4f} & {rep['repaired_residual_unknown_sel']['later_fnr']:.4f} & {rep['repaired_residual_unknown_sel']['mean_total_bytes']:.1f}" + end,
-        f"TC-PCR Unknown (Raw, 4B) & Raw residual + 30dB + Cal. Unknown & {rep['repaired_residual_unknown_raw']['u30']:.4f} & -- & {rep['repaired_residual_unknown_raw']['later_f1']:.4f} & {rep['repaired_residual_unknown_raw']['later_fnr']:.4f} & {rep['repaired_residual_unknown_raw']['mean_total_bytes']:.1f}" + end,
-        f"TC-PCR Unknown (Refined ROI, 4C) & Evaluated on refined evidence ROI & {rep['repaired_residual_unknown_sel']['u30']:.4f} & -- & {rep['repaired_residual_unknown_sel_calprobe']['later_f1']:.4f} & {rep['repaired_residual_unknown_sel_calprobe']['later_fnr']:.4f} & {rep['repaired_residual_unknown_sel']['mean_total_bytes']:.1f}" + end,
+        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR Change (4A+4B)}} & Active-support + 30dB Change & {rep['repaired_residual_change_sel']['u30']:.4f} & -- & {rep['repaired_residual_change_sel']['later_f1']:.4f} & {rep['repaired_residual_change_sel']['later_fnr']:.4f} & {rep['repaired_residual_change_sel']['mean_total_bytes']:.1f}" + end,
+        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR Unknown (4A+4B)}} & Active-support + 30dB + Cal. Unknown & {rep['repaired_residual_unknown_sel']['u30']:.4f} & -- & {rep['repaired_residual_unknown_sel']['later_f1']:.4f} & {rep['repaired_residual_unknown_sel']['later_fnr']:.4f} & {rep['repaired_residual_unknown_sel']['mean_total_bytes']:.1f}" + end,
+        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR Unknown (Raw, 4B)}} & Raw residual + 30dB + Cal. Unknown & {rep['repaired_residual_unknown_raw']['u30']:.4f} & -- & {rep['repaired_residual_unknown_raw']['later_f1']:.4f} & {rep['repaired_residual_unknown_raw']['later_fnr']:.4f} & {rep['repaired_residual_unknown_raw']['mean_total_bytes']:.1f}" + end,
+        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR Unknown (Refined, 4C)}} & Evaluated on refined evidence ROI & {rep['repaired_residual_unknown_sel']['u30']:.4f} & -- & {rep['repaired_residual_unknown_sel_calprobe']['later_f1']:.4f} & {rep['repaired_residual_unknown_sel_calprobe']['later_fnr']:.4f} & {rep['repaired_residual_unknown_sel']['mean_total_bytes']:.1f}" + end,
         f"Post-hoc Oracle Hybrid & Ideal 8-KiB residual or HP & {ora['oracle_hybrid_with_full_hp']['u30']:.4f} & -- & {ora['oracle_hybrid_with_full_hp']['later_f1']:.4f} & {ora['oracle_hybrid_with_full_hp']['later_fnr']:.4f} & {ora['oracle_hybrid_with_full_hp']['mean_total_bytes']:.1f}" + end,
         r"\midrule",
         f"Row effect ($C - A$, locked) & Residual vs Abs. (Change) & {100*c_dict['C_minus_A_residual_in_change']['u30_diff'][0]:+.2f} pp & [{100*c_dict['C_minus_A_residual_in_change']['u30_diff'][1]:+.2f}, {100*c_dict['C_minus_A_residual_in_change']['u30_diff'][2]:+.2f}] & {100*c_dict['C_minus_A_residual_in_change']['later_f1_diff'][0]:+.2f} pp & {100*c_dict['C_minus_A_residual_in_change']['later_fnr_diff'][0]:+.2f} pp & +99.6" + end,
@@ -660,7 +678,7 @@ def build_tables(
         f"TC-PCR Unknown vs HP & $+12.16$ pp (+33.6\\% UMR red.) & {100*rc_dict['repaired_residual_unknown_sel']['vs_hyperprior']['u30_diff'][0]:+.2f} pp & [{100*rc_dict['repaired_residual_unknown_sel']['vs_hyperprior']['u30_diff'][1]:+.2f}, {100*rc_dict['repaired_residual_unknown_sel']['vs_hyperprior']['u30_diff'][2]:+.2f}] & {100*rc_dict['repaired_residual_unknown_sel']['vs_hyperprior']['later_f1_diff'][0]:+.2f} pp & {100*rc_dict['repaired_residual_unknown_sel']['vs_hyperprior']['later_fnr_diff'][0]:+.2f} pp & +345.8" + end,
         f"TC-PCR Unknown vs TCM & Parity vs 4.18 GB TCM & {100*rc_dict['repaired_residual_unknown_sel']['vs_tcm']['u30_diff'][0]:+.2f} pp & [{100*rc_dict['repaired_residual_unknown_sel']['vs_tcm']['u30_diff'][1]:+.2f}, {100*rc_dict['repaired_residual_unknown_sel']['vs_tcm']['u30_diff'][2]:+.2f}] & {100*rc_dict['repaired_residual_unknown_sel']['vs_tcm']['later_f1_diff'][0]:+.2f} pp & {100*rc_dict['repaired_residual_unknown_sel']['vs_tcm']['later_fnr_diff'][0]:+.2f} pp & -50.8" + end,
         f"Refined ROI Probe vs WebP & Region-aligned task gain (4C) & {100*rc_dict['repaired_residual_unknown_sel_calprobe']['vs_full_webp']['u30_diff'][0]:+.2f} pp & [{100*rc_dict['repaired_residual_unknown_sel_calprobe']['vs_full_webp']['u30_diff'][1]:+.2f}, {100*rc_dict['repaired_residual_unknown_sel_calprobe']['vs_full_webp']['u30_diff'][2]:+.2f}] & {100*rc_dict['repaired_residual_unknown_sel_calprobe']['vs_full_webp']['later_f1_diff'][0]:+.2f} pp & {100*rc_dict['repaired_residual_unknown_sel_calprobe']['vs_full_webp']['later_fnr_diff'][0]:+.2f} pp & -209.6" + end,
-        r"\bottomrule\end{tabular*}\end{table*}",
+        r"\bottomrule\end{tabularx}\endgroup\end{table*}",
     ]
     p_fact_tex = ROOT / "paper/supplement/generated/factorial_oracle_table.tex"
     p_fact_tex.write_text("\n".join(fact_lines) + "\n", encoding="utf-8")
@@ -669,7 +687,13 @@ def build_tables(
 
 
 def main() -> None:
-    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 8, "pdf.fonttype": 42, "ps.fonttype": 42})
+    plt.rcParams.update({
+        "font.family": "serif",
+        "font.serif": ["Times New Roman", "DejaVu Serif"],
+        "font.size": 8.5,
+        "pdf.fonttype": 42,
+        "ps.fonttype": 42,
+    })
     lowres_analysis = read_json(ROOT / "results/lowres_reference_sn7/v1/analysis.json")
     png_profile = read_json(ROOT / "results/sender_profile/compressed_archive_v1/summary.json")
     sender_ref = read_json(ROOT / "results/task_evidence/sender_reference_v1/verification.json")

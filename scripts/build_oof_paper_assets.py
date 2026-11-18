@@ -61,15 +61,23 @@ def save(path, value):
 def table(path, caption, label, headers, rows, note, wide=True):
     env = "table*" if wide else "table"
     width = r"\textwidth" if wide else r"\columnwidth"
-    lines = [r"\begin{" + env + "}[t]", r"\centering\footnotesize",
+    lines = [r"\begin{" + env + "}[t]", r"\centering",
              r"\caption{" + caption + "}", r"\label{" + label + "}",
-             r"\setlength{\tabcolsep}{0pt}",
-             r"\renewcommand{\arraystretch}{1.00}",
-             r"\begin{tabular*}{" + width + r"}{@{\extracolsep{\fill}}l" + "r"*(len(headers)-1) + r"@{}}",
-             r"\toprule", " & ".join(headers) + r" \\", r"\midrule"]
-    lines += [" & ".join(map(str, row)) + r" \\" for row in rows]
-    lines += [r"\bottomrule", r"\end{tabular*}", r"\par\smallskip",
-              r"\begin{minipage}{" + width + r"}\footnotesize " + note + r"\end{minipage}",
+             r"\begingroup\fontsize{8}{10.0}\selectfont",
+             r"\setlength{\tabcolsep}{6.5pt}",
+             r"\renewcommand{\arraystretch}{1.08}",
+             r"\begin{tabularx}{" + width + r"}{X" + "r"*(len(headers)-1) + r"}",
+             r"\toprule", r"\rowcolor{tableheadbg} " + " & ".join(headers) + r" \\", r"\midrule"]
+    for row in rows:
+        first = str(row[0])
+        is_ss = first in ("Gaussian", "SafeSync-ZFSS") or "SafeSync" in first
+        row_cells = list(map(str, row))
+        if first == "Gaussian":
+            row_cells[0] = r"\textbf{SafeSync-ZFSS (Gaussian)}"
+        prefix = r"\rowcolor{safesyncbg} " if is_ss else ""
+        lines.append(prefix + " & ".join(row_cells) + r" \\")
+    lines += [r"\bottomrule", r"\end{tabularx}\endgroup", r"\vspace{2.5pt}",
+              r"\begin{minipage}{" + width + r"}\fontsize{7.5}{9.2}\selectfont\emph{Notes.} " + note + r"\end{minipage}",
               r"\end{" + env + "}", ""]
     save(path, "\n".join(lines))
 
@@ -117,29 +125,43 @@ def main():
           "Each AOI is scored with its out-of-fold validation checkpoint from the published four-fold split (building threshold 0.5, "
           "calibrated event threshold 0.941). Realized bidirectional byte counts and RGB reconstructions match Table~I.")
     selected = ["gaussian_20261029", "dct_bound", "random_1729", "full_cache_gate30",
-                "full_webp", "learned_hyperprior_q1_8"]
-    # Six policies, with both tasks and all three caps, in a full-width one-column table.
+                "full_jpeg420", "full_webp", "learned_hyperprior_q1_8"]
+    oof_paradigms = {
+        "gaussian_20261029": "Asymmetric State (Ours)",
+        "dct_bound": "Deterministic State",
+        "random_1729": "Random Priority Ctrl.",
+        "full_cache_gate30": "Full-Archive Ref.",
+        "full_jpeg420": "Stateless Transform",
+        "full_webp": "Stateless Transform",
+        "learned_hyperprior_q1_8": "Learned Neural Codec",
+    }
+    # Full-width two-column Table II matching Table I and Table III typography (uniform 8pt, 8 columns).
     lines = [
-        r"\begin{table}[t]", r"\centering\footnotesize",
-        r"\caption{Cross-validated 4-fold Author-OOF utility across 32, 64, and 128-KiB caps on unchanged decoded images.}",
-        r"\label{tab:oof}", r"\setlength{\tabcolsep}{4.0pt}",
+        r"\begin{table*}[t]", r"\centering",
+        r"\caption{Cross-validated four-fold Author-OOF building segmentation and new-track change-event F1 across the 32, 64, and 128-KiB downlink caps on the identical decoded confirmation streams. Best and second-best non-oracle methods per cap are \textbf{bolded} and \underline{underlined}.}",
+        r"\label{tab:oof}",
+        r"\begingroup\fontsize{8}{10.2}\selectfont",
+        r"\setlength{\tabcolsep}{8.0pt}",
         r"\renewcommand{\arraystretch}{1.12}",
-        r"\begin{tabularx}{\columnwidth}{Xrrrrrr}", r"\toprule",
-        r"\rowcolor{tableheadbg} & \multicolumn{3}{c}{\textbf{Building F1} $\uparrow$} & \multicolumn{3}{c}{\textbf{Event F1} $\uparrow$} \\",
-        r"\cmidrule(lr){2-4}\cmidrule(lr){5-7}",
-        r"\rowcolor{tableheadbg} Method & 32 & 64 & 128 & 32 & 64 & 128 \\", r"\midrule",
+        r"\begin{tabularx}{\textwidth}{lXrrrrrr}", r"\toprule",
+        r"\rowcolor{tableheadbg} & & \multicolumn{3}{c}{\textbf{Author-OOF Building F1} $\uparrow$} & \multicolumn{3}{c}{\textbf{Author-OOF Event F1} $\uparrow$} \\",
+        r"\cmidrule(lr){3-5}\cmidrule(lr){6-8}",
+        r"\rowcolor{tableheadbg} Method & Paradigm & 32 KiB & 64 KiB & 128 KiB & 32 KiB & 64 KiB & 128 KiB \\", r"\midrule",
     ]
     practical_oof = [m for m in selected if not m.startswith("full_cache")]
     col_ranks = {}
     for col_idx, (task, cap) in enumerate((t, c) for t in ("building", "event") for c in CAPS):
-        col_ranks[col_idx] = sorted({round(macro[(m, cap)][task]["f1"], 3) for m in practical_oof}, reverse=True)
+        col_ranks[col_idx] = sorted({round(macro[(m, cap)][task]["f1"], 4) for m in practical_oof}, reverse=True)
 
     for method in selected:
         if method == "gaussian_20261029":
-            name = r"\textbf{SafeSync-ZFSS}"
+            name = r"\textbf{SafeSync-ZFSS (Gaussian)}"
             prefix = r"\rowcolor{safesyncbg} "
         elif method == "full_cache_gate30":
-            name = "Full history (30)"
+            name = r"Full history (30 dB)$^{\dagger}$"
+            prefix = ""
+        elif method == "learned_hyperprior_q1_8":
+            name = r"Hyperprior$^{\dagger}$"
             prefix = ""
         else:
             name = LABELS[method]
@@ -147,8 +169,8 @@ def main():
         vals = [macro[(method, cap)][task]["f1"] for task in ("building", "event") for cap in CAPS]
         cells_fmt = []
         for col_idx, v in enumerate(vals):
-            rv = round(v, 3)
-            s = f"{v:.3f}"
+            rv = round(v, 4)
+            s = f"{v:.4f}"
             if not method.startswith("full_cache"):
                 ranks = col_ranks[col_idx]
                 if len(ranks) >= 1 and math.isclose(rv, ranks[0], abs_tol=1e-9):
@@ -156,11 +178,11 @@ def main():
                 elif len(ranks) >= 2 and math.isclose(rv, ranks[1], abs_tol=1e-9):
                     s = rf"\underline{{{s}}}"
             cells_fmt.append(s)
-        lines.append(prefix + name + " & " + " & ".join(cells_fmt) + r" \\")
+        lines.append(prefix + name + " & " + oof_paradigms[method] + " & " + " & ".join(cells_fmt) + r" \\")
     lines += [
-        r"\bottomrule\end{tabularx}", r"\par\smallskip",
-        r"\begin{minipage}{\columnwidth}\footnotesize Caps denote per-pass downlink limits (KiB); realized bidirectional byte counts match Table~\ref{tab:task-exp0200}. Each AOI is evaluated with its corresponding out-of-fold checkpoint from the published four-fold split. Complete nine-policy results and paired intervals appear in the Supplement.\end{minipage}",
-        r"\end{table}", "",
+        r"\bottomrule\end{tabularx}\endgroup", r"\vspace{3pt}",
+        r"\begin{minipage}{\textwidth}\fontsize{7.5}{9.2}\selectfont\emph{Notes.} Realized bidirectional byte counts (downlink packet plus 60-byte ACK) match Table~\ref{tab:task-exp0200}. Each confirmation AOI is scored exclusively with its out-of-fold checkpoint from the published four-fold split (4,806 decoded evaluations; building threshold 0.5, calibrated event threshold 0.941). Complete nine-policy metrics and paired 98.333\% bootstrap intervals appear in the Supplement.\end{minipage}",
+        r"\end{table*}", "",
     ]
     save(MAIN/"oof_table.tex", "\n".join(lines))
     pairs = csv_rows(OOF + "/paired_comparisons.csv")

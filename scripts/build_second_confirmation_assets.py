@@ -32,45 +32,51 @@ def main():
     future_summary = {(int(r["heldout"]), int(r["budget"]), r["method"]): r for r in rows(FUTURE / "summary.csv")}
     future_diff = {(int(r["heldout"]), int(r["budget"]), r["method"], r["comparator"]): r for r in rows(FUTURE / "comparisons.csv")}
     end = chr(92) * 2
-    lines = [r"\begin{table*}[t]", r"\centering\footnotesize",
+    lines = [r"\begin{table*}[t]", r"\centering",
         r"\caption{Internally locked primary contrasts on all 256 reserved SECOND pairs. Coverage differences and intervals are percentage points. Known-F1 intervals use pooled receiver confusion counts.}",
-        r"\label{tab:second-primary}", r"\begin{tabular}{lrrrrrr}\toprule",
-        r"Protocol & KiB & $\Delta U_{30}$ & 95\% interval & $\Delta$ known F1 & 95\% interval & Mean bytes, new/base" + end + r"\midrule"]
+        r"\label{tab:second-primary}",
+        r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{6.5pt}\renewcommand{\arraystretch}{1.06}",
+        r"\begin{tabularx}{\textwidth}{Xrrrrrr}\toprule",
+        r"\rowcolor{tableheadbg} Protocol & KiB & $\Delta U_{30}$ & 95\% interval & $\Delta$ known F1 & 95\% interval & Mean bytes, new/base" + end + r"\midrule"]
     for key, label in (("original_image", "Image routing"), ("hybrid_extension", "PQ extension")):
         r = analysis["primary"][key]
         lines.append(f"{label} & {r['budget']//1024} & {100*r['delta_unknown_coverage_30']:+.2f} & [{100*r['unknown_low']:+.2f},{100*r['unknown_high']:+.2f}] & {r['delta_known_macro_f1']:+.4f} & [{r['known_low']:+.4f},{r['known_high']:+.4f}] & {r['mean_new_bytes']:.0f}/{r['mean_old_bytes']:.0f} " + end)
-    lines += [r"\bottomrule\end{tabular}", r"\end{table*}"]
+    lines += [r"\bottomrule\end{tabularx}\endgroup", r"\end{table*}"]
     primary_table = OUT / "second_primary.tex"
     primary_table.write_text("\n".join(lines) + "\n", "utf-8")
-    lines = [r"\begin{table*}[t]", r"\centering\footnotesize",
+    lines = [r"\begin{table*}[t]", r"\centering",
         r"\caption{All reserved-set classes and caps. Evidence coverage is $U_{30}$. The PQ emergence mixture is compared with full-image WebP and the public hyperprior under actual packet-plus-feedback caps.}",
-        r"\label{tab:second-budgets}", r"\begin{tabular}{lrrrrrrrr}\toprule",
-        r"Held out & KiB & PQ change $U$ & PQ mix $U$ & WebP $U$ & Hyperprior $U$ & PQ known F1 & WebP known F1 & Hyperprior known F1" + end + r"\midrule"]
+        r"\label{tab:second-budgets}",
+        r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{5.2pt}\renewcommand{\arraystretch}{1.06}",
+        r"\begin{tabularx}{\textwidth}{Xrrrrrrrr}\toprule",
+        r"\rowcolor{tableheadbg} Held out & KiB & PQ change $U$ & PQ mix $U$ & WebP $U$ & Hyperprior $U$ & PQ known F1 & WebP known F1 & Hyperprior known F1" + end + r"\midrule"]
     labels = {5: "Building", 3: "Tree", 4: "Water"}
     for h in (5, 3, 4):
         for b in (4096, 8192, 16384, 32768):
             c, m, w, l = [summary[(h, b, method)] for method in ("hybrid_change", "hybrid_emergent_mix", "image_full_webp", "image_hyperprior")]
             lines.append(f"{labels[h]} & {b//1024} & {float(c['unknown_coverage_30']):.3f} & {float(m['unknown_coverage_30']):.3f} & {float(w['unknown_coverage_30']):.3f} & {float(l['unknown_coverage_30']):.3f} & {float(m['known_macro_f1']):.3f} & {float(w['known_macro_f1']):.3f} & {float(l['known_macro_f1']):.3f} " + end)
-    lines += [r"\bottomrule\end{tabular}", r"\end{table*}"]
+    lines += [r"\bottomrule\end{tabularx}\endgroup", r"\end{table*}"]
     budget_table = OUT / "second_budgets.tex"
     budget_table.write_text("\n".join(lines) + "\n", "utf-8")
-    lines = [r"\begin{table*}[t]", r"\centering\footnotesize",
+    lines = [r"\begin{table*}[t]", r"\centering",
         r"\caption{Additional later semantic use on explicit changed support. This all-class ground head is fitted only to calibration labels. It includes the class held out of sender fitting. RGB columns use 8-KiB-cap outputs; the PQ-feature column uses the smaller feature-only stream.}",
-        r"\label{tab:second-future}", r"\begin{tabular}{lrrrrrr}\toprule",
-        r"Target & Full RGB F1 & PQ-feature F1 & PQ-mix RGB F1 & WebP RGB F1 & Hyperprior RGB F1 & $\Delta$ mix/change, interval" + end + r"\midrule"]
+        r"\label{tab:second-future}",
+        r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{5.8pt}\renewcommand{\arraystretch}{1.06}",
+        r"\begin{tabularx}{\textwidth}{Xrrrrrr}\toprule",
+        r"\rowcolor{tableheadbg} Target & Full RGB F1 & PQ-feature F1 & PQ-mix RGB F1 & WebP RGB F1 & Hyperprior RGB F1 & $\Delta$ mix/change, interval" + end + r"\midrule"]
     for h in (5, 3, 4):
         f = [future_summary[(h, b, method)] for b, method in ((0, "image_full_current"), (0, "hybrid_PQ_feature_only"),
             (8192, "hybrid_emergent_mix"), (8192, "image_full_webp"), (8192, "learned_hyperprior"))]
         d = future_diff[(h, 8192, "hybrid_emergent_mix", "hybrid_change")]
         values = " & ".join(f"{float(r['later_class_f1']):.3f}" for r in f)
         lines.append(f"{labels[h]} & {values} & {float(d['delta_later_class_f1']):+.3f} [{float(d['interval_low']):+.3f},{float(d['interval_high']):+.3f}] " + end)
-    lines += [r"\bottomrule\end{tabular}", r"\end{table*}"]
+    lines += [r"\bottomrule\end{tabularx}\endgroup", r"\end{table*}"]
     future_table = OUT / "second_future.tex"
     future_table.write_text("\n".join(lines) + "\n", "utf-8")
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    plt.rcParams.update({"font.size": 8, "axes.spines.top": False, "axes.spines.right": False})
+    plt.rcParams.update({"font.family": "serif", "font.serif": ["Times New Roman", "DejaVu Serif"], "font.size": 8.5, "pdf.fonttype": 42, "ps.fonttype": 42, "axes.spines.top": False, "axes.spines.right": False})
     fig, axes = plt.subplots(2, 3, figsize=(7.2, 4.4), constrained_layout=True)
     styles = (("image_feature_change", "RGB change", "#777777", "o"),
               ("image_emergent_mix", "RGB novelty", "#9467bd", "s"),

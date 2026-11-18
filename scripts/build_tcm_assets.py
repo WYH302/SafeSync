@@ -29,10 +29,15 @@ def rows(path):
 
 def table(path, caption, label, columns, body):
     end = chr(92)*2
-    lines = [r"\begin{table*}[t]\centering\footnotesize",r"\caption{"+caption+"}",r"\label{"+label+"}",
-        r"\begin{tabular}{l"+"r"*(len(columns)-1)+r"}\toprule"," & ".join(columns)+end+r"\midrule"]
-    lines += [" & ".join(map(str,row))+end for row in body]
-    lines += [r"\bottomrule\end{tabular}\end{table*}"]
+    lines = [r"\begin{table*}[t]\centering",r"\caption{"+caption+"}",r"\label{"+label+"}",
+        r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{5.5pt}\renewcommand{\arraystretch}{1.06}",
+        r"\begin{tabularx}{\textwidth}{X"+"r"*(len(columns)-1)+r"}\toprule",
+        r"\rowcolor{tableheadbg} " + " & ".join(columns)+end+r"\midrule"]
+    for row in body:
+        cells = list(map(str, row))
+        prefix = r"\rowcolor{safesyncbg} " if cells[0] in ("Gaussian", "SafeSync-ZFSS") else ""
+        lines.append(prefix + " & ".join(cells) + end)
+    lines += [r"\bottomrule\end{tabularx}\endgroup\end{table*}"]
     path.parent.mkdir(parents=True,exist_ok=True)
     path.write_text("\n".join(lines)+"\n","utf-8")
 
@@ -132,5 +137,5 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("study",choices=("second","sn7"))
     args = parser.parse_args()
-    plt.rcParams.update({"font.family":"DejaVu Sans","font.size":8,"pdf.fonttype":42,"ps.fonttype":42})
+    plt.rcParams.update({"font.family":"serif","font.serif":["Times New Roman","DejaVu Serif"],"font.size":8.5,"pdf.fonttype":42,"ps.fonttype":42})
     build(args.study)

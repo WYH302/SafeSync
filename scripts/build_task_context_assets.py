@@ -52,21 +52,25 @@ def main():
     FIGURES.mkdir(parents=True, exist_ok=True)
     end = chr(92)*2
     outputs = []
-    lines = [r"\begin{table*}[t]\centering\footnotesize",
+    lines = [r"\begin{table*}[t]\centering",
         r"\caption{Fresh, internally locked joint confirmation. Building is held out of sender calibration, with an 8-KiB transaction cap. Differences and two-sided paired 95\% intervals use percentage points. All compared methods recover exactly the same current known-task array.}",
-        r"\label{tab:context-primary}", r"\begin{tabular}{lrrrrr}\toprule",
-        r"Comparator & $\Delta U_{30}$ & 95\% interval & $\Delta$ later F1 & 95\% interval & Bytes, mix/base"+end+r"\midrule"]
+        r"\label{tab:context-primary}",
+        r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{7.0pt}\renewcommand{\arraystretch}{1.06}",
+        r"\begin{tabularx}{\textwidth}{Xrrrrr}\toprule",
+        r"\rowcolor{tableheadbg} Comparator & $\Delta U_{30}$ & 95\% interval & $\Delta$ later F1 & 95\% interval & Bytes, mix/base"+end+r"\midrule"]
     for name, row in analysis["primary"].items():
         label = dict(adaptive_change="Adaptive change", full_webp="Full WebP", hyperprior="Hyperprior")[name]
         lines.append(f"{label} & {100*row['coverage_difference']:+.2f} & {interval(row)} & {100*row['later_class_f1_difference']:+.2f} & {interval(row,'later_low','later_high')} & {row['mean_method_bytes']:.0f}/{row['mean_baseline_bytes']:.0f} "+end)
-    lines += [r"\bottomrule\end{tabular}\end{table*}"]
+    lines += [r"\bottomrule\end{tabularx}\endgroup\end{table*}"]
     primary_path = TABLES/"context_primary.tex"
     primary_path.write_text("\n".join(lines)+"\n", "utf-8")
     outputs.append(primary_path)
-    lines = [r"\begin{table*}[t]\centering\scriptsize",
+    lines = [r"\begin{table*}[t]\centering",
         r"\caption{Every fresh held-out class and cap. Each cell gives quality-qualified evidence coverage $U_{30}$ followed by later held-out-class F1. Random results average three seeds within each source pair. Curves use actual mean transaction bytes.}",
-        r"\label{tab:context-all}", r"\begin{tabular}{lrrrrrrr}\toprule",
-        "Class & KiB & "+" & ".join(label for _,label in METHODS)+" "+end+r"\midrule"]
+        r"\label{tab:context-all}",
+        r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{5.2pt}\renewcommand{\arraystretch}{1.06}",
+        r"\begin{tabularx}{\textwidth}{Xrrrrrrr}\toprule",
+        r"\rowcolor{tableheadbg} Class & KiB & "+" & ".join(label for _,label in METHODS)+" "+end+r"\midrule"]
     for h in (5,3,4):
         for cap in (4096,8192,16384,32768):
             cells = []
@@ -74,19 +78,21 @@ def main():
                 row = summary[h,cap,method]
                 cells.append(f"{float(row['unknown_coverage_30']):.3f}/{float(row['later_class_f1']):.3f}")
             lines.append(f"{NAMES[h]} & {cap//1024} & "+" & ".join(cells)+" "+end)
-    lines += [r"\bottomrule\end{tabular}\end{table*}"]
+    lines += [r"\bottomrule\end{tabularx}\endgroup\end{table*}"]
     all_path = TABLES/"context_all.tex"
     all_path.write_text("\n".join(lines)+"\n", "utf-8")
     outputs.append(all_path)
-    lines = [r"\begin{table*}[t]\centering\footnotesize",
+    lines = [r"\begin{table*}[t]\centering",
         r"\caption{Fresh component contrasts at the primary building/8-KiB setting. The temporal-novelty method is compared with each listed alternative. These additional contrasts use descriptive 99.5833\% intervals.}",
-        r"\label{tab:context-ablations}", r"\begin{tabular}{lrrrr}\toprule",
-        r"Comparator & $\Delta U_{30}$, pp & Interval & $\Delta$ later F1, pp & Interval"+end+r"\midrule"]
+        r"\label{tab:context-ablations}",
+        r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{8.0pt}\renewcommand{\arraystretch}{1.06}",
+        r"\begin{tabularx}{\textwidth}{Xrrrr}\toprule",
+        r"\rowcolor{tableheadbg} Comparator & $\Delta U_{30}$, pp & Interval & $\Delta$ later F1, pp & Interval"+end+r"\midrule"]
     for name,label in (("adaptive_random","Random ranking"),("adaptive_current_distance","Current known distance"),
         ("roi_mix","Context-free ROI"),("context_mix","Context without full-frame selection")):
         row = comparisons[5,8192,name]
         lines.append(f"{label} & {100*float(row['coverage_difference']):+.2f} & {interval(row)} & {100*float(row['later_class_f1_difference']):+.2f} & {interval(row,'later_low','later_high')} "+end)
-    lines += [r"\bottomrule\end{tabular}\end{table*}"]
+    lines += [r"\bottomrule\end{tabularx}\endgroup\end{table*}"]
     ablation_path = TABLES/"context_ablations.tex"
     ablation_path.write_text("\n".join(lines)+"\n", "utf-8")
     outputs.append(ablation_path)
@@ -94,7 +100,7 @@ def main():
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    plt.rcParams.update({"font.family":"serif", "font.size":9, "pdf.fonttype":42,
+    plt.rcParams.update({"font.family":"serif", "font.serif":["Times New Roman", "DejaVu Serif"], "font.size":8.5, "pdf.fonttype":42,
         "axes.spines.top":False, "axes.spines.right":False, "savefig.dpi":300})
     colors = ["#D55E00", "#0072B2", "#CC79A7", "#999999", "#009E73", "#000000"]
     markers = ["o","s","^","v","D","x"]

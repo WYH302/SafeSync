@@ -59,9 +59,9 @@ def main():
     methods=["gaussian_20261029","full_webp"]
     labels=["Current RGB (GT)","Bootstrap (t = 0)","SafeSync-ZFSS (Ours)","Stateless WebP"]
     out=ROOT/"paper/figures";out.mkdir(exist_ok=True)
-    plt.rcParams.update({"font.family":"serif","font.serif":["Times New Roman","DejaVu Serif"],"font.size":8.0,
+    plt.rcParams.update({"font.family":"serif","font.serif":["Times New Roman","DejaVu Serif"],"font.size":8.5,
                          "pdf.fonttype":42,"svg.fonttype":"none"})
-    fig,axes=plt.subplots(2,4,figsize=(7.16,3.85))
+    fig,axes=plt.subplots(2,4,figsize=(7.16,3.70))
     selections=[]
     for ai in (0,1):
         aoi=manifest["aois"][ai];run=ROOT/f"results/layered/confirmation_v1/area_{ai}"
@@ -125,7 +125,7 @@ def main():
             selection="first chronological month with >=256 evaluable target pixels, center largest component; no method scores used",
             nominal_down_cap=32768,actual_packets=packets,scores=scores,
             run_spec_sha256=hashlib.sha256((run/"run_spec.json").read_bytes()).hexdigest()))
-    fig.subplots_adjust(left=.055,right=.995,top=.93,bottom=.04,wspace=.04,hspace=.08)
+    fig.subplots_adjust(left=.036,right=.997,top=.935,bottom=.02,wspace=.025,hspace=.055)
     for extension in ("pdf","svg","png"):
         fig.savefig(out/f"receiver_crops.{extension}",dpi=220,facecolor="white")
     plt.close(fig)

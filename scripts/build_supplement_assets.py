@@ -46,17 +46,28 @@ def tex(value):
 
 
 def table(name, caption, headers, rows, note, alignment=None):
-    alignment = alignment or "l" + "r" * (len(headers) - 1)
+    if alignment == "llrrrr":
+        col_spec = "lXrrrr"
+    else:
+        col_spec = "X" + "r" * (len(headers) - 1)
     content = [
-        r"\begin{table*}[t]", r"\centering\footnotesize",
+        r"\begin{table*}[t]", r"\centering",
         r"\caption{" + caption + "}",
-        r"\setlength{\tabcolsep}{5pt}",
-        r"\begin{tabular}{" + alignment + "}", r"\toprule",
-        " & ".join(headers) + r" \\", r"\midrule",
+        r"\begingroup\fontsize{8}{10.0}\selectfont",
+        r"\setlength{\tabcolsep}{6.5pt}",
+        r"\renewcommand{\arraystretch}{1.06}",
+        r"\begin{tabularx}{\textwidth}{" + col_spec + "}", r"\toprule",
+        r"\rowcolor{tableheadbg} " + " & ".join(headers) + r" \\", r"\midrule",
     ]
-    content += [" & ".join(map(str, row)) + r" \\" for row in rows]
-    content += [r"\bottomrule", r"\end{tabular}", r"\par\smallskip",
-                r"\begin{minipage}{0.97\textwidth}\footnotesize " + note +
+    for row in rows:
+        cells = list(map(str, row))
+        is_ss = cells[0] in ("Gaussian", "SafeSync-ZFSS")
+        if cells[0] == "Gaussian":
+            cells[0] = r"\textbf{SafeSync-ZFSS (Gaussian)}"
+        prefix = r"\rowcolor{safesyncbg} " if is_ss else ""
+        content.append(prefix + " & ".join(cells) + r" \\")
+    content += [r"\bottomrule", r"\end{tabularx}\endgroup", r"\vspace{2.5pt}",
+                r"\begin{minipage}{\textwidth}\fontsize{7.5}{9.2}\selectfont\emph{Notes.} " + note +
                 r"\end{minipage}", r"\end{table*}", ""]
     save(name + ".tex", "\n".join(content))
 

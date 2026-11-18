@@ -31,28 +31,32 @@ def main():
     end = chr(92)*2
     outputs = []
     score,residual = analyses
-    lines = [r"\begin{table*}[t]\centering\footnotesize",
+    lines = [r"\begin{table*}[t]\centering",
         r"\caption{Exploratory score-only intervention on 64 previously inspected pairs, building-held-out at 8 KiB. The same hyperprior quality/scale candidates and exact task states are used throughout. Differences and descriptive 95\% paired intervals are percentage points.}",
-        r"\label{tab:risk-objective}",r"\begin{tabular}{llrrrr}\toprule",
-        r"Score & Comparator & $\Delta U_{30}$ & Interval & $\Delta$ later F1 & Interval"+end+r"\midrule"]
+        r"\label{tab:risk-objective}",
+        r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{7.5pt}\renewcommand{\arraystretch}{1.06}",
+        r"\begin{tabularx}{\textwidth}{lXrrrr}\toprule",
+        r"\rowcolor{tableheadbg} Score & Comparator & $\Delta U_{30}$ & Interval & $\Delta$ later F1 & Interval"+end+r"\midrule"]
     for r in score["primary_diagnostic"]:
         if r["comparator"] == "full_webp":
             continue
         method = "Current distance" if r["method"] == "current_distance_quality" else "Temporal increment"
         comparator = {"mse":"RGB MSE","uniform_quality":"Uniform quality","change_quality":"Change quality"}[r["comparator"]]
         lines.append(f"{method} & {comparator} & {100*r['coverage_difference']:+.2f} & {interval(r,'coverage_low','coverage_high')} & {100*r['later_class_f1_difference']:+.2f} & {interval(r,'later_low','later_high')} "+end)
-    lines += [r"\bottomrule\end{tabular}\end{table*}"]
+    lines += [r"\bottomrule\end{tabularx}\endgroup\end{table*}"]
     path = TABLES/"risk_objective.tex"
     path.write_text("\n".join(lines)+"\n","utf-8")
     outputs.append(path)
-    lines = [r"\begin{table*}[t]\centering\footnotesize",
+    lines = [r"\begin{table*}[t]\centering",
         r"\caption{Exploratory learned-base absolute/residual factorial on 32 previously inspected pairs, building-held-out at 8 KiB. Residual/current-distance ranking is compared with each control. Differences and descriptive 95\% intervals are percentage points.}",
-        r"\label{tab:residual-factorial}",r"\begin{tabular}{lrrrrr}\toprule",
-        r"Comparator & $\Delta U_{30}$ & Interval & $\Delta$ later F1 & Interval & Bytes, residual/base"+end+r"\midrule"]
+        r"\label{tab:residual-factorial}",
+        r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{7.5pt}\renewcommand{\arraystretch}{1.06}",
+        r"\begin{tabularx}{\textwidth}{Xrrrrr}\toprule",
+        r"\rowcolor{tableheadbg} Comparator & $\Delta U_{30}$ & Interval & $\Delta$ later F1 & Interval & Bytes, residual/base"+end+r"\midrule"]
     labels = dict(absolute_current="Absolute atlas",residual_change="Residual/change",residual_random="Residual/random",hyperprior="Full hyperprior",full_webp="Full WebP")
     for r in residual["primary_diagnostic"]:
         lines.append(f"{labels[r['comparator']]} & {100*r['coverage_difference']:+.2f} & {interval(r,'coverage_low','coverage_high')} & {100*r['later_class_f1_difference']:+.2f} & {interval(r,'later_low','later_high')} & {r['mean_method_bytes']:.0f}/{r['mean_baseline_bytes']:.0f} "+end)
-    lines += [r"\bottomrule\end{tabular}\end{table*}"]
+    lines += [r"\bottomrule\end{tabularx}\endgroup\end{table*}"]
     path = TABLES/"residual_factorial.tex"
     path.write_text("\n".join(lines)+"\n","utf-8")
     outputs.append(path)
