@@ -13,6 +13,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
@@ -113,7 +115,7 @@ def build_figure2_storage_vs_utility(
     ax.plot(ns, dct_mb, label="DCT bound (0 shared mat.)", color="#E69F00", marker="s", markersize=3.2, linewidth=1.25)
     ax.plot(ns, lowres_mb, label="Low-res 4x WebP ref", color="#009E73", marker="^", markersize=3.2, linewidth=1.2, linestyle=":")
     ax.set_yscale("log")
-    ax.set_ylim(0.007, 130.0)
+    ax.set_ylim(0.007, 480.0)
     ax.set_xticks([1, 4, 8, 12, 16])
     ax.set_xlabel("Monitored geographic areas $N$")
     ax.set_ylabel("Sender historical state (MiB)")
@@ -132,8 +134,9 @@ def build_figure2_storage_vs_utility(
     b1 = ax.bar(xb - wb / 2, viol_pct, width=wb, color="#DC2626", alpha=0.88, label="False-Stable Violation Rate (%)")
     b2 = ax.bar(xb + wb / 2, drift_pct, width=wb, color="#2563EB", alpha=0.88, label="Orbital-Drift False Triggers (%)")
     for rect, v in zip(b1, viol_pct):
-        lbl = "0.0% (0)" if v == 0 else f"{v:.1f}%"
-        ax.text(rect.get_x() + rect.get_width() / 2, v + 1.8, lbl, ha="center", fontsize=6.0, color="#991B1B", fontweight="bold")
+        lbl = "0% (0)" if v == 0 else f"{v:.1f}%"
+        x_pos = rect.get_x() + rect.get_width() / 2 - (0.04 if v == 0 else 0.0)
+        ax.text(x_pos, v + 1.8, lbl, ha="center", fontsize=6.0, color="#991B1B", fontweight="bold")
     for rect, v in zip(b2, drift_pct):
         ax.text(rect.get_x() + rect.get_width() / 2, v + 1.8, f"{v:.1f}%", ha="center", fontsize=6.0, color="#1E40AF", fontweight="bold")
     ax.set_xticks(xb, methods_bar, fontsize=6.8)
@@ -160,7 +163,9 @@ def build_figure2_storage_vs_utility(
     ]
     for name, st_mib, ef1, col, mk, (dx, dy) in pts_b:
         ax.scatter(st_mib, ef1, color=col, marker=mk, s=38, zorder=3)
-        ax.annotate(name, (st_mib, ef1), xytext=(st_mib * dx, ef1 + dy), fontsize=5.8, color=col, fontweight="bold" if "SafeSync-ZFSS" in name else "normal")
+        ap = dict(arrowstyle="-", color=col, lw=0.7, alpha=0.75) if "SafeSync-ZFSS" in name else None
+        ax.annotate(name, (st_mib, ef1), xytext=(st_mib * dx, ef1 + dy), fontsize=5.8, color=col,
+                    fontweight="bold" if "SafeSync-ZFSS" in name else "normal", arrowprops=ap)
     ax.set_xscale("log")
     ax.set_xlim(0.001, 38.0)
     ax.set_ylim(0.088, 0.242)
@@ -348,56 +353,57 @@ def build_tables(
 
     end = chr(92) * 2
 
-    # 1. Comprehensive Cost & Utility Table (full \textwidth, row shading, bold highlights)
+    # 1. Comprehensive Cost & Utility Table (uniform 8pt font, spacious columns, header & row shading)
     cost_lines = [
-        r"\begin{table*}[t]\centering\scriptsize",
-        r"\caption{Comprehensive resource footprint, compute latency, and downstream utility across SpaceNet 7 monthly synchronization (32-KiB cap, 8 AOIs, 4-fold Author-OOF) and SECOND Cohort 3 open-world synchronization (8-KiB cap, 256 pairs, Building held-out). Sender historical state is reported for $N=1$ and $N=8$ monitored areas; proposed SafeSync variants are shaded.}",
+        r"\begin{table*}[t]\centering",
+        r"\caption{Comprehensive onboard state footprint, compute latency, and downstream utility across SpaceNet 7 monthly synchronization (32-KiB cap, 8 AOIs, 4-fold Author-OOF) and SECOND Cohort 3 open-world synchronization (8-KiB cap, 256 pairs, Building held-out). Sender historical state is shown for $N=1$ and $N=8$ monitored areas; proposed SafeSync variants are shaded.}",
         r"\label{tab:full-cost}",
-        r"\setlength{\tabcolsep}{0pt}",
-        r"\renewcommand{\arraystretch}{1.10}",
-        r"\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lllcrrrl@{}}\toprule",
-        r"Method / Variant & State ($N=1$ / $N=8$) & Model / Matrix Footprint & Sender Latency & Upd. KiB & Metric 1 $\uparrow$ & Metric 2 $\uparrow$ & Operational Regime &"[: -2] + end,
+        r"\begingroup\fontsize{8}{10.1}\selectfont",
+        r"\setlength{\tabcolsep}{3.8pt}",
+        r"\renewcommand{\arraystretch}{1.08}",
+        r"\begin{tabularx}{\textwidth}{lllcrrrX}\toprule",
+        r"\rowcolor{tableheadbg} Method / Variant & State ($N\!=\!1$ / $8$) & Weights / Matrix & Sender Time & KiB & M1 $\uparrow$ & M2 $\uparrow$ & Key Regime / Audit" + end,
         r"\midrule",
-        r"\multicolumn{8}{l}{\textit{Panel A: SpaceNet 7 Monthly Pixel-Tier Sync (32-KiB cap, 178 updates; Metric 1 = Author-OOF Building F1, Metric 2 = Event F1)}}" + end,
+        r"\multicolumn{8}{l}{\textit{Panel A: SpaceNet 7 Monthly Pixel-Tier Sync (32-KiB cap, 178 updates; M1 = Author-OOF Building F1, M2 = Event F1)}}" + end,
         r"\cmidrule(lr){1-8}",
     ]
 
     sn7_rows = [
         (
-            r"\rowcolor{safesyncbg} \textbf{SafeSync-ZFSS (coupled)}",
-            r"\textbf{12.3 KB / 98.6 KB}",
-            r"\textbf{0 B (ZFSS stream)}",
-            "254.7 ms (4-thr CPU)",
+            r"\rowcolor{safesyncbg} \textbf{SafeSync-ZFSS}",
+            r"\textbf{12.3 / 98.6 KB}",
+            r"\textbf{0 B (stream)}",
+            "254.7 ms (CPU)",
             f"{lookup['gaussian_20261029', 32768]['mean_bytes']/1024:.2f}",
             f"{lookup['gaussian_20261029', 32768]['building_f1']:.4f}",
             f"{lookup['gaussian_20261029', 32768]['event_f1']:.4f}",
-            r"\textbf{0 viol.}; $U_{30}=0.355$",
+            r"\textbf{0 viol.}; $U_{30}\!=\!0.355$",
         ),
         (
-            r"\rowcolor{safesyncbg} \textbf{SafeSync-DGAD (decoupled)}",
-            r"\textbf{12.3 KB / 98.6 KB}",
-            r"\textbf{0 B (ZFSS stream)}",
-            "254.7 ms (4-thr CPU)",
+            r"\rowcolor{safesyncbg} \textbf{SafeSync-DGAD}",
+            r"\textbf{12.3 / 98.6 KB}",
+            r"\textbf{0 B (stream)}",
+            "254.7 ms (CPU)",
             rf"\textbf{{{lookup['gaussian_decoupled', 32768]['mean_bytes']/1024:.2f}}}",
             rf"\textbf{{{lookup['gaussian_decoupled', 32768]['building_f1']:.4f}}}",
             f"{lookup['gaussian_decoupled', 32768]['event_f1']:.4f}",
-            r"\textbf{0 viol.}; best certified CPU",
+            r"\textbf{0 viol.}; top certified CPU",
         ),
         (
             "DCT summary bound",
-            "13.9 KB / 110.9 KB",
+            "13.9 / 110.9 KB",
             "0 B (CPU DCT)",
-            "291.2 ms (4-thr CPU)",
+            "291.2 ms (CPU)",
             f"{lookup['dct_bound', 32768]['mean_bytes']/1024:.2f}",
             f"{lookup['dct_bound', 32768]['building_f1']:.4f}",
             f"{lookup['dct_bound', 32768]['event_f1']:.4f}",
-            "Deterministic 48-B baseline",
+            "Deterministic 48-B",
         ),
         (
             "Low-res 4x WebP ref",
-            "10.7 KB / 85.4 KB",
+            "10.7 / 85.4 KB",
             "0 B (CPU WebP)",
-            "226.4 ms (4-thr CPU)",
+            "226.4 ms (CPU)",
             f"{lookup['lowres_4x_webp_12k', 32768]['mean_bytes']/1024:.2f}",
             f"{lookup['lowres_4x_webp_12k', 32768]['building_f1']:.4f}",
             f"{lookup['lowres_4x_webp_12k', 32768]['event_f1']:.4f}",
@@ -405,9 +411,9 @@ def build_tables(
         ),
         (
             "Coarse-only 16x16",
-            "12.3 KB / 98.6 KB",
+            "12.3 / 98.6 KB",
             "0 B (CPU mean)",
-            "206.8 ms (4-thr CPU)",
+            "206.8 ms (CPU)",
             f"{lookup['lowres_16x16_coarse_only', 32768]['mean_bytes']/1024:.2f}",
             f"{lookup['lowres_16x16_coarse_only', 32768]['building_f1']:.4f}",
             f"{lookup['lowres_16x16_coarse_only', 32768]['event_f1']:.4f}",
@@ -415,9 +421,9 @@ def build_tables(
         ),
         (
             "Full history (30 dB)",
-            f"{mean_png_1aoi/(1024**2):.2f} / {cap32_png_8aoi/(1024**2):.2f} MB (PNG)",
-            "0 B (CPU exact)",
-            "257.5 ms (+152 ms PNG)",
+            f"{mean_png_1aoi/(1024**2):.2f} / {cap32_png_8aoi/(1024**2):.2f} MB",
+            "0 B (PNG hist.)",
+            "257.5 ms (+PNG)",
             f"{lookup['full_cache_gate30', 32768]['mean_bytes']/1024:.2f}",
             f"{lookup['full_cache_gate30', 32768]['building_f1']:.4f}",
             f"{lookup['full_cache_gate30', 32768]['event_f1']:.4f}",
@@ -425,33 +431,33 @@ def build_tables(
         ),
         (
             "Stateless WebP",
-            "241 B / 1.9 KB (meta)",
+            "0.24 / 1.9 KB",
             "0 B (CPU WebP)",
-            "2063.1 / 56.3 ms (CPU)",
+            "2.06 s / 56 ms",
             f"{lookup['full_webp', 32768]['mean_bytes']/1024:.2f}",
             f"{lookup['full_webp', 32768]['building_f1']:.4f}",
             f"{lookup['full_webp', 32768]['event_f1']:.4f}",
             "Stateless CPU baseline",
         ),
         (
-            "Scale-Hyperprior (q1..8)",
-            "241 B / 1.9 KB (meta)",
-            "61.1 MB (8 ckpts)",
-            "11.54 s GPU / 36.4 s CPU",
+            "Scale-Hyperprior",
+            "0.24 / 1.9 KB",
+            "61.1 MB (8 ckpt)",
+            "11.5 s GPU / 36 s",
             f"{lookup['learned_hyperprior_q1_8', 32768]['mean_bytes']/1024:.2f}",
             f"{lookup['learned_hyperprior_q1_8', 32768]['building_f1']:.4f}",
             f"{lookup['learned_hyperprior_q1_8', 32768]['event_f1']:.4f}",
-            "Lightweight neural codec",
+            "Lightweight neural",
         ),
         (
             "LIC-TCM (35 cand.)",
-            "241 B / 1.9 KB (meta)",
-            "4,179.9 MB (6 ckpts)",
-            f"{sn7_tcm_search_ms/1000:.2f} s / {sn7_tcm_comp_ms/1000:.2f} s (GPU)",
+            "0.24 / 1.9 KB",
+            "4.18 GB (6 ckpt)",
+            f"{sn7_tcm_search_ms/1000:.1f} s / {sn7_tcm_comp_ms/1000:.2f} s GPU",
             f"{lookup['tcm', 32768]['mean_bytes']/1024:.2f}",
             rf"\underline{{{lookup['tcm', 32768]['building_f1']:.4f}}}",
             rf"\textbf{{{lookup['tcm', 32768]['event_f1']:.4f}}}",
-            "Heavy GPU SOTA codec",
+            "Heavy GPU SOTA",
         ),
     ]
     for r in sn7_rows:
@@ -462,14 +468,14 @@ def build_tables(
     rep = _index_sec_repaired(sec_repaired)
     cost_lines.append(r"\midrule")
     cost_lines.append(
-        r"\multicolumn{8}{l}{\textit{Panel B: SECOND Cohort 3 Semantic \& Open-World Sync (8-KiB cap, 256 pairs; Metric 1 = Held-Out $U_{30}$, Metric 2 = Later F1)}}" + end
+        r"\multicolumn{8}{l}{\textit{Panel B: SECOND Cohort 3 Semantic \& Open-World Sync (8-KiB cap, 256 pairs; M1 = Held-Out $U_{30}$, M2 = Later F1)}}" + end
     )
     cost_lines.append(r"\cmidrule(lr){1-8}")
     sec_rows = [
         (
             "Cell A: Abs. + Change",
-            "197.0 KB / 1.58 MB",
-            "88.2M DINO + 61.1M HP",
+            "197 KB / 1.58 MB",
+            "88.2M + 61.1M HP",
             "1.60 s (GPU+CPU)",
             f"{cells['absolute_change']['mean_total_bytes']/1024:.2f}",
             f"{cells['absolute_change']['u30']:.4f}",
@@ -477,9 +483,9 @@ def build_tables(
             "Absolute ROI baseline",
         ),
         (
-            "Cell C: Res.+Change (locked)",
-            "197.0 KB / 1.58 MB",
-            "88.2M DINO + 61.1M HP",
+            "Cell C: Res. + Change",
+            "197 KB / 1.58 MB",
+            "88.2M + 61.1M HP",
             "1.60 s (GPU+CPU)",
             f"{cells['residual_change']['mean_total_bytes']/1024:.2f}",
             f"{cells['residual_change']['u30']:.4f}",
@@ -487,19 +493,19 @@ def build_tables(
             "+9.05 pp vs. Hyperprior",
         ),
         (
-            "Cell D: Res.+Unknown (locked)",
-            "197 KB / 1.58 MB (+gal.)",
-            "88.2M DINO + 61.1M HP",
+            "Cell D: Res. + Unknown",
+            "197 KB / 1.58 MB",
+            "88.2M + 61.1M HP",
             "1.56 s (GPU+CPU)",
             f"{cells['residual_current']['mean_total_bytes']/1024:.2f}",
             f"{cells['residual_current']['u30']:.4f}",
             f"{cells['residual_current']['later_f1']:.4f}",
-            "Uncalibrated kNN baseline",
+            "Uncalibrated kNN",
         ),
         (
-            r"\rowcolor{safesyncbg} \textbf{SafeSync TC-PCR (Change)}",
-            "197.0 KB / 1.58 MB",
-            "88.2M DINO + 61.1M HP",
+            r"\rowcolor{safesyncbg} \textbf{TC-PCR (Change)}",
+            "197 KB / 1.58 MB",
+            "88.2M + 61.1M HP",
             "1.58 s (GPU+CPU)",
             f"{rep['repaired_residual_change_sel']['mean_total_bytes']/1024:.2f}",
             f"{rep['repaired_residual_change_sel']['u30']:.4f}",
@@ -507,9 +513,9 @@ def build_tables(
             "Active-support + 30 dB",
         ),
         (
-            r"\rowcolor{safesyncbg} \textbf{SafeSync TC-PCR (Unknown)}",
-            "197 KB / 1.58 MB (+pr.)",
-            "88.2M DINO + 61.1M HP",
+            r"\rowcolor{safesyncbg} \textbf{TC-PCR (Unknown)}",
+            "197 KB / 1.58 MB",
+            "88.2M + 61.1M HP",
             "1.58 s (GPU+CPU)",
             f"{rep['repaired_residual_unknown_sel']['mean_total_bytes']/1024:.2f}",
             rf"\underline{{{rep['repaired_residual_unknown_sel']['u30']:.4f}}}",
@@ -517,9 +523,9 @@ def build_tables(
             r"\textbf{+1.44 pp} vs. Change",
         ),
         (
-            r"\rowcolor{safesyncbg} \textbf{SafeSync TC-PCR (Raw)}",
-            "197 KB / 1.58 MB (+pr.)",
-            "88.2M DINO + 61.1M HP",
+            r"\rowcolor{safesyncbg} \textbf{TC-PCR (Raw)}",
+            "197 KB / 1.58 MB",
+            "88.2M + 61.1M HP",
             "1.56 s (GPU+CPU)",
             f"{rep['repaired_residual_unknown_raw']['mean_total_bytes']/1024:.2f}",
             f"{rep['repaired_residual_unknown_raw']['u30']:.4f}",
@@ -527,9 +533,9 @@ def build_tables(
             r"\textbf{FNR 0.1616} $<$ WebP/TCM",
         ),
         (
-            r"\rowcolor{safesyncbg} \textbf{SafeSync TC-PCR (Refined)}",
-            "197 KB / 1.58 MB (+pr.)",
-            "88.2M DINO + 61.1M HP",
+            r"\rowcolor{safesyncbg} \textbf{TC-PCR (Refined)}",
+            "197 KB / 1.58 MB",
+            "88.2M + 61.1M HP",
             "1.58 s (GPU+CPU)",
             f"{rep['repaired_residual_unknown_sel']['mean_total_bytes']/1024:.2f}",
             rf"\underline{{{rep['repaired_residual_unknown_sel']['u30']:.4f}}}",
@@ -538,18 +544,18 @@ def build_tables(
         ),
         (
             "Oracle Hybrid (8 KiB)",
-            "Post-hoc GT oracle",
-            "88.2M DINO + 61.1M HP",
+            "Post-hoc GT bound",
+            "88.2M + 61.1M HP",
             "Offline GT bound",
             f"{ora['oracle_hybrid_with_full_hp']['mean_total_bytes']/1024:.2f}",
             f"{ora['oracle_hybrid_with_full_hp']['u30']:.4f}",
             f"{ora['oracle_hybrid_with_full_hp']['later_f1']:.4f}",
-            "Offline selection ceiling",
+            "Selection ceiling",
         ),
         (
-            "Full Hyperprior (8 KiB)",
-            "197.0 KB / 1.58 MB",
-            "88.2M DINO + 61.1M HP",
+            "Full Hyperprior",
+            "197 KB / 1.58 MB",
+            "88.2M + 61.1M HP",
             "2.80 s (GPU+CPU)",
             f"{cells['hyperprior']['mean_total_bytes']/1024:.2f}",
             f"{cells['hyperprior']['u30']:.4f}",
@@ -558,28 +564,28 @@ def build_tables(
         ),
         (
             "Full WebP (8 KiB)",
-            "197.0 KB / 1.58 MB",
-            "88.2M DINO (task only)",
+            "197 KB / 1.58 MB",
+            "88.2M DINO task",
             "0.79 s (GPU+CPU)",
             f"{cells['full_webp']['mean_total_bytes']/1024:.2f}",
             f"{cells['full_webp']['u30']:.4f}",
             rf"\underline{{{cells['full_webp']['later_f1']:.4f}}}",
-            "Global Later F1 baseline",
+            "Global Later F1 ref.",
         ),
         (
             "Full LIC-TCM (8 KiB)",
-            "197.0 KB / 1.58 MB",
-            "88.2M DINO + 4.18G TCM",
-            f"{sec_tcm_search_ms/1000:.2f} s / {sec_tcm_comp_ms/1000:.2f} s (GPU)",
+            "197 KB / 1.58 MB",
+            "88.2M + 4.18G TCM",
+            f"{sec_tcm_search_ms/1000:.1f} s / {sec_tcm_comp_ms/1000:.2f} s GPU",
             rf"\textbf{{{cells['tcm']['mean_total_bytes']/1024:.2f}}}",
             rf"\textbf{{{cells['tcm']['u30']:.4f}}}",
             f"{cells['tcm']['later_f1']:.4f}",
-            "Heavy 4.18-GB GPU SOTA",
+            "Heavy 4.18-GB SOTA",
         ),
     ]
     for r in sec_rows:
         cost_lines.append(" & ".join(r) + end)
-    cost_lines += [r"\bottomrule\end{tabular*}\end{table*}"]
+    cost_lines += [r"\bottomrule\end{tabularx}\endgroup\end{table*}"]
 
     p_main_cost = ROOT / "paper/generated/full_cost_table.tex"
     p_sup_cost = ROOT / "paper/supplement/generated/full_cost_table.tex"

@@ -57,11 +57,11 @@ def replay(rows, height, width):
 def main():
     manifest=json.loads((ROOT/"data/spacenet7_pilot/confirmation_manifest_v1.json").read_text())
     methods=["gaussian_20261029","full_webp"]
-    labels=["Current RGB","Bootstrap","Compact summary","WebP"]
+    labels=["Current RGB (GT)","Bootstrap (t = 0)","SafeSync-ZFSS (Ours)","Stateless WebP"]
     out=ROOT/"paper/figures";out.mkdir(exist_ok=True)
-    plt.rcParams.update({"font.family":"DejaVu Sans","font.size":7.5,
+    plt.rcParams.update({"font.family":"serif","font.serif":["Times New Roman","DejaVu Serif"],"font.size":8.0,
                          "pdf.fonttype":42,"svg.fonttype":"none"})
-    fig,axes=plt.subplots(2,4,figsize=(7.16,4.05))
+    fig,axes=plt.subplots(2,4,figsize=(7.16,3.85))
     selections=[]
     for ai in (0,1):
         aoi=manifest["aois"][ai];run=ROOT/f"results/layered/confirmation_v1/area_{ai}"
@@ -102,7 +102,7 @@ def main():
         for col,(rgb,title) in enumerate(zip(displayed,labels)):
             ax=axes[ai,col]
             ax.imshow(rgb[crop])
-            if target[crop].any():ax.contour(target[crop],levels=[.5],colors=["#00D8E8"],linewidths=.45)
+            if target[crop].any():ax.contour(target[crop],levels=[.5],colors=["#00E5FF"],linewidths=.75)
             ax.set_xticks([]);ax.set_yticks([])
             values=((current[crop].astype(float)-rgb[crop])/255)**2
             mask=target[crop]
@@ -110,9 +110,16 @@ def main():
             score=None if mse is None or mse==0 else float(-10*np.log10(mse))
             scores.append(dict(method=title,crop_target_pixel_mse=mse,crop_target_psnr=score,
                                exact_match=mse==0 if mse is not None else None))
-            ax.set_title(title if ai==0 else "",fontsize=8,pad=4)
-            for spine in ax.spines.values():spine.set_color("#aab2b9");spine.set_linewidth(.5)
-        axes[ai,0].set_ylabel(f"Area {ai+1}\n{month['month']}",fontsize=7.5)
+            if score is not None and col>=1:
+                ax.text(0.97,0.04,f"Target PSNR: {score:.1f} dB",transform=ax.transAxes,
+                        ha="right",va="bottom",fontsize=6.8,fontweight="bold",color="white",
+                        bbox=dict(boxstyle="round,pad=0.22",facecolor="#0F172A",edgecolor="none",alpha=0.78))
+            tcol="#0F3D8A" if "SafeSync" in title else "#0F172A"
+            ax.set_title(title if ai==0 else "",fontsize=8.3,fontweight="bold",color=tcol,pad=5)
+            bcol="#1D4ED8" if "SafeSync" in title else "#94A3B8"
+            blw=1.1 if "SafeSync" in title else 0.55
+            for spine in ax.spines.values():spine.set_color(bcol);spine.set_linewidth(blw)
+        axes[ai,0].set_ylabel(f"Area {ai+1}\n({month['month']})",fontsize=8.0,fontweight="bold")
         selections.append(dict(area_index=ai,aoi=aoi["aoi_id"],month=month["month"],step=step,
             crop_xywh=[x,y,256,256],target_pixels=int(target[crop].sum()),component_pixels=int(counts[selected]),
             selection="first chronological month with >=256 evaluable target pixels, center largest component; no method scores used",

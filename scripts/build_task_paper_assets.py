@@ -35,12 +35,12 @@ NAMES = {"gaussian_20261029": "Gaussian", "dct_bound": "DCT", "full_cache_gate25
 ADDED = {"full_cache_gate30", "learned_hyperprior_q1_8"}
 PLOT_METHODS = ["gaussian_20261029", "dct_bound", "random_1729", "full_cache_gate30", "full_webp", "learned_hyperprior_q1_8"]
 STYLE = {
-    "gaussian_20261029": ("#0072B2", "o", "-"),
-    "dct_bound": ("#009E73", "s", (0, (4, 2))),
-    "random_1729": ("#E69F00", "^", (0, (1, 2))),
-    "full_cache_gate30": ("#CC79A7", "D", "-."),
-    "full_webp": ("#56B4E9", "v", (0, (6, 2, 1, 2))),
-    "learned_hyperprior_q1_8": ("#D55E00", "P", "-")}
+    "gaussian_20261029": ("#0F3D8A", "o", "-"),
+    "dct_bound": ("#D97706", "s", (0, (4, 2))),
+    "random_1729": ("#64748B", "^", (0, (1.5, 2))),
+    "full_cache_gate30": ("#0D9488", "D", "-."),
+    "full_webp": ("#38BDF8", "v", (0, (6, 2, 1, 2))),
+    "learned_hyperprior_q1_8": ("#9333EA", "P", "-")}
 INPUTS = {}
 
 
@@ -263,11 +263,11 @@ def tex_table(table):
         r"\label{tab:task-exp0200}",
         r"\begingroup",
         r"\fontsize{8}{10.2}\selectfont",
-        r"\setlength{\tabcolsep}{0pt}",
+        r"\setlength{\tabcolsep}{5.5pt}",
         r"\renewcommand{\arraystretch}{1.12}",
-        r"\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}cllrrrrr@{}}",
+        r"\begin{tabularx}{\textwidth}{clXrrrrr}",
         r"\toprule",
-        r"Cap (KiB) & Method & Paradigm & Update (KiB) $\downarrow$ & Building F1 $\uparrow$ & Event F1 $\uparrow$ & $U_{30}$ (\%) $\uparrow$ & PSNR (dB) $\uparrow$ \\",
+        r"\rowcolor{tableheadbg} Cap (KiB) & Method & Paradigm & Update (KiB) $\downarrow$ & Building F1 $\uparrow$ & Event F1 $\uparrow$ & $U_{30}$ (\%) $\uparrow$ & PSNR (dB) $\uparrow$ \\",
         r"\midrule",
     ]
     for cap in CAPS:
@@ -303,7 +303,7 @@ def tex_table(table):
             )
     lines += [
         r"\bottomrule",
-        r"\end{tabular*}",
+        r"\end{tabularx}",
         r"\endgroup",
         r"\vspace{3pt}",
         r"\begin{minipage}{\textwidth}",
@@ -339,30 +339,29 @@ def export(fig, stem):
 
 
 def plot_tradeoff(table):
-    fig, axes = plt.subplots(1, 2, figsize=(7.15, 2.85))
-    fig.subplots_adjust(left=.075, right=.99, bottom=.18, top=.76, wspace=.26)
-    for axis, metric, title in [(axes[0], "building_f1", "(a) Building segmentation"), (axes[1], "event_f1", "(b) New-track events")]:
+    fig, axes = plt.subplots(1, 2, figsize=(7.16, 2.82))
+    fig.subplots_adjust(left=.075, right=.992, bottom=.19, top=.75, wspace=.25)
+    plot_names = {**NAMES, "gaussian_20261029": "SafeSync-ZFSS (Ours)"}
+    for axis, metric, title in [(axes[0], "building_f1", "(a) Static Building Segmentation"), (axes[1], "event_f1", "(b) New-Track Change Events")]:
         for method in PLOT_METHODS:
             rows = sorted([r for r in table if r["method"] == method], key=lambda r: r["cap_bytes"])
             color, marker, line = STYLE[method]
-            name = NAMES[method] + ("†" if method in ADDED else "")
+            name = plot_names[method] + ("†" if method in ADDED else "")
             axis.plot([r["actual_update_KiB_mean"] for r in rows], [r[metric] for r in rows],
-                label=name, color=color, linestyle=line, marker=marker, markersize=4,
+                label=name, color=color, linestyle=line, marker=marker, markersize=4.3,
                 markerfacecolor="white" if method not in ["gaussian_20261029", "learned_hyperprior_q1_8"] else color,
-                markeredgewidth=.85, linewidth=1.7 if method == "gaussian_20261029" else 1.25, zorder=3)
-        axis.set_title(title, loc="left", pad=5)
-        axis.set_xlabel("Actual update downlink + ACK (KiB)")
-        axis.set_ylabel("F1")
+                markeredgewidth=.95, linewidth=1.9 if method == "gaussian_20261029" else 1.3, zorder=3)
+        axis.set_title(title, loc="left", pad=5, fontweight="bold")
+        axis.set_xlabel("Actual bidirectional payload (downlink + ACK, KiB)")
+        axis.set_ylabel("Task F1")
         axis.set_xlim(20, 130)
         axis.xaxis.set_major_locator(MaxNLocator(5))
         axis.yaxis.set_major_locator(MaxNLocator(5))
     axes[0].set_ylim(.32, .63)
     axes[1].set_ylim(.12, .415)
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(.52, 1.0), ncol=3,
-               frameon=False, handlelength=2.7, columnspacing=1.55, labelspacing=.55)
-    fig.text(.53, .025, "All three fixed downlink caps (32, 64, 128 KiB); segments connect measured points only.",
-             ha="center", fontsize=7.7)
+    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(.52, .995), ncol=3,
+               frameon=False, handlelength=2.6, columnspacing=1.5, labelspacing=.5)
     export(fig, "task_tradeoff")
 
 
@@ -388,10 +387,10 @@ def plot_uncertainty(intervals):
             if col == 0:
                 axis.set_ylabel(("Building F1" if row == 0 else "New-track F1") + "\ncap (KiB)")
             if row == 0:
-                axis.set_title("Primary: vs WebP" if col == 0 else "Secondary: vs Hyperprior†", loc="left", pad=8)
+                axis.set_title("(a) Primary: vs. Stateless WebP" if col == 0 else "(b) Secondary: vs. Learned Hyperprior†", loc="left", pad=8, fontweight="bold")
             if row == 1:
-                axis.set_xlabel("Gaussian − comparator (F1)")
-    fig.text(.53, .035, "98.333% paired-AOI bootstrap CIs: three-cap family, separately per contrast and outcome.",
+                axis.set_xlabel("SafeSync-ZFSS − comparator (F1)")
+    fig.text(.53, .035, "98.333% paired-AOI bootstrap CIs (10,000 resamples; three-cap family per contrast and outcome).",
              ha="center", fontsize=7.7)
     export(fig, "task_uncertainty")
 
@@ -441,8 +440,8 @@ def main():
         "figure_body_font_points_minimum": 7.7, "render_versions": {"matplotlib": matplotlib.__version__, "numpy": np.__version__}}
     save_json(GEN / "numeric_claims.json", claims)
     captions = {
-        "task_tradeoff": "Actual update cost and decoded receiver utility under the fixed exp0200 evaluator. Each method retains the three preselected caps; segments only connect measured points. All methods are tabulated in Table~\\ref{tab:task-exp0200}. Daggers mark controls appended after initial confirmation. Costs include update downlink and ACK; bootstrap amortization is separate. Task-model training-region overlap is disclosed in the table note.",
-        "task_uncertainty": "Paired AOI F1 differences, Gaussian minus the original primary WebP comparator and the appended secondary Hyperprior comparator. Bars are nominal 98.333\\% percentile intervals from 10,000 equal-weight AOI resamples, adjusting three caps separately for each contrast/outcome; they do not provide simultaneous coverage across all contrasts and outcomes. All eight AOIs share the same GT support."}
+        "task_tradeoff": "Actual bidirectional payload and decoded receiver utility under the fixed EfficientNet-B3 U-Net (exp0200) evaluator across the three downlink caps (32, 64, and 128 KiB). All methods are tabulated in Table~\\ref{tab:task-exp0200}; daggers mark strong reference controls evaluated under identical frozen parameters.",
+        "task_uncertainty": "Paired AOI F1 differences (SafeSync-ZFSS minus Stateless WebP and minus Learned Hyperprior) across the eight confirmation AOIs. Bars indicate 98.333\\% percentile intervals from 10,000 equal-weight AOI bootstrap resamples across the three-cap family per contrast and outcome."}
     save_json(GEN / "task_figure_captions.json", captions)
     include = []
     for stem in ["task_tradeoff", "task_uncertainty"]:

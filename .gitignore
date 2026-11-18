@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.pytest-tmp/
 .venv/
 build/
 dist/
@@ -13,4 +14,3 @@ resources/**/*.pth
 resources/**/*.pt
 resources/**/*.tar
 resources/**/*.whl
-.pytest-tmp/

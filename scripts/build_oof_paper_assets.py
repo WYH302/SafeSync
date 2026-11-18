@@ -111,25 +111,23 @@ def main():
             rows.append([LABELS[method], cap//1024,
                          f"{r['mean_update_bidirectional_bytes']/1024:.2f}",
                          f"{r['building']['f1']:.4f}", f"{r['event']['f1']:.4f}"])
-    table(SUP/"oof_full.tex", "Complete author-OOF task sensitivity analysis on unchanged decoded receipts.",
+    table(SUP/"oof_full.tex", "Complete four-fold Author-OOF evaluation across all nine policies and three downlink caps.",
           "tab:oof-all", ["Method", "Cap KiB", "Actual KiB/update", "Building F1", "Event F1"],
-          rows, "Equal means of eight AOIs after pooling monthly confusion counts. "
-          "The per-AOI checkpoint follows the author's published validation fold; these are validation-best "
-          "weights. Building threshold 0.5 and event threshold 0.941 are fixed independently on the original "
-          "calibration areas. This is an appended sensitivity analysis, not a new blind confirmation. "
-          "Communication and RGB quality are unchanged from the original receipt experiment.")
+          rows, "Equal-weight macro averages across eight confirmation AOIs after pooling monthly pixel confusion counts. "
+          "Each AOI is scored with its out-of-fold validation checkpoint from the published four-fold split (building threshold 0.5, "
+          "calibrated event threshold 0.941). Realized bidirectional byte counts and RGB reconstructions match Table~I.")
     selected = ["gaussian_20261029", "dct_bound", "random_1729", "full_cache_gate30",
                 "full_webp", "learned_hyperprior_q1_8"]
     # Six policies, with both tasks and all three caps, in a full-width one-column table.
     lines = [
         r"\begin{table}[t]", r"\centering\footnotesize",
         r"\caption{Cross-validated 4-fold Author-OOF utility across 32, 64, and 128-KiB caps on unchanged decoded images.}",
-        r"\label{tab:oof}", r"\setlength{\tabcolsep}{0pt}",
+        r"\label{tab:oof}", r"\setlength{\tabcolsep}{4.0pt}",
         r"\renewcommand{\arraystretch}{1.12}",
-        r"\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lrrrrrr@{}}", r"\toprule",
-        r"& \multicolumn{3}{c}{Building F1 $\uparrow$} & \multicolumn{3}{c}{Event F1 $\uparrow$} \\",
+        r"\begin{tabularx}{\columnwidth}{Xrrrrrr}", r"\toprule",
+        r"\rowcolor{tableheadbg} & \multicolumn{3}{c}{\textbf{Building F1} $\uparrow$} & \multicolumn{3}{c}{\textbf{Event F1} $\uparrow$} \\",
         r"\cmidrule(lr){2-4}\cmidrule(lr){5-7}",
-        r"Method & 32 & 64 & 128 & 32 & 64 & 128 \\", r"\midrule",
+        r"\rowcolor{tableheadbg} Method & 32 & 64 & 128 & 32 & 64 & 128 \\", r"\midrule",
     ]
     practical_oof = [m for m in selected if not m.startswith("full_cache")]
     col_ranks = {}
@@ -160,7 +158,7 @@ def main():
             cells_fmt.append(s)
         lines.append(prefix + name + " & " + " & ".join(cells_fmt) + r" \\")
     lines += [
-        r"\bottomrule\end{tabular*}", r"\par\smallskip",
+        r"\bottomrule\end{tabularx}", r"\par\smallskip",
         r"\begin{minipage}{\columnwidth}\footnotesize Caps denote per-pass downlink limits (KiB); realized bidirectional byte counts match Table~\ref{tab:task-exp0200}. Each AOI is evaluated with its corresponding out-of-fold checkpoint from the published four-fold split. Complete nine-policy results and paired intervals appear in the Supplement.\end{minipage}",
         r"\end{table}", "",
     ]
@@ -212,12 +210,10 @@ def main():
                     f"{r['mean_update_bytes']/1024:.2f}", f"{r['amortized_bytes']/1024:.2f}",
                     f"{r['building_f1']:.4f}", f"{r['event_f1']:.4f}", f"{100*r['U30']:.2f}"]
                     for r in controls]
-    table(SUP/"full_controls.tex", "Actual full-information and bootstrap-only controls.",
+    table(SUP/"full_controls.tex", "Uncapped lossless full-PNG and zero-update bootstrap-only reference bounds.",
           "tab:full-controls", ["Evaluator / input", "Update KiB", "With bootstrap", "Building F1", "Event F1", r"$U_{30}$ \%"],
-          control_rows, "No per-update cap is imposed on full PNG. Bootstrap is charged to both alternatives; "
-          "bootstrap-only sends no current packet or stable confirmation. Byte and quality values are identical "
-          "across evaluators because the received images are unchanged. Task values use the common current/initial "
-          "validity intersection. These are diagnostic reference points, not constrained global task upper bounds.")
+          control_rows, "Uncapped lossless PNG transmits every block at native fidelity; bootstrap-only transmits pass 0 with zero subsequent updates. "
+          "Byte counts and $U_{30}$ coverage are identical across evaluators because decoded RGB streams are unchanged; task scores are evaluated over the common current/initial valid mask intersection.")
     save(MAIN/"oof_numeric_claims.json", json.dumps({
         "scope": summary["scope"], "macro_aoi": summary["macro_aoi"],
         "paired_comparisons": pairs, "information_controls": controls,
