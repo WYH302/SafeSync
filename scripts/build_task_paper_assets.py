@@ -269,7 +269,7 @@ def load_asf_plus():
 def tex_table(table, asf_plus=None):
     asf_plus = asf_plus or {}
     paradigms = {
-        "safesync_asf_plus": "Smooth ASF + ZFSS (Ours)",
+        "safesync_asf_plus": "Smooth ASF+ / ZFSS",
         "gaussian_20261029": "Legacy Block ASF (Abl.)",
         "dct_bound": "Deterministic State",
         "random_1729": "Random Priority Ctrl.",

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import io
 from pathlib import Path
+import re
 import numpy as np
 from PIL import Image
 from pptx import Presentation
@@ -57,6 +58,29 @@ def add_round_rect(slide, x, y, w, h, fill, edge, lw=0.9, adj=0.08):
     return shp
 
 
+_SUBSUP_RE = re.compile(r"(_\{[^}]+\}|\^\{[^}]+\})")
+
+
+def _append_rich_runs(p, line: str, color: str, fs: float, bold: bool) -> None:
+    """Render plain text plus `_{sub}` and `^{sup}` as true native PowerPoint sub/superscripts."""
+    for tok in _SUBSUP_RE.split(line):
+        if not tok:
+            continue
+        run = p.add_run()
+        if tok.startswith("_{") and tok.endswith("}"):
+            run.text = tok[2:-1]
+            run._r.get_or_add_rPr().set("baseline", "-25000")
+        elif tok.startswith("^{") and tok.endswith("}"):
+            run.text = tok[2:-1]
+            run._r.get_or_add_rPr().set("baseline", "30000")
+        else:
+            run.text = tok
+        run.font.name = FONT
+        run.font.size = Pt(fs * FONT_SCALE)
+        run.font.bold = bold
+        run.font.color.rgb = rgb(color)
+
+
 def add_text_box(slide, x, y, w, h, text, color="#0F172A", fs=7.0, bold=False, align=PP_ALIGN.CENTER):
     left, top, width, height = xywh(x, y, w, h)
     tb = slide.shapes.add_textbox(left, top, width, height)
@@ -73,12 +97,7 @@ def add_text_box(slide, x, y, w, h, text, color="#0F172A", fs=7.0, bold=False, a
         p.alignment = align
         p.space_before = Pt(0)
         p.space_after = Pt(0)
-        run = p.add_run()
-        run.text = line
-        run.font.name = FONT
-        run.font.size = Pt(fs * FONT_SCALE)
-        run.font.bold = bold
-        run.font.color.rgb = rgb(color)
+        _append_rich_runs(p, line, color, fs, bold)
     return tb
 
 
@@ -94,12 +113,7 @@ def add_badge(slide, x, y, w, h, text, fill, edge, color="#FFFFFF", fs=7.0):
     for idx, line in enumerate(text.split("\n")):
         p = tf.paragraphs[0] if idx == 0 else tf.add_paragraph()
         p.alignment = PP_ALIGN.CENTER
-        run = p.add_run()
-        run.text = line
-        run.font.name = FONT
-        run.font.size = Pt(fs * FONT_SCALE)
-        run.font.bold = True
-        run.font.color.rgb = rgb(color)
+        _append_rich_runs(p, line, color, fs, True)
     return shp
 
 
@@ -150,11 +164,20 @@ def load_icons_and_patches():
         sat_img = trim(rgba[:, : int(w * 0.49)])
         gnd_img = trim(rgba[:, int(w * 0.51):])
 
+    gt_direct = ROOT / "data/spacenet7_pilot/train/L15-1848E-0793N_7394_5018_13/images_masked/global_monthly_2018_02_mosaic_L15-1848E-0793N_7394_5018_13.tif"
     crops_path = ROOT / "paper/figures/receiver_crops.png"
-    if crops_path.is_file():
+    patch = None
+    if gt_direct.is_file():
+        try:
+            img = np.array(Image.open(gt_direct).convert("RGB"), dtype=np.float32) / 255.0
+            patch = img[768:1024, 413:669]
+        except Exception:
+            patch = None
+    if patch is None and crops_path.is_file():
         img = np.array(Image.open(crops_path).convert("RGB"), dtype=np.float32) / 255.0
         hh, ww, _ = img.shape
-        patch = img[int(hh * 0.56):int(hh * 0.92), int(ww * 0.065):int(ww * 0.275)]
+        patch = img[int(hh * 0.54):int(hh * 0.94), int(ww * 0.045):int(ww * 0.195)]
+    if patch is not None:
         patch = np.array(
             Image.fromarray((np.clip(patch, 0, 1) * 255).astype(np.uint8)).resize((128, 128), Image.BICUBIC),
             dtype=np.float32,
@@ -208,7 +231,7 @@ def main() -> None:
     add_round_rect(slide, 1.1, 55.0, 29.8, 7.2, c_rose_lt, c_rose_bd, lw=0.85, adj=0.10)
     add_text_box(slide, 1.2, 60.0, 29.6, 1.9, "Prior Downlink Bottlenecks", c_rose, fs=7.3, bold=True)
     add_text_box(slide, 1.2, 55.1, 29.6, 5.0,
-                 "Stateless WebP: F1 = 0.279 (blur)\n4x WebP Ref: 1,495 viol. & 79.8% drift\nLIC-TCM: 4.18 GB & 30.9 s GPU search",
+                 "Stateless WebP: F1 = 0.279 (blur)\n4× WebP Ref: 1,495 viol. & 79.8% drift\nLIC-TCM: 4.18 GB & 30.9 s GPU search",
                  "#4C0519", fs=6.2)
 
     add_text_box(slide, 31.0, 59.6, 3.6, 1.8, "Shift", c_blue, fs=6.4, bold=True)
@@ -217,7 +240,7 @@ def main() -> None:
     add_round_rect(slide, 34.7, 55.0, 34.2, 7.2, c_green_lt, c_green_bd, lw=0.85, adj=0.10)
     add_text_box(slide, 34.8, 60.0, 34.0, 1.9, "SafeSync World-State Co-Construction", c_green, fs=7.3, bold=True)
     add_text_box(slide, 34.8, 55.1, 34.0, 5.0,
-                 "ZFSS: 32-bit seed -> 0 B matrix (-99.09%)\nASF+: #1 OOF F1 (0.476/0.522) in 118 ms CPU\nTC-PCR: U30=0.823 (+5.5 pp vs. 4.18G TCM)",
+                 "ZFSS: 32-bit seed → 0 B matrix (-99.09%)\nASF+: #1 OOF F1 (0.476/0.522) in 118 ms CPU\nTC-PCR: U_{30}=0.823 (+5.5 pp vs. 4.18G TCM)",
                  "#052E16", fs=6.15)
 
     add_round_rect(slide, 69.6, 55.0, 29.3, 7.2, "#FFFFFF", "#CBD5E1", lw=0.85, adj=0.10)
@@ -254,16 +277,16 @@ def main() -> None:
               c_blue_lt, c_blue, color=c_blue, fs=6.7)
 
     add_round_rect(slide, 1.7, 34.4, 15.8, 11.9, c_blue_lt, c_blue_bd, lw=0.8, adj=0.08)
-    add_text_box(slide, 1.8, 44.3, 15.6, 1.8, "Pass x_t & ASF Split", c_navy, fs=6.6, bold=True)
+    add_text_box(slide, 1.8, 44.3, 15.6, 1.8, "Pass x_{t} & ASF Split", c_navy, fs=6.6, bold=True)
     add_pil_image(slide, patch_rgb, 2.2, 37.3, 5.6, 6.6, border_color=c_navy)
-    add_text_box(slide, 2.1, 35.1, 5.8, 1.8, "RGB x_t", c_navy, fs=5.9, bold=True)
+    add_text_box(slide, 2.1, 35.1, 5.8, 1.8, "RGB x_{t}", c_navy, fs=5.9, bold=True)
     add_pil_image(slide, patch_coarse, 8.6, 40.9, 4.1, 3.3, border_color=c_blue)
-    add_text_box(slide, 12.8, 40.8, 4.5, 3.4, "c_t\nWebP85", c_blue, fs=5.5, bold=True)
+    add_text_box(slide, 12.8, 40.8, 4.5, 3.4, "c_{t}\nWebP85", c_blue, fs=5.5, bold=True)
     add_pil_image(slide, patch_detail, 8.6, 36.2, 4.1, 3.3, border_color=c_teal)
-    add_text_box(slide, 12.8, 36.1, 4.5, 3.4, "H x_t\nDetail", c_teal, fs=5.5, bold=True)
+    add_text_box(slide, 12.8, 36.1, 4.5, 3.4, "H x_{t}\nDetail", c_teal, fs=5.5, bold=True)
 
     add_round_rect(slide, 1.7, 23.6, 15.8, 10.1, c_green_lt, c_green_bd, lw=0.8, adj=0.08)
-    add_text_box(slide, 1.8, 31.7, 15.6, 1.8, "ZFSS Sketch s_t", c_green, fs=6.4, bold=True)
+    add_text_box(slide, 1.8, 31.7, 15.6, 1.8, "ZFSS Sketch s_{t}", c_green, fs=6.4, bold=True)
     add_badge(slide, 2.15, 28.5, 6.6, 2.5, "32-bit Seed", "#FFFFFF", c_green, color=c_green, fs=5.3)
     add_arrow_chevron(slide, 8.95, 29.3, 1.1, 0.9, c_green, "right")
     add_badge(slide, 10.25, 28.5, 6.7, 2.5, "q16 (48 B)", c_green, c_green, color="#FFFFFF", fs=5.4)
@@ -274,11 +297,11 @@ def main() -> None:
 
     add_round_rect(slide, 19.0, 37.2, 13.4, 6.7, c_green_lt, c_green, lw=0.75, adj=0.10)
     add_text_box(slide, 19.1, 41.8, 13.2, 1.7, "Safety Gate (Prop. 1)", c_green, fs=5.7, bold=True)
-    add_text_box(slide, 19.1, 37.5, 13.2, 4.1, "L_b <= tau -> STABLE\n0 False-Stable Viol.", "#052E16", fs=5.6)
+    add_text_box(slide, 19.1, 37.5, 13.2, 4.1, "L_{b} ≤ τ → STABLE\n0 False-Stable Viol.", "#052E16", fs=5.6)
 
     add_round_rect(slide, 19.0, 29.5, 13.4, 6.8, c_blue_lt, c_blue, lw=0.75, adj=0.10)
     add_text_box(slide, 19.1, 34.2, 13.2, 1.7, "Utility Gate (Point Est.)", c_blue, fs=5.7, bold=True)
-    add_text_box(slide, 19.1, 29.8, 13.2, 4.1, "Rank ||z_b||_2^2 / k\nJPEG 4:4:4 (q80-90)", c_navy, fs=5.6)
+    add_text_box(slide, 19.1, 29.8, 13.2, 4.1, "Rank ||z_{b}||_{2}^{2} / k\nJPEG 4:4:4 (q80-90)", c_navy, fs=5.6)
 
     gx0, gy0, cs = 33.2, 34.4, 1.56
     gmap = [[0, 1, 1, 0, 0], [0, 2, 1, 2, 0], [2, 0, 0, 0, 0], [0, 1, 1, 0, 2], [0, 0, 2, 0, 0]]
@@ -292,13 +315,13 @@ def main() -> None:
         add_round_rect(slide, 33.2, ly, 1.05, 0.85, col, c_navy, lw=0.35, adj=0.05)
         add_text_box(slide, 34.4, ly - 0.15, 7.1, 1.15, txt, c_navy, fs=5.5, align=PP_ALIGN.LEFT)
 
-    add_badge(slide, 18.3, 23.6, 23.5, 2.65, "Self-Decode Atlas -> Commit on ACK", "#F1F5F9", c_teal, color=c_teal, fs=5.7)
+    add_badge(slide, 18.3, 23.6, 23.5, 2.65, "Self-Decode Atlas → Commit on ACK", "#F1F5F9", c_teal, color=c_teal, fs=5.7)
 
     # TIER 1: LINK
     add_round_rect(slide, 44.5, 33.2, 12.0, 14.8, "#FFFFFF", c_amber, lw=0.9, adj=0.08)
     add_text_box(slide, 44.6, 45.6, 11.8, 2.0, "Downlink", c_amber, fs=6.9, bold=True)
-    add_badge(slide, 45.2, 43.3, 10.6, 2.0, "<= 32 KiB", c_amber_lt, c_amber, color=c_amber, fs=6.2)
-    add_text_box(slide, 44.7, 34.0, 11.6, 8.8, "WebP85 c_t\nJPEG 4:4:4\nDigest+CRC\n(118 ms CPU)", c_navy, fs=5.9)
+    add_badge(slide, 45.2, 43.3, 10.6, 2.0, "≤ 32 KiB", c_amber_lt, c_amber, color=c_amber, fs=6.2)
+    add_text_box(slide, 44.7, 34.0, 11.6, 8.8, "WebP85 c_{t}\nJPEG 4:4:4\nDigest+CRC\n(118 ms CPU)", c_navy, fs=5.9)
     add_arrow_chevron(slide, 42.1, 39.8, 2.1, 1.4, c_amber, "right")
     add_arrow_chevron(slide, 56.7, 39.8, 2.1, 1.4, c_amber, "right")
 
@@ -313,19 +336,19 @@ def main() -> None:
     add_badge(slide, 59.1, 46.9, 32.2, 2.05, "(b) Ground Smooth ASF+ Archive", c_teal_lt, c_teal, color=c_teal, fs=6.7)
 
     add_round_rect(slide, 59.1, 36.8, 15.6, 9.4, c_blue_lt, c_blue_bd, lw=0.8, adj=0.08)
-    add_text_box(slide, 59.2, 44.0, 15.4, 1.9, "Smooth Field U c_t", c_blue, fs=6.5, bold=True)
-    add_text_box(slide, 59.2, 37.3, 15.4, 6.4, "Bilinear drift align;\n4.5x fewer false\nbackground triggers", c_navy, fs=5.8)
+    add_text_box(slide, 59.2, 44.0, 15.4, 1.9, "Smooth Field Ũ c_{t}", c_blue, fs=6.5, bold=True)
+    add_text_box(slide, 59.2, 37.3, 15.4, 6.4, "Bilinear drift align;\n4.5× fewer false\nbackground triggers", c_navy, fs=5.8)
 
     add_round_rect(slide, 59.1, 23.6, 15.6, 12.2, "#F1F5F9", c_navy, lw=0.85, adj=0.08)
-    add_text_box(slide, 59.2, 33.6, 15.4, 1.9, "Immutable Archive a_t", c_navy, fs=6.5, bold=True)
-    add_text_box(slide, 59.2, 24.2, 15.4, 9.0, "Stores ACK'd absolute\nblocks C(x_{s,b}) only;\nnever overwritten!\n|S_{b,t}| <= t + 1", c_navy, fs=5.75)
+    add_text_box(slide, 59.2, 33.6, 15.4, 1.9, "Immutable Archive a_{t}", c_navy, fs=6.5, bold=True)
+    add_text_box(slide, 59.2, 24.2, 15.4, 9.0, "Stores ACK'd absolute\nblocks C(x_{s,b}) only;\nnever overwritten!\n|S_{b,t}| ≤ t", c_navy, fs=5.75)
 
     add_round_rect(slide, 75.6, 23.6, 22.6, 22.6, c_green_lt, c_green, lw=0.95, adj=0.06)
     add_text_box(slide, 75.8, 44.0, 22.2, 1.9, "Co-Constructed Render", c_green, fs=6.8, bold=True)
-    add_badge(slide, 76.5, 41.5, 20.8, 2.1, "x_hat_t = R( H a_t + U_bilin c_t )", "#FFFFFF", c_green, color=c_green, fs=5.95)
+    add_badge(slide, 76.5, 41.5, 20.8, 2.1, "x̂_{t}^{+} = R(H a_{t} + Ũ c_{t})", "#FFFFFF", c_green, color=c_green, fs=6.1)
     add_pil_image(slide, patch_rgb, 76.5, 31.8, 7.6, 8.7, border_color=c_green)
     add_text_box(slide, 84.5, 31.6, 13.4, 9.2, "SpaceNet 7 OOF\n(ASF+ CPU #1):\n32K: 0.4760\n(+3.9 pp TCM)\n128K: 0.5216", "#052E16", fs=5.8, bold=True)
-    add_badge(slide, 76.5, 24.5, 20.8, 5.8, "0 Violations / 118,317 Blocks\n263x Faster than GPU LIC-TCM", "#FFFFFF", c_green_bd, color=c_navy, fs=5.85)
+    add_badge(slide, 76.5, 24.5, 20.8, 5.8, "0 Violations / 118,317 Blocks\n263× Faster than GPU LIC-TCM", "#FFFFFF", c_green_bd, color=c_navy, fs=5.85)
 
     # TIER 2: SPACE
     add_round_rect(slide, 1.1, 1.1, 41.4, 20.8, "#FFFFFF", c_purple_bd, lw=0.85, adj=0.04)
@@ -339,8 +362,8 @@ def main() -> None:
     oval.fill.fore_color.rgb = rgb("#FFFFFF")
     oval.line.color.rgb = rgb(c_purple)
     oval.line.width = Pt(1.1)
-    add_text_box(slide, 2.0, 5.0, 6.8, 1.8, "|dq| <= 41", c_rose, fs=5.7, bold=True)
-    add_text_box(slide, 9.0, 3.5, 11.9, 12.2, "DINOv2-S/14\nLossless int8\ndelta: -20.6%\nto -35.4% bytes\nNACK Anchor", "#2E1065", fs=5.85)
+    add_text_box(slide, 2.0, 5.0, 6.8, 1.8, "|δq| ≤ 41", c_rose, fs=5.7, bold=True)
+    add_text_box(slide, 9.0, 3.5, 11.9, 12.2, "DINOv2-S/14\nLossless int8\nδ: -20.6% to\n-35.4% bytes\nNACK Anchor", "#2E1065", fs=5.85)
 
     add_round_rect(slide, 22.1, 1.8, 19.8, 16.7, c_blue_lt, c_blue_bd, lw=0.8, adj=0.07)
     add_text_box(slide, 22.2, 16.4, 19.6, 1.8, "TC-PCR Prototype Router", c_blue, fs=6.45, bold=True)
@@ -355,8 +378,8 @@ def main() -> None:
     # TIER 2: LINK
     add_round_rect(slide, 44.5, 1.8, 12.0, 19.4, "#FFFFFF", c_purple, lw=0.9, adj=0.08)
     add_text_box(slide, 44.6, 18.8, 11.8, 2.0, "TE01 Frame", c_purple, fs=6.7, bold=True)
-    add_badge(slide, 45.2, 16.7, 10.6, 1.9, "<= 8 KiB", c_purple_lt, c_purple, color=c_purple, fs=6.15)
-    add_text_box(slide, 44.7, 7.0, 11.6, 9.2, "Exact 16x16\nTask State +\nBase + RE01\nResidual ROIs", c_navy, fs=5.85)
+    add_badge(slide, 45.2, 16.7, 10.6, 1.9, "≤ 8 KiB", c_purple_lt, c_purple, color=c_purple, fs=6.15)
+    add_text_box(slide, 44.7, 7.0, 11.6, 9.2, "Exact 16×16\nTask State +\nBase + RE01\nResidual ROIs", c_navy, fs=5.85)
     add_badge(slide, 45.2, 2.6, 10.6, 3.6, "ACK / NACK\nRisk Anchor", c_rose_lt, c_rose, color=c_rose, fs=5.75)
     add_arrow_chevron(slide, 42.1, 10.8, 2.1, 1.4, c_purple, "right")
     add_arrow_chevron(slide, 56.7, 10.8, 2.1, 1.4, c_purple, "right")
@@ -373,7 +396,7 @@ def main() -> None:
     add_text_box(slide, 59.3, 3.2, 13.8, 12.6, "Exact known\nchange +\nBase + RE01\n>30 dB novel\nROI recovery", "#042F2E", fs=5.85)
 
     add_round_rect(slide, 74.0, 1.8, 24.3, 16.7, c_amber_lt, c_amber, lw=0.9, adj=0.06)
-    add_text_box(slide, 74.2, 16.3, 23.9, 1.8, "SECOND 8-KiB Held-Out U30", c_amber, fs=6.55, bold=True)
+    add_text_box(slide, 74.2, 16.3, 23.9, 1.8, "SECOND 8-KiB Held-Out U_{30}", c_amber, fs=6.55, bold=True)
     for idx, (mlbl, uval, col) in enumerate([
         ("WebP", 0.5380, "#64748B"),
         ("Hyperprior", 0.6379, "#9333EA"),
@@ -388,7 +411,7 @@ def main() -> None:
         add_round_rect(slide, 82.8, by - 0.35, bw, 0.95, col, None, adj=0.22)
         add_text_box(slide, 82.9 + bw, by - 0.5, 5.2, 1.3, f"{uval:.3f}", col, fs=5.7, bold=True, align=PP_ALIGN.LEFT)
 
-    add_badge(slide, 74.7, 2.5, 22.9, 5.1, "#1 U30: +5.45 pp vs. 4.18G LIC-TCM\n+15.3 pp WebP | FNR 0.157 | F1 0.850",
+    add_badge(slide, 74.7, 2.5, 22.9, 5.1, "#1 U_{30}: +5.45 pp vs. 4.18G LIC-TCM\n+15.3 pp WebP | FNR 0.157 | F1 0.850",
               "#FFFFFF", c_amber, color=c_navy, fs=5.35)
 
     out_path = ROOT / "paper/figures/layered_state.pptx"

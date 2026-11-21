@@ -52,11 +52,20 @@ def _load_satellite_and_ground_icons():
 
 
 def _load_real_rs_patches():
+    gt_direct = ROOT / "data/spacenet7_pilot/train/L15-1848E-0793N_7394_5018_13/images_masked/global_monthly_2018_02_mosaic_L15-1848E-0793N_7394_5018_13.tif"
     crops_path = ROOT / "paper/figures/receiver_crops.png"
-    if crops_path.is_file():
+    patch = None
+    if gt_direct.is_file():
+        try:
+            img = np.array(Image.open(gt_direct).convert("RGB"), dtype=np.float32) / 255.0
+            patch = img[768:1024, 413:669]
+        except Exception:
+            patch = None
+    if patch is None and crops_path.is_file():
         img = np.array(Image.open(crops_path).convert("RGB"), dtype=np.float32) / 255.0
         h, w, _ = img.shape
-        patch = img[int(h * 0.56):int(h * 0.92), int(w * 0.065):int(w * 0.275)]
+        patch = img[int(h * 0.54):int(h * 0.94), int(w * 0.045):int(w * 0.195)]
+    if patch is not None:
         patch = np.array(
             Image.fromarray((np.clip(patch, 0, 1) * 255).astype(np.uint8)).resize((128, 128), Image.BICUBIC),
             dtype=np.float32,
@@ -75,6 +84,7 @@ def main() -> None:
     plt.rcParams.update({
         "font.family": font_name,
         "font.sans-serif": [font_name, "DejaVu Sans"],
+        "mathtext.fontset": "stixsans",
         "font.size": 7.2,
         "pdf.fonttype": 42,
         "ps.fonttype": 42,
@@ -158,7 +168,7 @@ def main() -> None:
     ax.text(16.0, 60.9, "Prior Downlink Bottlenecks", color=c_rose, fontsize=7.4, fontweight="bold", ha="center", va="center", zorder=5)
     ax.text(16.0, 57.6,
             "Stateless WebP: F1 = 0.279 (blur)\n"
-            "4x WebP Ref: 1,495 viol. & 79.8% drift\n"
+            "4× WebP Ref: 1,495 viol. & 79.8% drift\n"
             "LIC-TCM: 4.18 GB & 30.9 s GPU search",
             color="#4C0519", fontsize=6.4, ha="center", va="center", linespacing=1.22, zorder=5)
 
@@ -168,9 +178,9 @@ def main() -> None:
     card(34.7, 55.0, 34.2, 7.2, fill=c_green_lt, edge=c_green_bd, lw=0.85, r=0.65, shadow=False, zorder=3)
     ax.text(51.8, 60.9, "SafeSync World-State Co-Construction", color=c_green, fontsize=7.4, fontweight="bold", ha="center", va="center", zorder=5)
     ax.text(51.8, 57.6,
-            "ZFSS: 32-bit seed -> 0 B matrix (-99.09%)\n"
+            "ZFSS: 32-bit seed $\\rightarrow$ 0 B matrix (-99.09%)\n"
             "ASF+: #1 OOF F1 (0.476/0.522) in 118 ms CPU\n"
-            "TC-PCR: U30=0.823 (+5.5 pp vs. 4.18G TCM)",
+            "TC-PCR: $U_{30}$=0.823 (+5.5 pp vs. 4.18G TCM)",
             color="#052E16", fontsize=6.3, ha="center", va="center", linespacing=1.22, zorder=5)
 
     # Right mini bar chart: Single-Area Persistent State (N=1)
@@ -216,21 +226,21 @@ def main() -> None:
 
     # Pass RGB + Coarse/Detail thumbnails
     card(1.7, 34.4, 15.8, 11.9, fill=c_blue_lt, edge=c_blue_bd, lw=0.8, r=0.65, shadow=False, zorder=3)
-    ax.text(9.6, 45.2, "Pass x_t & ASF Split", color=c_navy, fontsize=6.8, fontweight="bold", ha="center", va="center", zorder=5)
+    ax.text(9.6, 45.2, "Pass $x_t$ & ASF Split", color=c_navy, fontsize=6.8, fontweight="bold", ha="center", va="center", zorder=5)
     img_box(patch_rgb, 2.2, 37.3, 5.6, 6.6, edge=c_navy)
-    ax.text(5.0, 36.0, "RGB x_t", color=c_navy, fontsize=6.1, fontweight="bold", ha="center", va="center", zorder=5)
+    ax.text(5.0, 36.0, "RGB $x_t$", color=c_navy, fontsize=6.1, fontweight="bold", ha="center", va="center", zorder=5)
     img_box(patch_coarse, 8.6, 40.9, 4.1, 3.3, edge=c_blue)
-    ax.text(15.1, 42.5, "c_t\nWebP85", color=c_blue, fontsize=5.75, fontweight="bold", ha="center", va="center", zorder=5)
+    ax.text(15.1, 42.5, "$c_t$\nWebP85", color=c_blue, fontsize=5.75, fontweight="bold", ha="center", va="center", zorder=5)
     img_box(patch_detail, 8.6, 36.2, 4.1, 3.3, edge=c_teal)
-    ax.text(15.1, 37.8, "H x_t\nDetail", color=c_teal, fontsize=5.9, fontweight="bold", ha="center", va="center", zorder=5)
+    ax.text(15.1, 37.8, "$Hx_t$\nDetail", color=c_teal, fontsize=5.9, fontweight="bold", ha="center", va="center", zorder=5)
 
     # ZFSS Seeded Sketching card
     card(1.7, 23.6, 15.8, 10.1, fill=c_green_lt, edge=c_green_bd, lw=0.8, r=0.65, shadow=False, zorder=3)
-    ax.text(9.6, 32.6, "ZFSS Sketch s_t", color=c_green, fontsize=6.5, fontweight="bold", ha="center", va="center", zorder=5)
+    ax.text(9.6, 32.6, "ZFSS Sketch $s_t$", color=c_green, fontsize=6.5, fontweight="bold", ha="center", va="center", zorder=5)
     badge(2.15, 28.5, 6.7, 2.5, "32-bit Seed", fill="#FFFFFF", edge=c_green, color=c_green, fs=5.55)
     arrow((8.95, 29.75), (10.15, 29.75), color=c_green, lw=1.1, scale=8)
     badge(10.25, 28.5, 6.7, 2.5, "q16 (48 B)", fill=c_green, edge=c_green, color="#FFFFFF", fs=5.65)
-    ax.text(9.6, 25.8, "Stream A: 0 B Matrix\n12.3 KB/AOI (-99.09%)",
+    ax.text(9.6, 25.8, "Stream $A$: 0 B Matrix\n12.3 KB/AOI (-99.09%)",
             color="#052E16", fontsize=5.95, fontweight="bold", ha="center", va="center", linespacing=1.2, zorder=5)
 
     # DGAD Dual-Gate + 5x5 Block Map
@@ -239,12 +249,12 @@ def main() -> None:
 
     card(19.0, 37.2, 13.4, 6.7, fill=c_green_lt, edge=c_green, lw=0.75, r=0.55, shadow=False, zorder=4)
     ax.text(25.7, 42.6, "Safety Gate (Prop. 1)", color=c_green, fontsize=5.95, fontweight="bold", ha="center", va="center", zorder=5)
-    ax.text(25.7, 39.4, "L_b <= tau -> STABLE\n0 False-Stable Viol.",
+    ax.text(25.7, 39.4, "$L_b \\leq \\tau \\rightarrow$ STABLE\n0 False-Stable Viol.",
             color="#052E16", fontsize=5.8, ha="center", va="center", linespacing=1.2, zorder=5)
 
     card(19.0, 29.5, 13.4, 6.8, fill=c_blue_lt, edge=c_blue, lw=0.75, r=0.55, shadow=False, zorder=4)
     ax.text(25.7, 35.0, "Utility Gate (Point Est.)", color=c_blue, fontsize=5.9, fontweight="bold", ha="center", va="center", zorder=5)
-    ax.text(25.7, 31.8, "Rank ||z_b||_2^2 / k\nJPEG 4:4:4 (q80-90)",
+    ax.text(25.7, 31.8, "Rank $\\|z_b\\|_2^2 / k$\nJPEG 4:4:4 (q80-90)",
             color=c_navy, fontsize=5.7, ha="center", va="center", linespacing=1.2, zorder=5)
 
     # Crisp 5x5 Block Routing Grid
@@ -270,7 +280,7 @@ def main() -> None:
         ax.text(34.55, ly, txt, color=c_navy, fontsize=5.75, va="center", zorder=5)
 
     # Dedicated Self-Decode pill
-    badge(18.3, 23.6, 23.5, 2.65, "Self-Decode LA01 -> Commit on ACK",
+    badge(18.3, 23.6, 23.5, 2.65, "Self-Decode Atlas $\\rightarrow$ Commit on ACK",
           fill="#F1F5F9", edge=c_teal, color=c_teal, fs=5.85)
     arrow((30.05, 27.1), (30.05, 26.25), color=c_teal, lw=1.0, scale=7.5)
     arrow((18.3, 24.9), (17.5, 26.2), color=c_teal, lw=1.1, dashed=True, scale=8)
@@ -280,9 +290,9 @@ def main() -> None:
     # --- Link Tier 1 ---
     card(44.5, 33.2, 12.0, 14.8, fill="#FFFFFF", edge=c_amber, lw=0.9, r=0.7, shadow=False, zorder=3)
     ax.text(50.5, 46.5, "Downlink", color=c_amber, fontsize=7.0, fontweight="bold", ha="center", va="center", zorder=5)
-    badge(45.2, 43.3, 10.6, 2.0, "<= 32 KiB", fill=c_amber_lt, edge=c_amber, color=c_amber, fs=6.4)
+    badge(45.2, 43.3, 10.6, 2.0, "≤ 32 KiB", fill=c_amber_lt, edge=c_amber, color=c_amber, fs=6.4)
     ax.text(50.5, 38.2,
-            "WebP85 c_t\nJPEG 4:4:4\nDigest+CRC\n(118 ms CPU)",
+            "WebP85 $c_t$\nJPEG 4:4:4\nDigest+CRC\n(118 ms CPU)",
             color=c_navy, fontsize=6.05, ha="center", va="center", linespacing=1.22, zorder=5)
     arrow((41.8, 40.5), (44.5, 40.5), color=c_amber, lw=1.5, scale=9.5)
     arrow((56.5, 40.5), (58.9, 40.5), color=c_amber, lw=1.5, scale=9.5)
@@ -300,18 +310,18 @@ def main() -> None:
           fill=c_teal_lt, edge=c_teal, color=c_teal, fs=6.8)
 
     card(59.1, 36.8, 15.6, 9.4, fill=c_blue_lt, edge=c_blue_bd, lw=0.8, r=0.65, shadow=False, zorder=3)
-    ax.text(66.9, 44.9, "Smooth Field U c_t", color=c_blue, fontsize=6.6, fontweight="bold", ha="center", va="center", zorder=5)
-    ax.text(66.9, 40.4, "Bilinear drift align;\n4.5x fewer false\nbackground triggers",
+    ax.text(66.9, 44.9, "Smooth Field $\\tilde{U}c_t$", color=c_blue, fontsize=6.6, fontweight="bold", ha="center", va="center", zorder=5)
+    ax.text(66.9, 40.4, "Bilinear drift align;\n4.5× fewer false\nbackground triggers",
             color=c_navy, fontsize=5.95, ha="center", va="center", linespacing=1.2, zorder=5)
 
     card(59.1, 23.6, 15.6, 12.2, fill="#F1F5F9", edge=c_navy, lw=0.85, r=0.65, shadow=False, zorder=3)
-    ax.text(66.9, 34.4, "Immutable Archive a_t", color=c_navy, fontsize=6.65, fontweight="bold", ha="center", va="center", zorder=5)
-    ax.text(66.9, 28.6, "Stores ACK'd absolute\nblocks C(x_{s,b}) only;\nnever overwritten!\n|S_{b,t}| <= t + 1",
+    ax.text(66.9, 34.4, "Immutable Archive $a_t$", color=c_navy, fontsize=6.65, fontweight="bold", ha="center", va="center", zorder=5)
+    ax.text(66.9, 28.6, "Stores ACK'd absolute\nblocks $C(x_{s,b})$ only;\nnever overwritten!\n$|\\mathcal{S}_{b,t}| \\leq t$",
             color=c_navy, fontsize=5.95, ha="center", va="center", linespacing=1.2, zorder=5)
 
     card(75.6, 23.6, 22.6, 22.6, fill=c_green_lt, edge=c_green, lw=0.95, r=0.75, shadow=False, zorder=3)
     ax.text(86.9, 44.8, "Co-Constructed Render", color=c_green, fontsize=6.9, fontweight="bold", ha="center", va="center", zorder=5)
-    badge(76.5, 41.5, 20.8, 2.1, "x_hat_t = R( H a_t + U_bilin c_t )", fill="#FFFFFF", edge=c_green, color=c_green, fs=6.05)
+    badge(76.5, 41.5, 20.8, 2.1, "$\\hat{x}_t^+ = \\mathcal{R}(H a_t + \\tilde{U} c_t)$", fill="#FFFFFF", edge=c_green, color=c_green, fs=6.25)
 
     img_box(patch_rgb, 76.5, 31.8, 7.6, 8.7, edge=c_green, lw=0.95)
     for bx, by in [(80.2, 37.8), (81.3, 37.1), (79.1, 34.0)]:
@@ -321,7 +331,7 @@ def main() -> None:
             "SpaceNet 7 OOF\n(ASF+ CPU #1):\n32K: 0.4760\n(+3.9 pp TCM)\n128K: 0.5216",
             color="#052E16", fontsize=5.95, fontweight="bold", ha="center", va="center", linespacing=1.22, zorder=5)
     badge(76.5, 24.5, 20.8, 5.8,
-          "0 Violations / 118,317 Blocks\n263x Faster than GPU LIC-TCM",
+          "0 Violations / 118,317 Blocks\n263× Faster than GPU LIC-TCM",
           fill="#FFFFFF", edge=c_green_bd, color=c_navy, fs=6.05)
 
     arrow((74.7, 41.2), (75.6, 39.2), color=c_blue, lw=1.15, scale=8.5)
@@ -346,9 +356,9 @@ def main() -> None:
     arrow((scx, scy), p_ref, color=c_slate, lw=0.95, scale=6.5)
     arrow((scx, scy), p_cur, color=c_purple, lw=1.0, scale=6.5)
     arrow(p_ref, p_cur, color=c_rose, lw=1.1, scale=6.5)
-    ax.text(scx, scy - sr - 1.15, "|dq|<=41", color=c_rose, fontsize=5.8, fontweight="bold", ha="center", zorder=5)
+    ax.text(scx, scy - sr - 1.15, "$|\\delta q| \\leq 41$", color=c_rose, fontsize=5.8, fontweight="bold", ha="center", zorder=5)
     ax.text(15.0, 9.6,
-            "DINOv2-S/14\nLossless int8\ndelta: -20.6%\nto -35.4% bytes\nNACK Anchor",
+            "DINOv2-S/14\nLossless int8\n$\\delta$: -20.6% to\n-35.4% bytes\nNACK Anchor",
             color="#2E1065", fontsize=5.95, ha="center", va="center", linespacing=1.22, zorder=5)
 
     # TC-PCR card with Prototype Ellipsoid
@@ -367,9 +377,9 @@ def main() -> None:
     # --- Link Tier 2 ---
     card(44.5, 1.8, 12.0, 19.4, fill="#FFFFFF", edge=c_purple, lw=0.9, r=0.7, shadow=False, zorder=3)
     ax.text(50.5, 19.7, "TE01 Frame", color=c_purple, fontsize=6.8, fontweight="bold", ha="center", va="center", zorder=5)
-    badge(45.2, 16.7, 10.6, 1.9, "<= 8 KiB", fill=c_purple_lt, edge=c_purple, color=c_purple, fs=6.3)
+    badge(45.2, 16.7, 10.6, 1.9, "≤ 8 KiB", fill=c_purple_lt, edge=c_purple, color=c_purple, fs=6.3)
     ax.text(50.5, 11.7,
-            "Exact 16x16\nTask State +\nBase + RE01\nResidual ROIs",
+            "Exact 16×16\nTask State +\nBase + RE01\nResidual ROIs",
             color=c_navy, fontsize=5.95, ha="center", va="center", linespacing=1.22, zorder=5)
     badge(45.2, 2.6, 10.6, 3.6, "ACK / NACK\nRisk Anchor", fill=c_rose_lt, edge=c_rose, color=c_rose, fs=5.9)
     arrow((41.9, 11.5), (44.5, 11.5), color=c_purple, lw=1.5, scale=9.5)
@@ -389,7 +399,7 @@ def main() -> None:
             color="#042F2E", fontsize=6.0, ha="center", va="center", linespacing=1.24, zorder=5)
 
     card(74.0, 1.8, 24.3, 16.7, fill=c_amber_lt, edge=c_amber, lw=0.9, r=0.7, shadow=False, zorder=3)
-    ax.text(86.15, 17.2, "SECOND 8-KiB Held-Out U30", color=c_amber, fontsize=6.7, fontweight="bold", ha="center", va="center", zorder=5)
+    ax.text(86.15, 17.2, "SECOND 8-KiB Held-Out $U_{30}$", color=c_amber, fontsize=6.7, fontweight="bold", ha="center", va="center", zorder=5)
 
     for idx, (mlbl, uval, col) in enumerate([
         ("WebP", 0.5380, "#64748B"),
@@ -408,7 +418,7 @@ def main() -> None:
         ax.text(82.9 + bw, by, f"{uval:.3f}", color=col, fontsize=5.9, fontweight="bold", va="center", zorder=5)
 
     badge(74.7, 2.5, 22.9, 5.1,
-          "#1 U30: +5.45 pp vs. 4.18G LIC-TCM\n+15.3 pp WebP | FNR 0.157 | F1 0.850",
+          "#1 $U_{30}$: +5.45 pp vs. 4.18G LIC-TCM\n+15.3 pp WebP | FNR 0.157 | F1 0.850",
           fill="#FFFFFF", edge=c_amber, color=c_navy, fs=5.55)
     arrow((73.3, 10.0), (74.0, 10.0), color=c_teal, lw=1.15, scale=8.5)
 
