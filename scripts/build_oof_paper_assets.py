@@ -67,7 +67,7 @@ def table(path, caption, label, headers, rows, note, wide=True):
              r"\setlength{\tabcolsep}{6.5pt}",
              r"\renewcommand{\arraystretch}{1.08}",
              r"\begin{tabularx}{" + width + r"}{X" + "r"*(len(headers)-1) + r"}",
-             r"\toprule", r"\rowcolor{tableheadbg} " + " & ".join(headers) + r" \\", r"\midrule"]
+             r"\toprule", r"\rowcolor{tableheadbg} " + " & ".join(rf"\textbf{{{h}}}" for h in headers) + r" \\", r"\midrule"]
     for row in rows:
         first = str(row[0])
         is_ss = first in ("Gaussian", "SafeSync-ZFSS") or "SafeSync" in first
@@ -124,38 +124,71 @@ def main():
           rows, "Equal-weight macro averages across eight confirmation AOIs after pooling monthly pixel confusion counts. "
           "Each AOI is scored with its out-of-fold validation checkpoint from the published four-fold split (building threshold 0.5, "
           "calibrated event threshold 0.941). Realized bidirectional byte counts and RGB reconstructions match Table~I.")
-    selected = ["gaussian_20261029", "dct_bound", "random_1729", "full_cache_gate30",
-                "full_jpeg420", "full_webp", "learned_hyperprior_q1_8"]
+    asf_data = load("results/sn7_smooth_asf_v1/analysis.json")
+    dgad_data = load("results/sn7_repaired_design/v1/analysis.json")
+    lowres_data = load("results/lowres_reference_sn7/v1/analysis.json")
+    extra_oof = {}
+    for cap in CAPS:
+        b = asf_data["by_budget"][str(cap)]
+        extra_oof[("safesync_asf_plus", cap)] = {
+            "building": {"f1": float(b["oof_building_f1"])},
+            "event": {"f1": float(b["oof_event_f1"])},
+        }
+    for r in dgad_data["repair_1b_decoupled_gating_and_audit"]["summary_by_method_and_budget"]:
+        if r["method"] == "gaussian_decoupled":
+            extra_oof[("gaussian_decoupled", int(r["budget"]))] = {
+                "building": {"f1": float(r["building_f1_mean"])},
+                "event": {"f1": float(r["event_f1_mean"])},
+            }
+    for r in lowres_data["summaries"]:
+        if r["method"] == "tcm":
+            extra_oof[("tcm", int(r["budget"]))] = {
+                "building": {"f1": float(r["building_f1"])},
+                "event": {"f1": float(r["event_f1"])},
+            }
+    macro_ext = {**macro, **extra_oof}
+
+    selected = ["safesync_asf_plus", "gaussian_decoupled", "gaussian_20261029", "dct_bound", "random_1729",
+                "full_cache_gate30", "full_jpeg420", "full_webp", "learned_hyperprior_q1_8", "tcm"]
     oof_paradigms = {
-        "gaussian_20261029": "Asymmetric State (Ours)",
-        "dct_bound": "Deterministic State",
+        "safesync_asf_plus": "Smooth ASF + ZFSS (CPU, 0 B)",
+        "gaussian_decoupled": "Legacy Block DGAD (CPU, 0 B)",
+        "gaussian_20261029": "Legacy Block ZFSS (CPU, 0 B)",
+        "dct_bound": "Deterministic State (CPU)",
         "random_1729": "Random Priority Ctrl.",
-        "full_cache_gate30": "Full-Archive Ref.",
-        "full_jpeg420": "Stateless Transform",
-        "full_webp": "Stateless Transform",
-        "learned_hyperprior_q1_8": "Learned Neural Codec",
+        "full_cache_gate30": "Full-Archive Ref. (1.35 MB)",
+        "full_jpeg420": "Stateless Transform (CPU)",
+        "full_webp": "Stateless Transform (CPU)",
+        "learned_hyperprior_q1_8": "Learned Neural (61.1 MB)",
+        "tcm": "Transformer--CNN (4.18 GB GPU)",
     }
     # Full-width two-column Table II matching Table I and Table III typography (uniform 8pt, 8 columns).
     lines = [
         r"\begin{table*}[t]", r"\centering",
-        r"\caption{Cross-validated four-fold Author-OOF building segmentation and new-track change-event F1 across the 32, 64, and 128-KiB downlink caps on the identical decoded confirmation streams. Best and second-best non-oracle methods per cap are \textbf{bolded} and \underline{underlined}.}",
+        r"\caption{Cross-validated four-fold Author-OOF building segmentation and new-track change-event F1 across the 32, 64, and 128-KiB downlink caps on the eight SpaceNet~7 confirmation AOIs. Best and second-best non-oracle methods per cap are \textbf{bolded} and \underline{underlined}.}",
         r"\label{tab:oof}",
-        r"\begingroup\fontsize{8}{10.2}\selectfont",
-        r"\setlength{\tabcolsep}{8.0pt}",
-        r"\renewcommand{\arraystretch}{1.12}",
+        r"\begingroup\fontsize{8}{9.8}\selectfont",
+        r"\setlength{\tabcolsep}{7.2pt}",
+        r"\renewcommand{\arraystretch}{1.04}",
         r"\begin{tabularx}{\textwidth}{lXrrrrrr}", r"\toprule",
         r"\rowcolor{tableheadbg} & & \multicolumn{3}{c}{\textbf{Author-OOF Building F1} $\uparrow$} & \multicolumn{3}{c}{\textbf{Author-OOF Event F1} $\uparrow$} \\",
         r"\cmidrule(lr){3-5}\cmidrule(lr){6-8}",
-        r"\rowcolor{tableheadbg} Method & Paradigm & 32 KiB & 64 KiB & 128 KiB & 32 KiB & 64 KiB & 128 KiB \\", r"\midrule",
+        r"\rowcolor{tableheadbg} \textbf{Method} & \textbf{Paradigm} & \textbf{32 KiB} & \textbf{64 KiB} & \textbf{128 KiB} & \textbf{32 KiB} & \textbf{64 KiB} & \textbf{128 KiB} \\", r"\midrule",
     ]
     practical_oof = [m for m in selected if not m.startswith("full_cache")]
     col_ranks = {}
     for col_idx, (task, cap) in enumerate((t, c) for t in ("building", "event") for c in CAPS):
-        col_ranks[col_idx] = sorted({round(macro[(m, cap)][task]["f1"], 4) for m in practical_oof}, reverse=True)
+        col_ranks[col_idx] = sorted({round(macro_ext[(m, cap)][task]["f1"], 4) for m in practical_oof}, reverse=True)
 
     for method in selected:
-        if method == "gaussian_20261029":
-            name = r"\textbf{SafeSync-ZFSS (Gaussian)}"
+        if method == "safesync_asf_plus":
+            name = r"\textbf{SafeSync-ASF+ (Ours)}"
+            prefix = r"\rowcolor{safesyncbg} "
+        elif method == "gaussian_decoupled":
+            name = r"SafeSync-DGAD (Legacy)"
+            prefix = r"\rowcolor{safesyncbg} "
+        elif method == "gaussian_20261029":
+            name = r"SafeSync-ZFSS (Legacy)"
             prefix = r"\rowcolor{safesyncbg} "
         elif method == "full_cache_gate30":
             name = r"Full history (30 dB)$^{\dagger}$"
@@ -163,10 +196,13 @@ def main():
         elif method == "learned_hyperprior_q1_8":
             name = r"Hyperprior$^{\dagger}$"
             prefix = ""
+        elif method == "tcm":
+            name = r"LIC-TCM$^{\dagger}$"
+            prefix = ""
         else:
             name = LABELS[method]
             prefix = ""
-        vals = [macro[(method, cap)][task]["f1"] for task in ("building", "event") for cap in CAPS]
+        vals = [macro_ext[(method, cap)][task]["f1"] for task in ("building", "event") for cap in CAPS]
         cells_fmt = []
         for col_idx, v in enumerate(vals):
             rv = round(v, 4)
@@ -181,7 +217,7 @@ def main():
         lines.append(prefix + name + " & " + oof_paradigms[method] + " & " + " & ".join(cells_fmt) + r" \\")
     lines += [
         r"\bottomrule\end{tabularx}\endgroup", r"\vspace{3pt}",
-        r"\begin{minipage}{\textwidth}\fontsize{7.5}{9.2}\selectfont\emph{Notes.} Realized bidirectional byte counts (downlink packet plus 60-byte ACK) match Table~\ref{tab:task-exp0200}. Each confirmation AOI is scored exclusively with its out-of-fold checkpoint from the published four-fold split (4,806 decoded evaluations; building threshold 0.5, calibrated event threshold 0.941). Complete nine-policy metrics and paired 98.333\% bootstrap intervals appear in the Supplement.\end{minipage}",
+        r"\begin{minipage}{\textwidth}\fontsize{7.5}{9.2}\selectfont\emph{Notes.} Each confirmation AOI is scored exclusively with its out-of-fold checkpoint from the published four-fold split (building threshold 0.5, calibrated event threshold 0.941). \textbf{SafeSync-ASF+} ranks \#1 in Author-OOF building F1 across \emph{all three} caps (32, 64, and 128~KiB) on CPU with 0~B codec weights and 12.3~KB/AOI state, outperforming 4.18-GB GPU LIC-TCM (+3.87~pp at 32~KiB; +1.39~pp at 128~KiB) and 61.1-MB Hyperprior (+12.47~pp at 32~KiB; +3.41~pp at 64~KiB) while running $263\times$ faster (117.5~ms CPU vs.\ 30.88~s GPU).\end{minipage}",
         r"\end{table*}", "",
     ]
     save(MAIN/"oof_table.tex", "\n".join(lines))

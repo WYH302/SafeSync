@@ -211,8 +211,8 @@ def main() -> None:
     # =========================================================================
     # --- Space Tier 1 ---
     card(1.1, 22.9, 41.4, 26.7, fill="#FFFFFF", edge="#BFDBFE", lw=0.85, r=0.8, shadow=False, zorder=2)
-    badge(1.7, 46.9, 32.8, 2.05, "(a) Tier 1: Pixel Sync (ASF + ZFSS + DGAD)",
-          fill=c_blue_lt, edge=c_blue, color=c_blue, fs=6.9)
+    badge(1.7, 46.9, 32.8, 2.05, "(a) Tier 1: Pixel Sync (ASF+ + ZFSS + DGAD)",
+          fill=c_blue_lt, edge=c_blue, color=c_blue, fs=6.7)
 
     # Pass RGB + Coarse/Detail thumbnails
     card(1.7, 34.4, 15.8, 11.9, fill=c_blue_lt, edge=c_blue_bd, lw=0.8, r=0.65, shadow=False, zorder=3)
@@ -220,7 +220,7 @@ def main() -> None:
     img_box(patch_rgb, 2.2, 37.3, 5.6, 6.6, edge=c_navy)
     ax.text(5.0, 36.0, "RGB x_t", color=c_navy, fontsize=6.1, fontweight="bold", ha="center", va="center", zorder=5)
     img_box(patch_coarse, 8.6, 40.9, 4.1, 3.3, edge=c_blue)
-    ax.text(15.1, 42.5, "c_t\nLB01", color=c_blue, fontsize=5.9, fontweight="bold", ha="center", va="center", zorder=5)
+    ax.text(15.1, 42.5, "c_t\nWebP85", color=c_blue, fontsize=5.75, fontweight="bold", ha="center", va="center", zorder=5)
     img_box(patch_detail, 8.6, 36.2, 4.1, 3.3, edge=c_teal)
     ax.text(15.1, 37.8, "H x_t\nDetail", color=c_teal, fontsize=5.9, fontweight="bold", ha="center", va="center", zorder=5)
 
@@ -244,8 +244,8 @@ def main() -> None:
 
     card(19.0, 29.5, 13.4, 6.8, fill=c_blue_lt, edge=c_blue, lw=0.75, r=0.55, shadow=False, zorder=4)
     ax.text(25.7, 35.0, "Utility Gate (Point Est.)", color=c_blue, fontsize=5.9, fontweight="bold", ha="center", va="center", zorder=5)
-    ax.text(25.7, 31.8, "Rank ||z_b||_2^2 / k\nPack JPEG 4:4:4 (LA01)",
-            color=c_navy, fontsize=5.8, ha="center", va="center", linespacing=1.2, zorder=5)
+    ax.text(25.7, 31.8, "Rank ||z_b||_2^2 / k\nJPEG 4:4:4 (q80-90)",
+            color=c_navy, fontsize=5.7, ha="center", va="center", linespacing=1.2, zorder=5)
 
     # Crisp 5x5 Block Routing Grid
     gx0, gy0, cs = 33.2, 34.4, 1.56
@@ -296,13 +296,13 @@ def main() -> None:
 
     # --- Ground Tier 1 ---
     card(58.5, 22.9, 40.4, 26.7, fill="#FFFFFF", edge="#99F6E4", lw=0.85, r=0.8, shadow=False, zorder=2)
-    badge(59.1, 46.9, 32.2, 2.05, "(b) Ground ASF & Reconstructed State",
-          fill=c_teal_lt, edge=c_teal, color=c_teal, fs=6.9)
+    badge(59.1, 46.9, 32.2, 2.05, "(b) Ground Smooth ASF+ Archive",
+          fill=c_teal_lt, edge=c_teal, color=c_teal, fs=6.8)
 
     card(59.1, 36.8, 15.6, 9.4, fill=c_blue_lt, edge=c_blue_bd, lw=0.8, r=0.65, shadow=False, zorder=3)
-    ax.text(66.9, 44.9, "Coarse Field U c_t", color=c_blue, fontsize=6.7, fontweight="bold", ha="center", va="center", zorder=5)
-    ax.text(66.9, 40.4, "Absorbs orbital drift;\n4.5x fewer false\nbackground triggers",
-            color=c_navy, fontsize=6.0, ha="center", va="center", linespacing=1.2, zorder=5)
+    ax.text(66.9, 44.9, "Smooth Field U c_t", color=c_blue, fontsize=6.6, fontweight="bold", ha="center", va="center", zorder=5)
+    ax.text(66.9, 40.4, "Bilinear drift align;\n4.5x fewer false\nbackground triggers",
+            color=c_navy, fontsize=5.95, ha="center", va="center", linespacing=1.2, zorder=5)
 
     card(59.1, 23.6, 15.6, 12.2, fill="#F1F5F9", edge=c_navy, lw=0.85, r=0.65, shadow=False, zorder=3)
     ax.text(66.9, 34.4, "Immutable Archive a_t", color=c_navy, fontsize=6.65, fontweight="bold", ha="center", va="center", zorder=5)
@@ -311,7 +311,7 @@ def main() -> None:
 
     card(75.6, 23.6, 22.6, 22.6, fill=c_green_lt, edge=c_green, lw=0.95, r=0.75, shadow=False, zorder=3)
     ax.text(86.9, 44.8, "Co-Constructed Render", color=c_green, fontsize=6.9, fontweight="bold", ha="center", va="center", zorder=5)
-    badge(76.5, 41.5, 20.8, 2.1, "x_hat_t = R( H a_t + U c_t )", fill="#FFFFFF", edge=c_green, color=c_green, fs=6.4)
+    badge(76.5, 41.5, 20.8, 2.1, "x_hat_t = R( H a_t + U_bilin c_t )", fill="#FFFFFF", edge=c_green, color=c_green, fs=6.05)
 
     img_box(patch_rgb, 76.5, 31.8, 7.6, 8.7, edge=c_green, lw=0.95)
     for bx, by in [(80.2, 37.8), (81.3, 37.1), (79.1, 34.0)]:

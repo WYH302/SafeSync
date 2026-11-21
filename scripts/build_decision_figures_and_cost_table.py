@@ -70,47 +70,41 @@ def build_figure1_sn7_comm_vs_utility(
         }
 
     methods_cfg = [
-        ("safesync_asf_plus", "SafeSync-ASF+ (Ours, 12.3 KB, CPU)", "#0F3D8A", "o", "-", 2.3),
-        ("gaussian_decoupled", "SafeSync-DGAD (Legacy, 12.3 KB)", "#2563EB", "o", "--", 1.35),
-        ("dct_bound", "DCT bound (13.9 KB, CPU)", "#E69F00", "s", "-", 1.25),
-        ("lowres_4x_webp_12k", "4x WebP ref (<=12.3 KB, 1,495 viol.)", "#56B4E9", "^", "--", 1.25),
-        ("lowres_16x16_coarse_only", "Coarse-only 16x16 (1,190 viol.)", "#94A3B8", "d", ":", 1.15),
-        ("full_cache_gate30", "Full history (30 dB, 1.35 MB PNG)", "#0D9488", "P", "-.", 1.3),
-        ("full_webp", "Stateless WebP (0 hist.)", "#555555", "X", "-", 1.25),
-        ("learned_hyperprior_q1_8", "Hyperprior (61.1 MB weights)", "#9333EA", "D", "-", 1.45),
-        ("tcm", "LIC-TCM (4.18 GB GPU weights)", "#D55E00", "*", "-", 1.75),
+        ("safesync_asf_plus", "SafeSync-ASF+ (Ours, 12.3 KB, CPU)", "#0F3D8A", "o", "-", 1.55),
+        ("gaussian_decoupled", "SafeSync-DGAD (Legacy, 12.3 KB)", "#2563EB", "o", "--", 1.15),
+        ("dct_bound", "DCT bound (13.9 KB, CPU)", "#E69F00", "s", "-", 1.1),
+        ("lowres_4x_webp_12k", "4x WebP ref (<=12.3 KB, 1,495 viol.)", "#56B4E9", "^", "--", 1.1),
+        ("lowres_16x16_coarse_only", "Coarse-only 16x16 (1,190 viol.)", "#94A3B8", "d", ":", 1.05),
+        ("full_cache_gate30", "Full history (30 dB, 1.35 MB PNG)", "#0D9488", "P", "-.", 1.15),
+        ("full_webp", "Stateless WebP (0 hist.)", "#555555", "X", "-", 1.1),
+        ("learned_hyperprior_q1_8", "Hyperprior (61.1 MB weights)", "#9333EA", "D", "-", 1.25),
+        ("tcm", "LIC-TCM (4.18 GB GPU weights)", "#D55E00", "*", "-", 1.35),
     ]
 
     fig, axes = plt.subplots(1, 2, figsize=(7.16, 2.76))
-    fig.subplots_adjust(left=0.075, right=0.992, bottom=0.17, top=0.715, wspace=0.25)
+    fig.subplots_adjust(left=0.075, right=0.992, bottom=0.175, top=0.715, wspace=0.25)
     for m, label, color, marker, ls, lw in methods_cfg:
         pts = [lookup[m, cap] for cap in (32768, 65536, 131072)]
         xs = [float(r["mean_bytes"]) / 1024.0 for r in pts]
         b_f1 = [float(r["building_f1"]) for r in pts]
         e_f1 = [float(r["event_f1"]) for r in pts]
         is_asf = m == "safesync_asf_plus"
-        ms = 5.3 if is_asf else (5.6 if m == "tcm" else 4.1)
+        ms = 4.6 if is_asf else (4.9 if m == "tcm" else 3.8)
         mec = "white" if is_asf else color
-        mew = 0.7 if is_asf else 0.8
+        mew = 0.65 if is_asf else 0.75
         zo = 6 if is_asf else (4 if m == "tcm" else 3)
         axes[0].plot(xs, b_f1, label=label, color=color, marker=marker, linestyle=ls,
                      linewidth=lw, markersize=ms, markeredgecolor=mec, markeredgewidth=mew, zorder=zo)
         axes[1].plot(xs, e_f1, label=label, color=color, marker=marker, linestyle=ls,
                      linewidth=lw, markersize=ms, markeredgecolor=mec, markeredgewidth=mew, zorder=zo)
 
-    # Annotate Bootstrap-only (0 update bytes: Building F1 = 0.5475, Event F1 = 0.0000)
-    axes[0].axhline(0.5475, color="#333333", linestyle=":", linewidth=0.95, alpha=0.75)
-    axes[0].text(28.0, 0.551, "Bootstrap-only (0 KiB/upd, Event F1 = 0.000)", fontsize=6.9, color="#333333")
-    axes[0].annotate("#1 @ 32 KiB: 0.4760\n(+3.9 pp vs. 4.18G TCM)",
-                     xy=(31.62, 0.4760), xytext=(68.0, 0.305),
-                     arrowprops=dict(arrowstyle="->", color="#0F3D8A", lw=1.0, connectionstyle="arc3,rad=-0.12"),
-                     fontsize=6.9, fontweight="bold", color="#0F3D8A",
-                     bbox=dict(boxstyle="round,pad=0.22", fc="#EFF6FF", ec="#93C5FD", lw=0.6))
-    axes[0].set_ylim(0.265, 0.572)
+    # Clean dashed reference line for bootstrap-only static building F1 (described in caption; no cluttered in-plot box)
+    axes[0].axhline(0.5475, color="#475569", linestyle=":", linewidth=0.9, alpha=0.8)
+    axes[0].set_ylim(0.265, 0.568)
     axes[1].set_ylim(0.088, 0.312)
 
-    axes[0].set_title("(a) Static Building F1 (Author-OOF)", loc="left", pad=5, fontsize=8.8, fontweight="bold")
-    axes[1].set_title("(b) New-Track Event F1 (Author-OOF)", loc="left", pad=5, fontsize=8.8, fontweight="bold")
+    axes[0].set_title("(a) Static Building F1 (Author-OOF)", loc="center", pad=5, fontsize=8.8, fontweight="bold")
+    axes[1].set_title("(b) New-Track Event F1 (Author-OOF)", loc="center", pad=5, fontsize=8.8, fontweight="bold")
     axes[0].set_ylabel("Building F1")
     axes[1].set_ylabel("New-track Event F1")
     for ax in axes:
@@ -159,18 +153,18 @@ def build_figure2_storage_vs_utility(
     lowres_mb = (lookup32["lowres_4x_webp_12k"]["mean_sender_summary_bytes"] * ns) / (1024**2)
 
     ax = axes[0, 0]
-    ax.plot(ns, raw_rgb_mb, label="Full history (Raw RGB)", color="#888888", linestyle="--", linewidth=1.2)
-    ax.plot(ns, png_hist_mb, label="Full history (Lossless PNG)", color="#0D9488", marker="P", markersize=3.4, linewidth=1.4)
-    ax.plot(ns, gauss_cached_mb, label="SafeSync (cached 2.36M mat.)", color="#56B4E9", marker="o", markersize=2.8, linewidth=1.2, linestyle="--")
-    ax.plot(ns, gauss_stream_mb, label="SafeSync-ASF+/ZFSS (0 B mat.)", color="#0F3D8A", marker="o", markersize=3.9, linewidth=1.8)
-    ax.plot(ns, dct_mb, label="DCT bound (0 shared mat.)", color="#E69F00", marker="s", markersize=3.2, linewidth=1.25)
-    ax.plot(ns, lowres_mb, label="Low-res 4x WebP ref", color="#009E73", marker="^", markersize=3.2, linewidth=1.2, linestyle=":")
+    ax.plot(ns, raw_rgb_mb, label="Full history (Raw RGB)", color="#888888", linestyle="--", linewidth=1.1)
+    ax.plot(ns, png_hist_mb, label="Full history (Lossless PNG)", color="#0D9488", marker="P", markersize=3.2, linewidth=1.2)
+    ax.plot(ns, gauss_cached_mb, label="SafeSync (cached 2.36M mat.)", color="#56B4E9", marker="o", markersize=2.6, linewidth=1.1, linestyle="--")
+    ax.plot(ns, gauss_stream_mb, label="SafeSync-ASF+/ZFSS (0 B mat.)", color="#0F3D8A", marker="o", markersize=3.5, linewidth=1.45)
+    ax.plot(ns, dct_mb, label="DCT bound (0 shared mat.)", color="#E69F00", marker="s", markersize=3.0, linewidth=1.1)
+    ax.plot(ns, lowres_mb, label="Low-res 4x WebP ref", color="#009E73", marker="^", markersize=3.0, linewidth=1.1, linestyle=":")
     ax.set_yscale("log")
     ax.set_ylim(0.007, 480.0)
     ax.set_xticks([1, 4, 8, 12, 16])
     ax.set_xlabel("Monitored geographic areas $N$")
     ax.set_ylabel("Sender historical state (MiB)")
-    ax.set_title("(a) Multi-AOI Onboard State Scaling", loc="left", pad=4, fontsize=8.8, fontweight="bold")
+    ax.set_title("(a) Multi-AOI Onboard State Scaling", loc="center", pad=4, fontsize=8.8, fontweight="bold")
     ax.grid(alpha=0.18, which="both", linewidth=0.5)
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(frameon=True, facecolor="white", framealpha=0.92, edgecolor="none", fontsize=6.4, ncol=2, loc="upper left", columnspacing=0.75, handlelength=1.7)
@@ -193,7 +187,7 @@ def build_figure2_storage_vs_utility(
     ax.set_xticks(xb, methods_bar, fontsize=7.6)
     ax.set_ylim(0, 96.0)
     ax.set_ylabel("Error / False-trigger rate (%)")
-    ax.set_title("(b) Reuse Safety & Drift Immunity", loc="left", pad=4, fontsize=8.6, fontweight="bold")
+    ax.set_title("(b) Reuse Safety & Drift Immunity", loc="center", pad=4, fontsize=8.6, fontweight="bold")
     ax.legend(frameon=False, fontsize=6.9, loc="upper left")
     ax.grid(axis="y", alpha=0.18, linewidth=0.5)
     ax.spines[["top", "right"]].set_visible(False)
@@ -225,7 +219,7 @@ def build_figure2_storage_vs_utility(
     ax.set_ylim(0.255, 0.515)
     ax.set_xlabel("8-AOI sender state (MiB; *excl. 61M/4.18G weights)")
     ax.set_ylabel("32-KiB Author-OOF Building F1")
-    ax.set_title("(c) SpaceNet 7 State Footprint vs. Building F1", loc="left", pad=4, fontsize=8.6, fontweight="bold")
+    ax.set_title("(c) SpaceNet 7 State Footprint vs. Building F1", loc="center", pad=4, fontsize=8.6, fontweight="bold")
     ax.grid(alpha=0.18, linewidth=0.5)
     ax.spines[["top", "right"]].set_visible(False)
 
@@ -271,7 +265,7 @@ def build_figure2_storage_vs_utility(
     ax.set_ylim(0.799, 0.858)
     ax.set_xlabel("Held-out building 30-dB coverage $U_{30}$")
     ax.set_ylabel("Held-out building Later F1")
-    ax.set_title("(d) Universal TC-PCR Over Every Codec (8 KiB)", loc="left", pad=4, fontsize=8.5, fontweight="bold")
+    ax.set_title("(d) Universal TC-PCR Over Every Codec (8 KiB)", loc="center", pad=4, fontsize=8.5, fontweight="bold")
     ax.grid(alpha=0.18, linewidth=0.5)
     ax.spines[["top", "right"]].set_visible(False)
 
@@ -320,14 +314,12 @@ def build_figure3_second_four_cell_and_oracle(
         ax.annotate("", xy=(brows[k_tp]["u30"], brows[k_tp]["later_f1"]),
                     xytext=(brows[k_st]["u30"], brows[k_st]["later_f1"]),
                     arrowprops=dict(arrowstyle="->", color=col, lw=1.25))
-    ax.text(0.752, 0.8355, "TC-PCR(TCM):\n0.8233 (+5.45 pp)", fontsize=5.8, fontweight="bold", color="#0F3D8A")
     ax.axhline(brows["webp_standalone"]["later_f1"], color="#333333", linestyle=":", linewidth=0.85, alpha=0.7)
     ax.axhline(brows["webp_standalone"]["later_f1"] - 0.02, color="#CC0000", linestyle="--", linewidth=0.85, alpha=0.6)
-    ax.text(0.535, brows["webp_standalone"]["later_f1"] - 0.0188, "WebP -2.0 pp non-inferiority floor (0.8132)", fontsize=5.6, color="#CC0000")
 
     ax.set_xlabel("Qualified unknown evidence coverage $U_{30}$")
     ax.set_ylabel("Later held-out building F1")
-    ax.set_title("(a) Attribution & Universal TC-PCR Across Codecs (8 KiB)", fontsize=8.0, fontweight="bold")
+    ax.set_title("(a) Attribution & Universal TC-PCR Across Codecs (8 KiB)", loc="center", fontsize=8.0, fontweight="bold")
     ax.grid(alpha=0.22)
     ax.spines[["top", "right"]].set_visible(False)
 
@@ -335,14 +327,9 @@ def build_figure3_second_four_cell_and_oracle(
     for label, u30, lf1, fnr, col, mk in points:
         is_top = "TC-PCR (TCM Base" in label
         ax.scatter(fnr, lf1, color=col, marker=mk, s=75 if is_top else 42, label=label, zorder=5 if is_top else 4)
-    ax.annotate("TC-PCR(TCM Raw):\nFNR=0.1571 (#1 global!)",
-                xy=(brows["tcm_tcpcr_unknown_raw"]["heldout_fnr"], brows["tcm_tcpcr_unknown_raw"]["later_f1"]),
-                xytext=(0.163, 0.839),
-                arrowprops=dict(arrowstyle="->", color="#1E3A8A", lw=1.0),
-                fontsize=5.8, fontweight="bold", color="#1E3A8A")
     ax.set_xlabel("Held-out building False Negative Rate (FNR = FN / GT)")
     ax.set_ylabel("Later held-out building F1")
-    ax.set_title("(b) Target Miss (FNR) vs Later Building F1", fontsize=8.0, fontweight="bold")
+    ax.set_title("(b) Target Miss (FNR) vs. Later Building F1", loc="center", fontsize=8.0, fontweight="bold")
     ax.grid(alpha=0.22)
     ax.spines[["top", "right"]].set_visible(False)
 
@@ -416,7 +403,7 @@ def build_tables(
         r"\setlength{\tabcolsep}{3.6pt}",
         r"\renewcommand{\arraystretch}{1.03}",
         r"\begin{tabularx}{\textwidth}{lllcrrrX}\toprule",
-        r"\rowcolor{tableheadbg} Method / Variant & State ($N\!=\!1$ / $8$) & Weights / Matrix & Sender Time & KiB & M1 $\uparrow$ & M2 $\uparrow$ & Key Regime / Audit" + end,
+        r"\rowcolor{tableheadbg} \textbf{Method / Variant} & \textbf{State ($N\!=\!1$/$8$)} & \textbf{Weights / Matrix} & \textbf{Sender Time} & \textbf{KiB} & \textbf{M1} $\uparrow$ & \textbf{M2} $\uparrow$ & \textbf{Key Regime / Audit}" + end,
         r"\midrule",
         r"\multicolumn{8}{l}{\textit{Panel A: SpaceNet~7 Monthly Pixel-Tier Sync (32-KiB cap, 178 updates; M1 = Author-OOF Building F1, M2 = Event F1)}}" + end,
         r"\cmidrule(lr){1-8}",
@@ -632,7 +619,7 @@ def build_tables(
         r"\setlength{\tabcolsep}{4.8pt}",
         r"\renewcommand{\arraystretch}{1.06}",
         r"\begin{tabularx}{\textwidth}{Xrrrrrrrrr}\toprule",
-        r"\rowcolor{tableheadbg} Method & B32 & E32 & KiB32 & B64 & E64 & KiB64 & B128 & E128 & KiB128" + end,
+        r"\rowcolor{tableheadbg} \textbf{Method} & \textbf{B32} & \textbf{E32} & \textbf{KiB32} & \textbf{B64} & \textbf{E64} & \textbf{KiB64} & \textbf{B128} & \textbf{E128} & \textbf{KiB128}" + end,
         r"\midrule",
     ]
     lowres_order = [
@@ -675,25 +662,13 @@ def build_tables(
 
     fact_lines = [
         r"\begin{table*}[t]\centering",
-        r"\caption{Complete $2\times 2$ attribution, universal plug-and-play TC-PCR across all three base codecs (WebP, Scale-Hyperprior, LIC-TCM) and all three held-out classes (Building, Tree, Water), and GT Oracle diagnostic on SECOND Cohort~3 (256 locked pairs, 8-KiB cap).}",
-        r"\label{tab:factorial-oracle}",
-        r"\begingroup\fontsize{7.8}{9.8}\selectfont",
-        r"\setlength{\tabcolsep}{3.8pt}",
-        r"\renewcommand{\arraystretch}{1.05}",
-        r"\begin{tabularx}{\textwidth}{lXrrrrr}\toprule",
-        r"\rowcolor{tableheadbg} Variant / Contrast & Class & Base Codec / Mechanism & $U_{30}$ / $\Delta U_{30}$ & 95\% CI (pp) & Later F1 & Held-out FNR & KiB" + end,
-        r"\midrule",
-    ]
-    # Wait: header has 7 columns, let's keep exact 7 columns lXrrrrr!
-    fact_lines = [
-        r"\begin{table*}[t]\centering",
         r"\caption{Complete $2\times 2$ attribution, universal plug-and-play TC-PCR across all three base codecs (WebP, Scale-Hyperprior, LIC-TCM) and held-out classes (Building, Tree, Water), and GT Oracle diagnostic on SECOND Cohort~3 (256 locked pairs, 8-KiB cap).}",
         r"\label{tab:factorial-oracle}",
         r"\begingroup\fontsize{7.8}{9.8}\selectfont",
         r"\setlength{\tabcolsep}{3.8pt}",
         r"\renewcommand{\arraystretch}{1.05}",
         r"\begin{tabularx}{\textwidth}{lXrrrrr}\toprule",
-        r"\rowcolor{tableheadbg} Variant / Contrast & Mechanism / Class & $U_{30}$ / $\Delta U_{30}$ & 95\% CI (pp) & Later F1 & FNR & KiB" + end,
+        r"\rowcolor{tableheadbg} \textbf{Variant / Contrast} & \textbf{Mechanism / Class} & \textbf{$U_{30}$ / $\Delta U_{30}$} & \textbf{95\% CI (pp)} & \textbf{Later F1} & \textbf{FNR} & \textbf{KiB}" + end,
         r"\midrule",
         f"Cell A / C / D (locked HP) & Abs.+Chg / Res.+Chg / Res.+Unk (Bldg) & {cells['absolute_change']['u30']:.3f}/{cells['residual_change']['u30']:.3f}/{cells['residual_current']['u30']:.3f} & -- & {cells['residual_current']['later_f1']:.4f} & {cells['residual_current']['later_fnr']:.4f} & 7.71" + end,
         f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (WebP, Bldg)}} & 4-KiB WebP + RE01 vs. WebP (0.5380) & \\textbf{{{brows['webp_tcpcr_unknown']['u30']:.4f}}} ({100*bct['webp_tcpcr_vs_standalone']['u30_diff'][0]:+.2f} pp) & [{100*bct['webp_tcpcr_vs_standalone']['u30_diff'][1]:+.2f}, {100*bct['webp_tcpcr_vs_standalone']['u30_diff'][2]:+.2f}] & {brows['webp_tcpcr_unknown']['later_f1']:.4f} & {brows['webp_tcpcr_unknown']['heldout_fnr']:.4f} & {brows['webp_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,

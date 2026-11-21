@@ -4,15 +4,15 @@
 
 # SafeSync
 
-**Asymmetric Space-Ground State Synchronization and Evidence-Preserving Co-Construction for Repeated Earth Observation**  
-**面向重复地球观测的非对称星地状态同步与证据保护型空地共建框架**
+**SafeSync: Breaking the Satellite Downlink Bottleneck via Zero-Footprint Asymmetric Space-Ground State Co-Construction**  
+**突破卫星下行瓶颈的零内存足迹非对称星地状态共建框架**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](pyproject.toml)
 [![Sender: CPU-Only](https://img.shields.io/badge/Pixel_Sender-CPU_Only_(117.5ms)-2EA44F.svg)](#computational-cost--reproducibility--算力开销与复现环境)
 [![Benchmarks](https://img.shields.io/badge/Datasets-SpaceNet_7_%7C_SECOND-F59E0B.svg)](#key-empirical-findings--核心实验结果)
 
-[**English**](#english-overview) · [**简体中文**](#中文说明) · [**Quickstart / 快速上手**](#quickstart--快速开始) · [**Citation / 引用**](#citation--引用说明)
+[**English**](#english-overview) · [**简体中文**](#中文说明) · [**Editable Fig. 1 (`PPTX` / `SVG`)**](assets/layered_state.pptx) · [**Quickstart / 快速上手**](#quickstart--快速开始) · [**Citation / 引用**](#citation--引用说明)
 
 </div>
 
@@ -33,7 +33,7 @@ Rather than re-encoding each revisit from scratch or uplinking historical refere
 
 1. **Asymmetric State Factorization (`ASF`) & Adaptive-History Reuse Certificate**
    - Separates an immutable ground archive of acknowledged absolute image blocks from a pass-specific $4\times 4$ coarse illumination field (`LB01`), committing updates via a **60-byte uplink-free ACK**.
-   - Restricts adaptive archive histories to a finite candidate set, enabling a union-bound reuse certificate (`Proposition 1`) with **0 false-stable block violations** across 47,616 evaluated blocks.
+   - Restricts adaptive archive histories to a finite candidate set, enabling a union-bound reuse certificate (`Proposition 1`) with **0 false-stable block violations** across 118,317 evaluated blocks across all three caps.
 2. **Zero-Footprint Seeded Sketching (`ZFSS`) & Dual-Gate Asymmetric Decoupling (`DGAD`)**
    - Streams row-orthonormal Gaussian projections in 512-coordinate chunks directly from a 32-bit seed stored in the 24-byte `SC02` header (**0 bytes** persistent matrix memory), keeping persistent historical state at **12,328 bytes per $1024\times 1024$ area** ($99.09\%$ smaller than lossless PNG history even at $N=1$).
    - Decouples conservative $\chi^2_{24}(\alpha)$ safety certification (`STABLE`) from unbiased point-estimate candidate ranking (`UPDATED`).
@@ -52,7 +52,7 @@ Rather than re-encoding each revisit from scratch or uplinking historical refere
 ### 方法组成概览
 
 - **第一层：像素档案层同步（`ASF` + `ZFSS` + `DGAD`）**
-  - **非对称状态分解（ASF）**：地面端将已确认的绝对像素块档案 $a_t$ 与当轨 $4\times 4$ 粗粒度光照场 $c_t$（`LB01`）解耦，仅通过 **60 字节免图像上注确认帧（ACK）** 保持星地状态一致，避免闭环渲染回写导致的误差累积，并通过有限候选集联合界（Proposition 1）保证自适应历史选择下的安全复用（实测 47,616 块中伪稳定违约数为 **0**）。
+  - **非对称状态分解（ASF）**：地面端将已确认的绝对像素块档案 $a_t$ 与当轨 $4\times 4$ 粗粒度光照场 $c_t$（`LB01`）解耦，仅通过 **60 字节免图像上注确认帧（ACK）** 保持星地状态一致，避免闭环渲染回写导致的误差累积，并通过有限候选集联合界（Proposition 1）保证自适应历史选择下的安全复用（三档码率实测 118,317 块中伪稳定违约数为 **0**）。
   - **零持久矩阵种子流式草图（ZFSS）**：从 `SC02` 摘要头部的 32-bit 种子按 512 维分块流式生成正交高斯投影行，持久投影矩阵开销为 **0 字节**，单区域（$N=1$）与多区域（$N=8$）历史状态均压缩至 **12.3 KB/区域**（较无损 PNG 历史档案节省 **99.09%**）。
   - **双门限非对称解耦（DGAD）**：将保守的 $\chi^2_{24}(\alpha)$ 安全认证门限与无偏点估计候选排序解耦，在保持 0 伪稳定违约的同时提升低码率建筑分割与抗轨间辐射漂移能力。
 - **第二层：语义特征与开放世界共建层（`US-BRS` + `TC-PCR`）**
@@ -176,7 +176,7 @@ If you find this repository or the experimental protocols helpful in your resear
 ```bibtex
 @article{wu2026safesync,
   author  = {Wu, Yonghao},
-  title   = {{SafeSync}: Asymmetric Space-Ground State Synchronization and Evidence-Preserving Co-Construction for Repeated {Earth} Observation},
+  title   = {{SafeSync}: Breaking the Satellite Downlink Bottleneck via Zero-Footprint Asymmetric Space-Ground State Co-Construction},
   journal = {IEEE Transactions on Geoscience and Remote Sensing},
   year    = {2026},
   note    = {Code available at https://github.com/WYH302/SafeSync}
