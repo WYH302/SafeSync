@@ -169,9 +169,9 @@ def main() -> None:
     ax.text(51.8, 60.9, "SafeSync World-State Co-Construction", color=c_green, fontsize=7.4, fontweight="bold", ha="center", va="center", zorder=5)
     ax.text(51.8, 57.6,
             "ZFSS: 32-bit seed -> 0 B matrix (-99.09%)\n"
-            "DGAD: 0 violations & 0.4250 OOF F1 (CPU)\n"
-            "US-BRS + TC-PCR: -33.6% Open-World Miss",
-            color="#052E16", fontsize=6.4, ha="center", va="center", linespacing=1.22, zorder=5)
+            "ASF+: #1 OOF F1 (0.476/0.522) in 118 ms CPU\n"
+            "TC-PCR: U30=0.823 (+5.5 pp vs. 4.18G TCM)",
+            color="#052E16", fontsize=6.3, ha="center", va="center", linespacing=1.22, zorder=5)
 
     # Right mini bar chart: Single-Area Persistent State (N=1)
     card(69.6, 55.0, 29.3, 7.2, fill="#FFFFFF", edge="#CBD5E1", lw=0.85, r=0.65, shadow=False, zorder=3)
@@ -282,7 +282,7 @@ def main() -> None:
     ax.text(50.5, 46.5, "Downlink", color=c_amber, fontsize=7.0, fontweight="bold", ha="center", va="center", zorder=5)
     badge(45.2, 43.3, 10.6, 2.0, "<= 32 KiB", fill=c_amber_lt, edge=c_amber, color=c_amber, fs=6.4)
     ax.text(50.5, 38.2,
-            "Coarse c_t\nLA01 RGB\nDigest+CRC\n(255 ms CPU)",
+            "WebP85 c_t\nJPEG 4:4:4\nDigest+CRC\n(118 ms CPU)",
             color=c_navy, fontsize=6.05, ha="center", va="center", linespacing=1.22, zorder=5)
     arrow((41.8, 40.5), (44.5, 40.5), color=c_amber, lw=1.5, scale=9.5)
     arrow((56.5, 40.5), (58.9, 40.5), color=c_amber, lw=1.5, scale=9.5)
@@ -318,11 +318,11 @@ def main() -> None:
         ax.add_patch(Rectangle((bx, by), 1.0, 0.9, fill=False, edgecolor="#06B6D4", linewidth=1.1, zorder=6))
 
     ax.text(91.3, 36.1,
-            "SpaceNet 7\n(32 KiB OOF):\nF1: 0.4250\n(+14.6 pp WebP)\nU30: +8.66 pp",
-            color="#052E16", fontsize=6.05, fontweight="bold", ha="center", va="center", linespacing=1.22, zorder=5)
+            "SpaceNet 7 OOF\n(ASF+ CPU #1):\n32K: 0.4760\n(+3.9 pp TCM)\n128K: 0.5216",
+            color="#052E16", fontsize=5.95, fontweight="bold", ha="center", va="center", linespacing=1.22, zorder=5)
     badge(76.5, 24.5, 20.8, 5.8,
-          "0 Violations / 47,616 Blocks\n45.3 s CPU / 178 Updates",
-          fill="#FFFFFF", edge=c_green_bd, color=c_navy, fs=6.15)
+          "0 Violations / 118,317 Blocks\n263x Faster than GPU LIC-TCM",
+          fill="#FFFFFF", edge=c_green_bd, color=c_navy, fs=6.05)
 
     arrow((74.7, 41.2), (75.6, 39.2), color=c_blue, lw=1.15, scale=8.5)
     arrow((74.7, 30.0), (75.6, 33.8), color=c_navy, lw=1.15, scale=8.5)
@@ -394,21 +394,22 @@ def main() -> None:
     for idx, (mlbl, uval, col) in enumerate([
         ("WebP", 0.5380, "#64748B"),
         ("Hyperprior", 0.6379, "#9333EA"),
-        ("TC-PCR", 0.7594, c_blue),
-        ("LIC-TCM", 0.7688, "#DC2626"),
+        ("LIC-TCM", 0.7688, "#D55E00"),
+        ("TC-PCR(TCM)", 0.8233, c_blue),
     ]):
         by = 14.8 - idx * 2.0
-        ax.text(74.7, by, mlbl, color=c_blue if mlbl == "TC-PCR" else c_navy,
-                fontsize=6.0, fontweight="bold" if mlbl == "TC-PCR" else "normal", va="center", zorder=5)
-        bw = uval * 10.6
-        ax.add_patch(FancyBboxPatch((82.0, by - 0.48), bw, 0.96,
+        is_best = mlbl == "TC-PCR(TCM)"
+        ax.text(74.5, by, mlbl, color=c_blue if is_best else c_navy,
+                fontsize=5.7 if is_best else 5.95, fontweight="bold" if is_best else "normal", va="center", zorder=5)
+        bw = uval * 9.8
+        ax.add_patch(FancyBboxPatch((82.6, by - 0.48), bw, 0.96,
                                     boxstyle="round,pad=0.01,rounding_size=0.2",
                                     facecolor=col, edgecolor="none", zorder=5))
-        ax.text(82.3 + bw, by, f"{uval:.3f}", color=col, fontsize=5.95, fontweight="bold", va="center", zorder=5)
+        ax.text(82.9 + bw, by, f"{uval:.3f}", color=col, fontsize=5.9, fontweight="bold", va="center", zorder=5)
 
     badge(74.7, 2.5, 22.9, 5.1,
-          "-33.56% Unknown Miss vs. Hyperprior\nRefined F1: 0.8503 | FNR: 0.1616",
-          fill="#FFFFFF", edge=c_amber, color=c_navy, fs=6.0)
+          "#1 U30: +5.45 pp vs. 4.18G LIC-TCM\n+15.3 pp WebP | FNR 0.157 | F1 0.850",
+          fill="#FFFFFF", edge=c_amber, color=c_navy, fs=5.55)
     arrow((73.3, 10.0), (74.0, 10.0), color=c_teal, lw=1.15, scale=8.5)
 
     for suffix in ("pdf", "svg", "png"):

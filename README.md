@@ -9,7 +9,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](pyproject.toml)
-[![Sender: CPU-Only](https://img.shields.io/badge/Pixel_Sender-CPU_Only_(254.7ms)-2EA44F.svg)](#computational-cost--reproducibility--算力开销与复现环境)
+[![Sender: CPU-Only](https://img.shields.io/badge/Pixel_Sender-CPU_Only_(117.5ms)-2EA44F.svg)](#computational-cost--reproducibility--算力开销与复现环境)
 [![Benchmarks](https://img.shields.io/badge/Datasets-SpaceNet_7_%7C_SECOND-F59E0B.svg)](#key-empirical-findings--核心实验结果)
 
 [**English**](#english-overview) · [**简体中文**](#中文说明) · [**Quickstart / 快速上手**](#quickstart--快速开始) · [**Citation / 引用**](#citation--引用说明)
@@ -70,17 +70,18 @@ Rather than re-encoding each revisit from scratch or uplinking historical refere
 <p><em>Fig. 2. Four-fold cross-validated Author-OOF rate–utility curves across 32, 64, and 128-KiB update caps on SpaceNet 7.</em></p>
 </div>
 
-| Method / 配置 | Onboard State ($N=1$) | Model / Matrix Weights | Sender Time | 32-KiB Upd. | OOF Building F1 $\uparrow$ | OOF Event F1 $\uparrow$ | False-Stable Violations $\downarrow$ |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **SafeSync-ZFSS (Coupled)** | **12.3 KB** | **0 B (streamed)** | **254.7 ms (4-thr CPU)** | 30.66 KiB | 0.3943 | 0.1418 | **0 (0.00%)** |
-| **SafeSync-DGAD (Decoupled)** | **12.3 KB** | **0 B (streamed)** | **254.7 ms (4-thr CPU)** | **25.60 KiB** | **0.4250** | 0.1337 | **0 (0.00%)** |
-| Deterministic DCT Bound | 13.9 KB | 0 B | 291.2 ms (4-thr CPU) | 31.30 KiB | 0.3852 | 0.1050 | 0 (0.00%) |
-| Low-Res $4\times$ WebP Thumbnail | 10.7 KB | 0 B | 226.4 ms (4-thr CPU) | 27.65 KiB | 0.4390* | 0.1386 | 1,495 (21.79%) |
-| Stateless Full WebP | 241 B (meta) | 0 B | 2,063.1 ms search (CPU) | 31.66 KiB | 0.2794 | 0.1020 | N/A (stateless) |
-| Scale-Hyperprior (`q1..8`) | 241 B (meta) | 61.1 MB | 11.54 s GPU / 36.4 s CPU | 29.11 KiB | 0.3513 | 0.1693 | N/A (stateless) |
-| LIC-TCM (35 candidates) | 241 B (meta) | 4,179.9 MB | 30.88 s GPU search | 28.32 KiB | 0.4374 | **0.2255** | N/A (stateless) |
+| Method / 配置 | Onboard State ($N=1$) | Model / Matrix Weights | Sender Time | 32-KiB B-F1 $\uparrow$ | 64-KiB B-F1 $\uparrow$ | 128-KiB B-F1 $\uparrow$ | 32-KiB E-F1 $\uparrow$ | False-Stable Viol. $\downarrow$ |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **SafeSync-ASF+ (Ours)** | **12.3 KB** | **0 B (streamed)** | **117.5 ms (4-thr CPU)** | **0.4760** | **0.4964** | **0.5216** | 0.1899 | **0 / 118,317 (0%)** |
+| SafeSync-DGAD (Legacy Block) | 12.3 KB | 0 B (streamed) | 254.7 ms (4-thr CPU) | 0.4250 | 0.4377 | 0.4431 | 0.1337 | 0 (0.00%) |
+| SafeSync-ZFSS (Legacy Coupled) | 12.3 KB | 0 B (streamed) | 254.7 ms (4-thr CPU) | 0.3943 | 0.4122 | 0.4308 | 0.1418 | 0 (0.00%) |
+| Deterministic DCT Bound | 13.9 KB | 0 B | 291.2 ms (4-thr CPU) | 0.3852 | 0.3975 | 0.4316 | 0.1050 | 0 (0.00%) |
+| Low-Res $4\times$ WebP Thumbnail | 10.7 KB | 0 B | 226.4 ms (4-thr CPU) | 0.4390* | 0.4475* | 0.4526* | 0.1386 | 1,495 (21.79%) |
+| Stateless Full WebP | 241 B (meta) | 0 B | 2,063.1 ms search (CPU) | 0.2794 | 0.3788 | 0.4698 | 0.1020 | N/A (stateless) |
+| Scale-Hyperprior (`q1..8`) | 241 B (meta) | 61.1 MB | 11.54 s GPU / 36.4 s CPU | 0.3513 | 0.4623 | 0.5181 | 0.1693 | N/A (stateless) |
+| LIC-TCM (35 candidates) | 241 B (meta) | 4,179.9 MB | 30.88 s GPU search | 0.4374 | 0.4957 | 0.5076 | **0.2255** | N/A (stateless) |
 
-> *Note / 说明*：`4x WebP` reaches 0.4390 on clean sequences only when granted SafeSync's `LB01` coarse restoration, while committing 1,495 false-stable block violations; without `LB01` under pass-to-pass orbital radiometric drift, direct `4x WebP` suffers **79.80%** background false triggers (vs. **19.37%** for SafeSync) and trails SafeSync on building F1, event F1, and new-track $U_{30}$ ($+8.76\text{ pp}$). At higher budgets (64–128 KiB) with GPU search available, `Scale-Hyperprior` and `LIC-TCM` achieve higher global utility.
+> *Note / 说明*：`SafeSync-ASF+` ranks **#1 in four-fold Author-OOF building F1 across all three caps (32, 64, 128 KiB)** on CPU with 0 B codec weights and 0 false-stable violations across all 118,317 blocks ($263\times$ faster than GPU LIC-TCM). Heavy GPU codecs (`LIC-TCM` / `Hyperprior`) retain an event-F1 edge at 64–128 KiB. `4x WebP` reaches 0.4390* on clean sequences only when granted SafeSync's `LB01` coarse restoration while committing 1,495 false-stable violations; without `LB01` under pass-to-pass orbital radiometric drift, direct `4x WebP` suffers **79.80%** background false triggers (vs. **19.37%** for SafeSync).
 
 <div align="center">
 <img src="assets/receiver_crops.png" alt="SpaceNet 7 Decoded Native Crops at 32 KiB" width="95%"/>
@@ -89,21 +90,23 @@ Rather than re-encoding each revisit from scratch or uplinking historical refere
 
 ---
 
-### 2. State Scaling, Drift Immunity & SECOND Open-World Discovery (Cohort 3, 256 Pairs, 8-KiB Cap)
+### 2. State Scaling, Drift Immunity & Universal Plug-and-Play TC-PCR on SECOND (Cohort 3, 256 Pairs, 8-KiB Cap)
 
 <div align="center">
 <img src="assets/storage_utility_tradeoff.png" alt="Multi-Dimensional State, Safety, Drift and Open-World Results" width="95%"/>
-<p><em>Fig. 4. (a) Multi-AOI persistent state scaling; (b) reuse safety violations and orbital-drift false-trigger rates; (c) SpaceNet 7 state footprint vs. event F1; (d) SECOND Cohort 3 open-world held-out building discovery at 8 KiB.</em></p>
+<p><em>Fig. 4. (a) Multi-AOI persistent state scaling; (b) reuse safety violations and orbital-drift false-trigger rates; (c) SpaceNet 7 state footprint vs. 32-KiB Author-OOF building F1; (d) universal codec-agnostic TC-PCR across WebP, Hyperprior, and LIC-TCM on SECOND Cohort 3 at 8 KiB.</em></p>
 </div>
 
-| SECOND Cohort 3 Method (8-KiB Cap) | Codec Weights | Mean Payload | Held-Out $U_{30}$ $\uparrow$ | Held-Out FNR $\downarrow$ | Global / Refined Later F1 $\uparrow$ |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| Stateless Full WebP | 0 B (+DINO task) | 7.91 KiB | 0.5380 | 0.1699 | 0.8332 / 0.8332 |
-| Full Scale-Hyperprior | 61.1 MB | 7.36 KiB | 0.6379 | 0.1965 | 0.8212 / 0.8212 |
-| Locked Residual + Change (Cell C) | 61.1 MB | 7.71 KiB | 0.7284 | 0.1782 | 0.8139 / — |
-| **SafeSync TC-PCR (Unknown, 4A+4B)** | **61.1 MB** | 7.72 KiB | **0.7594** | 0.1766 | 0.8154 / **0.8503** |
-| **SafeSync TC-PCR (Raw Residual)** | **61.1 MB** | 7.86 KiB | 0.7524 | **0.1616** | 0.8163 / — |
-| Full LIC-TCM (35-cand. GPU SOTA) | 4,179.9 MB | **7.31 KiB** | **0.7688** | 0.1891 | 0.8268 / 0.8268 |
+| SECOND Cohort 3 Method (8-KiB Cap, Building Held-Out) | Base Codec Weights | Mean Payload | Held-Out $U_{30}$ $\uparrow$ | Gain vs. Standalone | Held-Out FNR $\downarrow$ | Global / Refined Later F1 $\uparrow$ |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Stateless Full WebP | 0 B (+DINO task) | 7.91 KiB | 0.5380 | — | 0.1699 | 0.8332 / 0.8332 |
+| **SafeSync TC-PCR (WebP Base)** | **0 B (+DINO task)** | 7.88 KiB | **0.6913** | **+15.33 pp** ($>$ Hyperprior!) | 0.1739 | 0.8222 / — |
+| Full Scale-Hyperprior | 61.1 MB | 7.36 KiB | 0.6379 | — | 0.1965 | 0.8212 / 0.8212 |
+| **SafeSync TC-PCR (Hyperprior Base)** | **61.1 MB** | 7.72 KiB | **0.7594** | **+12.15 pp** (-33.6% UMR) | 0.1763 | 0.8154 / **0.8503** |
+| Full LIC-TCM (35-cand. GPU SOTA) | 4,179.9 MB | **7.31 KiB** | 0.7688 | — | 0.1891 | 0.8268 / 0.8268 |
+| **SafeSync TC-PCR (LIC-TCM Base)** | **4,179.9 MB** | 7.55 KiB | **0.8233** | **+5.45 pp** (-23.6% UMR) | 0.1728 | 0.8257 / — |
+| **SafeSync TC-PCR (LIC-TCM Raw)** | **4,179.9 MB** | 7.82 KiB | 0.7994 | +3.06 pp | **0.1571** | 0.8244 / — |
+| Post-Hoc Hyperprior GT Oracle | 61.1 MB | 7.80 KiB | 0.8163 | Offline GT ceiling | 0.1576 | 0.8214 / — |
 
 ---
 
@@ -160,9 +163,9 @@ All benchmark experiments in our study were conducted without any model training
 - **Hardware**: AMD Ryzen 7 5700X CPU (pinned to 4 threads for sender benchmarks) + NVIDIA GeForce RTX 3090 GPU (24 GB VRAM)
 - **Software**: Python 3.11 / 3.12, PyTorch `2.8.0+cu128`, CUDA `12.8`, NumPy `2.4`, Pillow `12.2`, OpenJPEG `2.5.4`
 - **Total Campaign Compute**:
-  - **6.40 RTX 3090 GPU-hours** in total across all neural baselines and downstream evaluations (`1.70 h` SpaceNet 7 `LIC-TCM`, `1.69 h` SECOND `LIC-TCM`, `0.82 h` SpaceNet 7 `Scale-Hyperprior`, `1.15 h` SECOND `Hyperprior`/`DINOv2-S/14`, and `1.04 h` `U-Net` receiver evaluation).
-  - **0.00 GPU-hours** for **SafeSync's pixel-tier sender** (`254.7 ms/update` on 4 CPU threads, `45.3 s` per 178-update pass).
-  - **5.20 CPU-hours** across all 5,874 stateful protocol transactions, orbital-drift tests, archive profiling, and 10,000-resample paired geographic bootstrap intervals.
+  - **6.48 RTX 3090 GPU-hours** in total across all neural baselines and downstream evaluations (`1.70 h` SpaceNet 7 `LIC-TCM`, `1.69 h` SECOND `LIC-TCM`, `0.82 h` SpaceNet 7 `Scale-Hyperprior`, `1.19 h` SECOND `Hyperprior`/`DINOv2-S/14`, and `1.08 h` `U-Net` receiver evaluation).
+  - **0.00 GPU-hours** for **SafeSync's pixel-tier sender** (`117.5 ms/update` on 4 CPU threads for `SafeSync-ASF+`, `20.9 s` per 178-update pass; `254.7 ms` for legacy `ZFSS/DGAD`).
+  - **5.32 CPU-hours** across all stateful protocol transactions, orbital-drift tests, archive profiling, and 10,000-resample paired geographic bootstrap intervals.
 
 ---
 

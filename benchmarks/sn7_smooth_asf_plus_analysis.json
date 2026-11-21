@@ -1,0 +1,794 @@
+{
+  "schema": "sn7-smooth-asf-plus-v1",
+  "status": "complete",
+  "protocol_locked_on_calibration_aois": {
+    "block_codec": "position_invariant_jpeg_444",
+    "q_by_budget": {
+      "32768": 80,
+      "65536": 86,
+      "131072": 90
+    },
+    "coarse_codec": "webp_q85",
+    "receiver_render": "smooth_bilinear_coarse_plus_feathered_updated_r7",
+    "persistent_matrix_bytes": 0,
+    "sender_state_bytes_per_aoi": 12328
+  },
+  "by_budget": {
+    "32768": {
+      "budget": 32768,
+      "q_atlas": 80,
+      "mean_update_KiB": 31.616256145545652,
+      "mean_coarse_KiB": 1.3289552218516556,
+      "mean_updated_blocks": 35.685893376489354,
+      "mean_stable_blocks": 40.15261310864059,
+      "oof_building_f1": 0.4760481881967099,
+      "oof_event_f1": 0.18993453664725318,
+      "exp_building_f1": 0.5676862575510089,
+      "exp_event_f1": 0.29097474204126667,
+      "new_track_u25_pct": 47.713633707291734,
+      "new_track_u30_pct": 33.57355548025572,
+      "new_track_u35_pct": 25.96373924656763,
+      "global_psnr_db": 28.056326245325277,
+      "sender_ms_mean": 117.54723539800916,
+      "sender_ms_p95": 208.4975899779238,
+      "receiver_ms_mean": 106.87302190711031,
+      "total_false_stable_blocks": 0,
+      "total_valid_blocks": 39439
+    },
+    "65536": {
+      "budget": 65536,
+      "q_atlas": 86,
+      "mean_update_KiB": 63.414064758970746,
+      "mean_coarse_KiB": 1.3289552218516556,
+      "mean_updated_blocks": 61.297824901491694,
+      "mean_stable_blocks": 36.951694284173,
+      "oof_building_f1": 0.49635936189595886,
+      "oof_event_f1": 0.2288056102387267,
+      "exp_building_f1": 0.5837982815897039,
+      "exp_event_f1": 0.3344513186132636,
+      "new_track_u25_pct": 63.093493206482584,
+      "new_track_u30_pct": 48.824977311052606,
+      "new_track_u35_pct": 43.11315478301773,
+      "global_psnr_db": 29.21114608408631,
+      "sender_ms_mean": 136.69244831773253,
+      "sender_ms_p95": 250.05713004502476,
+      "receiver_ms_mean": 112.20727527770475,
+      "total_false_stable_blocks": 0,
+      "total_valid_blocks": 39439
+    },
+    "131072": {
+      "budget": 131072,
+      "q_atlas": 90,
+      "mean_update_KiB": 127.37192845400463,
+      "mean_coarse_KiB": 1.3289552218516556,
+      "mean_updated_blocks": 107.32272610000939,
+      "mean_stable_blocks": 29.67439047987616,
+      "oof_building_f1": 0.5215601276542858,
+      "oof_event_f1": 0.26537922025675786,
+      "exp_building_f1": 0.6027029085213362,
+      "exp_event_f1": 0.3751673627249521,
+      "new_track_u25_pct": 79.40521448865006,
+      "new_track_u30_pct": 68.55456074993744,
+      "new_track_u35_pct": 65.32025033887591,
+      "global_psnr_db": 31.332152751390844,
+      "sender_ms_mean": 173.71471517188266,
+      "sender_ms_p95": 293.71961997821927,
+      "receiver_ms_mean": 114.01886629134292,
+      "total_false_stable_blocks": 0,
+      "total_valid_blocks": 39439
+    }
+  },
+  "per_aoi": {
+    "32768": [
+      {
+        "aoi": "L15-0632E-0892N_2528_4620_13",
+        "mean_total_bytes": 32336.5,
+        "mean_coarse_bytes": 1057.5,
+        "mean_updated_blocks": 39.0,
+        "mean_stable_blocks": 95.20833333333333,
+        "sender_ms_mean": 88.94382081537817,
+        "sender_ms_p95": 114.00184506201185,
+        "receiver_ms_mean": 81.22503746805403,
+        "oof_building_f1": 0.5113673407195652,
+        "oof_event_f1": 0.1796996179018651,
+        "exp_building_f1": 0.6416178609216031,
+        "exp_event_f1": 0.3098205821424809,
+        "new_track_u25": 0.5864547170960472,
+        "new_track_u30": 0.4084292587855533,
+        "new_track_u35": 0.2682867409708265,
+        "global_psnr_db": 30.95576779359447
+      },
+      {
+        "aoi": "L15-1848E-0793N_7394_5018_13",
+        "mean_total_bytes": 32407.791666666668,
+        "mean_coarse_bytes": 1484.0833333333333,
+        "mean_updated_blocks": 30.541666666666668,
+        "mean_stable_blocks": 14.958333333333334,
+        "sender_ms_mean": 201.53519585437607,
+        "sender_ms_p95": 240.5854450073093,
+        "receiver_ms_mean": 173.5892874955122,
+        "oof_building_f1": 0.5135978067745448,
+        "oof_event_f1": 0.28555549275608055,
+        "exp_building_f1": 0.5885841857985405,
+        "exp_event_f1": 0.2869799578575979,
+        "new_track_u25": 0.5429801365229691,
+        "new_track_u30": 0.46182891581083574,
+        "new_track_u35": 0.4528995756718529,
+        "global_psnr_db": 26.260702963114355
+      },
+      {
+        "aoi": "L15-1335E-1166N_5342_3524_13",
+        "mean_total_bytes": 32606.666666666668,
+        "mean_coarse_bytes": 645.0,
+        "mean_updated_blocks": 65.25,
+        "mean_stable_blocks": 162.20833333333334,
+        "sender_ms_mean": 148.71720000519417,
+        "sender_ms_p95": 180.41897498769686,
+        "receiver_ms_mean": 118.74317500526861,
+        "oof_building_f1": 0.3905382863659384,
+        "oof_event_f1": 0.15760971455200895,
+        "exp_building_f1": 0.565873128223502,
+        "exp_event_f1": 0.33853901041594875,
+        "new_track_u25": 0.6844595575778111,
+        "new_track_u30": 0.5107338206108718,
+        "new_track_u35": 0.4394997337722058,
+        "global_psnr_db": 35.11511109811542
+      },
+      {
+        "aoi": "L15-1015E-1062N_4061_3941_13",
+        "mean_total_bytes": 32335.647058823528,
+        "mean_coarse_bytes": 1492.7058823529412,
+        "mean_updated_blocks": 31.529411764705884,
+        "mean_stable_blocks": 29.058823529411764,
+        "sender_ms_mean": 89.99410588705145,
+        "sender_ms_p95": 100.84726002532989,
+        "receiver_ms_mean": 87.9006999928285,
+        "oof_building_f1": 0.447758097793612,
+        "oof_event_f1": 0.1488392208955685,
+        "exp_building_f1": 0.5138057148818445,
+        "exp_event_f1": 0.19840276812332977,
+        "new_track_u25": 0.286159098156172,
+        "new_track_u30": 0.19983868849999062,
+        "new_track_u35": 0.13977829047324292,
+        "global_psnr_db": 27.103799405881976
+      },
+      {
+        "aoi": "L15-0586E-1127N_2345_3680_13",
+        "mean_total_bytes": 32286.041666666668,
+        "mean_coarse_bytes": 1621.3333333333333,
+        "mean_updated_blocks": 27.791666666666668,
+        "mean_stable_blocks": 4.125,
+        "sender_ms_mean": 112.90898751758505,
+        "sender_ms_p95": 220.18968004849737,
+        "receiver_ms_mean": 104.1851125046378,
+        "oof_building_f1": 0.5206391909106949,
+        "oof_event_f1": 0.12204195313869466,
+        "exp_building_f1": 0.577700753003788,
+        "exp_event_f1": 0.4433580682440241,
+        "new_track_u25": 0.6874972734807835,
+        "new_track_u30": 0.42689656676700255,
+        "new_track_u35": 0.29810670505605724,
+        "global_psnr_db": 25.992098044234186
+      },
+      {
+        "aoi": "L15-1210E-1025N_4840_4088_13",
+        "mean_total_bytes": 32427.363636363636,
+        "mean_coarse_bytes": 1601.090909090909,
+        "mean_updated_blocks": 29.045454545454547,
+        "mean_stable_blocks": 11.681818181818182,
+        "sender_ms_mean": 97.33970455867662,
+        "sender_ms_p95": 121.7408899217844,
+        "receiver_ms_mean": 96.44712728384712,
+        "oof_building_f1": 0.5263548740031844,
+        "oof_event_f1": 0.40522001003848085,
+        "exp_building_f1": 0.5695555056913223,
+        "exp_event_f1": 0.4387260292623663,
+        "new_track_u25": 0.40033445861465367,
+        "new_track_u30": 0.29766816704176047,
+        "new_track_u35": 0.16386909227306826,
+        "global_psnr_db": 26.935514825032932
+      },
+      {
+        "aoi": "L15-1538E-1163N_6154_3539_13",
+        "mean_total_bytes": 32394.526315789473,
+        "mean_coarse_bytes": 1466.421052631579,
+        "mean_updated_blocks": 30.57894736842105,
+        "mean_stable_blocks": 2.1052631578947367,
+        "sender_ms_mean": 88.93696841244635,
+        "sender_ms_p95": 102.31007997645064,
+        "receiver_ms_mean": 90.65486842423286,
+        "oof_building_f1": 0.4489593902207783,
+        "oof_event_f1": 0.09816120050357927,
+        "exp_building_f1": 0.4803781824045367,
+        "exp_event_f1": 0.0987644207795754,
+        "new_track_u25": 0.3251118878834406,
+        "new_track_u30": 0.20134918820032013,
+        "new_track_u35": 0.15969749436477085,
+        "global_psnr_db": 25.959296698886153
+      },
+      {
+        "aoi": "L15-1138E-1216N_4553_3325_13",
+        "mean_total_bytes": 32205.833333333332,
+        "mean_coarse_bytes": 1518.6666666666667,
+        "mean_updated_blocks": 31.75,
+        "mean_stable_blocks": 1.875,
+        "sender_ms_mean": 96.32113750073283,
+        "sender_ms_p95": 116.84343007509595,
+        "receiver_ms_mean": 92.45766666329776,
+        "oof_building_f1": 0.44917051878536085,
+        "oof_event_f1": 0.12234908339174756,
+        "exp_building_f1": 0.6039747294829337,
+        "exp_event_f1": 0.21320709950481032,
+        "new_track_u25": 0.30409356725146197,
+        "new_track_u30": 0.17913983270412318,
+        "new_track_u35": 0.15496150714338588,
+        "global_psnr_db": 26.128319133742714
+      }
+    ],
+    "65536": [
+      {
+        "aoi": "L15-0632E-0892N_2528_4620_13",
+        "mean_total_bytes": 65043.041666666664,
+        "mean_coarse_bytes": 1057.5,
+        "mean_updated_blocks": 66.625,
+        "mean_stable_blocks": 98.20833333333333,
+        "sender_ms_mean": 212.09467916438976,
+        "sender_ms_p95": 293.36082004592754,
+        "receiver_ms_mean": 165.8013374884225,
+        "oof_building_f1": 0.5376967333935618,
+        "oof_event_f1": 0.2317450387516074,
+        "exp_building_f1": 0.65475916421791,
+        "exp_event_f1": 0.33974039770275205,
+        "new_track_u25": 0.7914002070771667,
+        "new_track_u30": 0.6253121383762714,
+        "new_track_u35": 0.5412631707168525,
+        "global_psnr_db": 32.25576780140949
+      },
+      {
+        "aoi": "L15-1848E-0793N_7394_5018_13",
+        "mean_total_bytes": 64635.291666666664,
+        "mean_coarse_bytes": 1484.0833333333333,
+        "mean_updated_blocks": 53.666666666666664,
+        "mean_stable_blocks": 15.25,
+        "sender_ms_mean": 185.03006668470334,
+        "sender_ms_p95": 213.25454508769326,
+        "receiver_ms_mean": 148.02345832868014,
+        "oof_building_f1": 0.520849014726034,
+        "oof_event_f1": 0.28949189310493145,
+        "exp_building_f1": 0.6065475279944842,
+        "exp_event_f1": 0.2871845328872928,
+        "new_track_u25": 0.7020847426357543,
+        "new_track_u30": 0.6134555070413874,
+        "new_track_u35": 0.606813849086772,
+        "global_psnr_db": 27.16192390598328
+      },
+      {
+        "aoi": "L15-1335E-1166N_5342_3524_13",
+        "mean_total_bytes": 65145.208333333336,
+        "mean_coarse_bytes": 645.0,
+        "mean_updated_blocks": 108.25,
+        "mean_stable_blocks": 129.5,
+        "sender_ms_mean": 143.41505417057002,
+        "sender_ms_p95": 186.03329499601386,
+        "receiver_ms_mean": 98.84393749234732,
+        "oof_building_f1": 0.4601218168562358,
+        "oof_event_f1": 0.21430465196908205,
+        "exp_building_f1": 0.6113711372499171,
+        "exp_event_f1": 0.4197638157558407,
+        "new_track_u25": 0.8221174790648144,
+        "new_track_u30": 0.713454184616874,
+        "new_track_u35": 0.6526392855414105,
+        "global_psnr_db": 36.75803439573764
+      },
+      {
+        "aoi": "L15-1015E-1062N_4061_3941_13",
+        "mean_total_bytes": 64901.82352941176,
+        "mean_coarse_bytes": 1492.7058823529412,
+        "mean_updated_blocks": 54.11764705882353,
+        "mean_stable_blocks": 28.58823529411765,
+        "sender_ms_mean": 120.1886235298041,
+        "sender_ms_p95": 156.52291991282254,
+        "receiver_ms_mean": 104.97761176734724,
+        "oof_building_f1": 0.47010101140827115,
+        "oof_event_f1": 0.2001752275730981,
+        "exp_building_f1": 0.5300478007078182,
+        "exp_event_f1": 0.25216671103617594,
+        "new_track_u25": 0.43781066531615176,
+        "new_track_u30": 0.33408361937988856,
+        "new_track_u35": 0.2983137321103671,
+        "global_psnr_db": 28.158356277615354
+      },
+      {
+        "aoi": "L15-0586E-1127N_2345_3680_13",
+        "mean_total_bytes": 64781.125,
+        "mean_coarse_bytes": 1621.3333333333333,
+        "mean_updated_blocks": 48.458333333333336,
+        "mean_stable_blocks": 4.708333333333333,
+        "sender_ms_mean": 98.33249582637411,
+        "sender_ms_p95": 108.99461997905746,
+        "receiver_ms_mean": 89.78653751061454,
+        "oof_building_f1": 0.5199107952282013,
+        "oof_event_f1": 0.1663520706708445,
+        "exp_building_f1": 0.5817656322294588,
+        "exp_event_f1": 0.4810905308814092,
+        "new_track_u25": 0.810866814989312,
+        "new_track_u30": 0.5792108362779741,
+        "new_track_u35": 0.4747742442088732,
+        "global_psnr_db": 26.93426175122047
+      },
+      {
+        "aoi": "L15-1210E-1025N_4840_4088_13",
+        "mean_total_bytes": 64888.181818181816,
+        "mean_coarse_bytes": 1601.090909090909,
+        "mean_updated_blocks": 50.36363636363637,
+        "mean_stable_blocks": 11.909090909090908,
+        "sender_ms_mean": 105.51378181183033,
+        "sender_ms_p95": 133.08396002976224,
+        "receiver_ms_mean": 99.31605908257717,
+        "oof_building_f1": 0.545685683199762,
+        "oof_event_f1": 0.4372947897502707,
+        "exp_building_f1": 0.5910093949247657,
+        "exp_event_f1": 0.4725417122881739,
+        "new_track_u25": 0.5451675418854713,
+        "new_track_u30": 0.4311390347586897,
+        "new_track_u35": 0.3438203300825206,
+        "global_psnr_db": 27.83467512649564
+      },
+      {
+        "aoi": "L15-1538E-1163N_6154_3539_13",
+        "mean_total_bytes": 65107.26315789474,
+        "mean_coarse_bytes": 1466.421052631579,
+        "mean_updated_blocks": 53.526315789473685,
+        "mean_stable_blocks": 2.1578947368421053,
+        "sender_ms_mean": 97.99408947583288,
+        "sender_ms_p95": 112.14917000615964,
+        "receiver_ms_mean": 87.38236842480929,
+        "oof_building_f1": 0.44306044643636683,
+        "oof_event_f1": 0.11762914333090811,
+        "exp_building_f1": 0.4731644590893446,
+        "exp_event_f1": 0.12830434499381146,
+        "new_track_u25": 0.4785697951716703,
+        "new_track_u30": 0.31885596680931694,
+        "new_track_u35": 0.2763385711018915,
+        "global_psnr_db": 27.044287002828717
+      },
+      {
+        "aoi": "L15-1138E-1216N_4553_3325_13",
+        "mean_total_bytes": 64986.083333333336,
+        "mean_coarse_bytes": 1518.6666666666667,
+        "mean_updated_blocks": 55.375,
+        "mean_stable_blocks": 5.291666666666667,
+        "sender_ms_mean": 115.49680001432232,
+        "sender_ms_p95": 121.49708502111025,
+        "receiver_ms_mean": 95.1721166590384,
+        "oof_building_f1": 0.47344939391923807,
+        "oof_event_f1": 0.17345206675907116,
+        "exp_building_f1": 0.6217211363039328,
+        "exp_event_f1": 0.29481850336065313,
+        "new_track_u25": 0.45946221037826634,
+        "new_track_u30": 0.29048689762380636,
+        "new_track_u35": 0.25508919979273076,
+        "global_psnr_db": 27.541862411399883
+      }
+    ],
+    "131072": [
+      {
+        "aoi": "L15-0632E-0892N_2528_4620_13",
+        "mean_total_bytes": 130463.875,
+        "mean_coarse_bytes": 1057.5,
+        "mean_updated_blocks": 117.04166666666667,
+        "mean_stable_blocks": 104.45833333333333,
+        "sender_ms_mean": 288.55613751026493,
+        "sender_ms_p95": 350.49039003206417,
+        "receiver_ms_mean": 174.6317208308028,
+        "oof_building_f1": 0.5638375264549172,
+        "oof_event_f1": 0.2601511913495582,
+        "exp_building_f1": 0.6679425718609837,
+        "exp_event_f1": 0.36769748833760696,
+        "new_track_u25": 0.9492660941592058,
+        "new_track_u30": 0.8867166088068701,
+        "new_track_u35": 0.8497472440465315,
+        "global_psnr_db": 34.74105202893841
+      },
+      {
+        "aoi": "L15-1848E-0793N_7394_5018_13",
+        "mean_total_bytes": 130420.16666666667,
+        "mean_coarse_bytes": 1484.0833333333333,
+        "mean_updated_blocks": 95.875,
+        "mean_stable_blocks": 17.333333333333332,
+        "sender_ms_mean": 230.19002915437645,
+        "sender_ms_p95": 264.10974002210423,
+        "receiver_ms_mean": 150.50836249914332,
+        "oof_building_f1": 0.5426333218927117,
+        "oof_event_f1": 0.3187620609366082,
+        "exp_building_f1": 0.6265790951690375,
+        "exp_event_f1": 0.31908170258128377,
+        "new_track_u25": 0.895799766312035,
+        "new_track_u30": 0.8349793985609741,
+        "new_track_u35": 0.8293954861324642,
+        "global_psnr_db": 29.532361913542452
+      },
+      {
+        "aoi": "L15-1335E-1166N_5342_3524_13",
+        "mean_total_bytes": 130781.125,
+        "mean_coarse_bytes": 645.0,
+        "mean_updated_blocks": 188.79166666666666,
+        "mean_stable_blocks": 55.791666666666664,
+        "sender_ms_mean": 197.4826375177751,
+        "sender_ms_p95": 277.59886007406743,
+        "receiver_ms_mean": 98.13305833085906,
+        "oof_building_f1": 0.5093624438576159,
+        "oof_event_f1": 0.26218313603262167,
+        "exp_building_f1": 0.6384357508455806,
+        "exp_event_f1": 0.47750628731208367,
+        "new_track_u25": 0.9376421898446198,
+        "new_track_u30": 0.9088835374413089,
+        "new_track_u35": 0.893496781063943,
+        "global_psnr_db": 39.60320758699507
+      },
+      {
+        "aoi": "L15-1015E-1062N_4061_3941_13",
+        "mean_total_bytes": 130434.88235294117,
+        "mean_coarse_bytes": 1492.7058823529412,
+        "mean_updated_blocks": 94.3529411764706,
+        "mean_stable_blocks": 27.941176470588236,
+        "sender_ms_mean": 137.4848176492378,
+        "sender_ms_p95": 182.87712002638725,
+        "receiver_ms_mean": 102.00138236669933,
+        "oof_building_f1": 0.4988806984275836,
+        "oof_event_f1": 0.235643816614531,
+        "exp_building_f1": 0.5649511715221991,
+        "exp_event_f1": 0.29802994259341037,
+        "new_track_u25": 0.6554874045729935,
+        "new_track_u30": 0.5564684035788644,
+        "new_track_u35": 0.5284264625888621,
+        "global_psnr_db": 30.051272659025816
+      },
+      {
+        "aoi": "L15-0586E-1127N_2345_3680_13",
+        "mean_total_bytes": 130221.375,
+        "mean_coarse_bytes": 1621.3333333333333,
+        "mean_updated_blocks": 84.58333333333333,
+        "mean_stable_blocks": 6.625,
+        "sender_ms_mean": 129.04439165140502,
+        "sender_ms_p95": 154.20131496503018,
+        "receiver_ms_mean": 97.2361499928714,
+        "oof_building_f1": 0.5310683972877244,
+        "oof_event_f1": 0.22794097860698748,
+        "exp_building_f1": 0.5875375578236798,
+        "exp_event_f1": 0.5345712020097823,
+        "new_track_u25": 0.9110936613881254,
+        "new_track_u30": 0.7300200671814335,
+        "new_track_u35": 0.6850652183396588,
+        "global_psnr_db": 28.76321799748586
+      },
+      {
+        "aoi": "L15-1210E-1025N_4840_4088_13",
+        "mean_total_bytes": 130262.04545454546,
+        "mean_coarse_bytes": 1601.090909090909,
+        "mean_updated_blocks": 88.27272727272727,
+        "mean_stable_blocks": 12.0,
+        "sender_ms_mean": 125.53261363857679,
+        "sender_ms_p95": 146.4937699958682,
+        "receiver_ms_mean": 96.78190454988825,
+        "oof_building_f1": 0.5611479742626854,
+        "oof_event_f1": 0.453343091640964,
+        "exp_building_f1": 0.6065349978546553,
+        "exp_event_f1": 0.49508891187626225,
+        "new_track_u25": 0.7108183295823955,
+        "new_track_u30": 0.5922105526381596,
+        "new_track_u35": 0.5548574643660915,
+        "global_psnr_db": 29.391129221081766
+      },
+      {
+        "aoi": "L15-1538E-1163N_6154_3539_13",
+        "mean_total_bytes": 130437.36842105263,
+        "mean_coarse_bytes": 1466.421052631579,
+        "mean_updated_blocks": 93.78947368421052,
+        "mean_stable_blocks": 2.5789473684210527,
+        "sender_ms_mean": 119.35619475001371,
+        "sender_ms_p95": 145.42835000902411,
+        "receiver_ms_mean": 88.0669894640481,
+        "oof_building_f1": 0.4583279580791606,
+        "oof_event_f1": 0.14224118159717444,
+        "exp_building_f1": 0.48782993086998894,
+        "exp_event_f1": 0.16031205498111573,
+        "new_track_u25": 0.6470223122406978,
+        "new_track_u30": 0.49279670706608736,
+        "new_track_u35": 0.4503283133514096,
+        "global_psnr_db": 28.855557312271007
+      },
+      {
+        "aoi": "L15-1138E-1216N_4553_3325_13",
+        "mean_total_bytes": 130410.0,
+        "mean_coarse_bytes": 1518.6666666666667,
+        "mean_updated_blocks": 95.875,
+        "mean_stable_blocks": 10.666666666666666,
+        "sender_ms_mean": 136.16397917697518,
+        "sender_ms_p95": 158.70465490152125,
+        "receiver_ms_mean": 94.443208334269,
+        "oof_building_f1": 0.5072227009718886,
+        "oof_event_f1": 0.22276830527561803,
+        "exp_building_f1": 0.6418121922245655,
+        "exp_event_f1": 0.34905131210807216,
+        "new_track_u25": 0.6452874009919313,
+        "new_track_u30": 0.4822895847212969,
+        "new_track_u35": 0.43430305722111184,
+        "global_psnr_db": 29.7194232917864
+      }
+    ]
+  },
+  "paired_contrasts_oof": {
+    "32768": {
+      "full_webp": {
+        "building_f1": {
+          "mean_diff": 0.19663903022119786,
+          "ci9833_low": 0.12490770305574045,
+          "ci9833_high": 0.2657884466628011
+        },
+        "event_f1": {
+          "mean_diff": 0.08792609152843607,
+          "ci9833_low": 0.03518596811375582,
+          "ci9833_high": 0.16467884371840316
+        }
+      },
+      "learned_hyperprior_q1_8": {
+        "building_f1": {
+          "mean_diff": 0.12474999487870164,
+          "ci9833_low": 0.06234729204724526,
+          "ci9833_high": 0.19001694222750493
+        },
+        "event_f1": {
+          "mean_diff": 0.02060726367703519,
+          "ci9833_low": -0.016637351782184152,
+          "ci9833_high": 0.05820154998840575
+        }
+      },
+      "gaussian_20261029": {
+        "building_f1": {
+          "mean_diff": 0.08179032662876322,
+          "ci9833_low": 0.052463789038464305,
+          "ci9833_high": 0.11787318202593901
+        },
+        "event_f1": {
+          "mean_diff": 0.04813483343335738,
+          "ci9833_low": 0.023353799702671874,
+          "ci9833_high": 0.07508710527328523
+        }
+      },
+      "tcm": {
+        "building_f1": {
+          "mean_diff": 0.03866763979859382,
+          "ci9833_low": -0.00023626927544168758,
+          "ci9833_high": 0.08172507279530734
+        },
+        "event_f1": {
+          "mean_diff": -0.03557691143423203,
+          "ci9833_low": -0.06600846325373302,
+          "ci9833_high": -0.008994187029951518
+        }
+      }
+    },
+    "65536": {
+      "full_webp": {
+        "building_f1": {
+          "mean_diff": 0.11755992218544671,
+          "ci9833_low": 0.0655625767917739,
+          "ci9833_high": 0.16476947677576023
+        },
+        "event_f1": {
+          "mean_diff": 0.07448863084001639,
+          "ci9833_low": 0.027481610036744746,
+          "ci9833_high": 0.12611628518308976
+        }
+      },
+      "learned_hyperprior_q1_8": {
+        "building_f1": {
+          "mean_diff": 0.034066442280170764,
+          "ci9833_low": 1.86667521512094e-05,
+          "ci9833_high": 0.07585774143441086
+        },
+        "event_f1": {
+          "mean_diff": -0.016233701996877493,
+          "ci9833_low": -0.03177267742952667,
+          "ci9833_high": -0.0001005333260610552
+        }
+      },
+      "gaussian_20261029": {
+        "building_f1": {
+          "mean_diff": 0.0841849793787931,
+          "ci9833_low": 0.054669876125821144,
+          "ci9833_high": 0.12060643663535722
+        },
+        "event_f1": {
+          "mean_diff": 0.0562684923251295,
+          "ci9833_low": 0.012130852452173357,
+          "ci9833_high": 0.10823966355681681
+        }
+      },
+      "tcm": {
+        "building_f1": {
+          "mean_diff": 0.000625765526210631,
+          "ci9833_low": -0.021680785676356687,
+          "ci9833_high": 0.026736804743302183
+        },
+        "event_f1": {
+          "mean_diff": -0.042360638584448614,
+          "ci9833_low": -0.07927591057860316,
+          "ci9833_high": -0.015948044816690356
+        }
+      }
+    },
+    "131072": {
+      "full_webp": {
+        "building_f1": {
+          "mean_diff": 0.051774070314921004,
+          "ci9833_low": 0.025014210358270283,
+          "ci9833_high": 0.07208468203940413
+        },
+        "event_f1": {
+          "mean_diff": 0.041641686501180115,
+          "ci9833_low": 0.009985348231444337,
+          "ci9833_high": 0.07781307393065226
+        }
+      },
+      "learned_hyperprior_q1_8": {
+        "building_f1": {
+          "mean_diff": 0.003444448762163356,
+          "ci9833_low": -0.01097090703061728,
+          "ci9833_high": 0.019918744812161097
+        },
+        "event_f1": {
+          "mean_diff": -0.026442429597651515,
+          "ci9833_low": -0.035514822650075106,
+          "ci9833_high": -0.018648258479965686
+        }
+      },
+      "gaussian_20261029": {
+        "building_f1": {
+          "mean_diff": 0.0907741350013202,
+          "ci9833_low": 0.05250371256826669,
+          "ci9833_high": 0.13983259615768381
+        },
+        "event_f1": {
+          "mean_diff": 0.07719054690763863,
+          "ci9833_low": 0.02407476685156163,
+          "ci9833_high": 0.13668867561673828
+        }
+      },
+      "tcm": {
+        "building_f1": {
+          "mean_diff": 0.013945910984735042,
+          "ci9833_low": -0.00859735342499554,
+          "ci9833_high": 0.03997571361934376
+        },
+        "event_f1": {
+          "mean_diff": -0.017112706517694264,
+          "ci9833_low": -0.04998151189954259,
+          "ci9833_high": 0.01460322750273
+        }
+      }
+    }
+  },
+  "paired_contrasts_exp0200": {
+    "32768": {
+      "full_webp": {
+        "building_f1": {
+          "mean_diff": 0.2164063710727753,
+          "ci9833_low": 0.16405133453106116,
+          "ci9833_high": 0.2739800641974086
+        },
+        "event_f1": {
+          "mean_diff": 0.148458613667387,
+          "ci9833_low": 0.0474874573040586,
+          "ci9833_high": 0.269057676819733
+        }
+      },
+      "learned_hyperprior_q1_8": {
+        "building_f1": {
+          "mean_diff": 0.11626476056213517,
+          "ci9833_low": 0.07595252136006504,
+          "ci9833_high": 0.16117917667394213
+        },
+        "event_f1": {
+          "mean_diff": 0.05832972857326654,
+          "ci9833_low": -0.01482111827415499,
+          "ci9833_high": 0.15454844439084722
+        }
+      },
+      "gaussian_20261029": {
+        "building_f1": {
+          "mean_diff": 0.05626483979076815,
+          "ci9833_low": 0.03877383500764104,
+          "ci9833_high": 0.07478546558794696
+        },
+        "event_f1": {
+          "mean_diff": 0.04976199214663646,
+          "ci9833_low": 0.02123201809031562,
+          "ci9833_high": 0.08123092419057103
+        }
+      }
+    },
+    "65536": {
+      "full_webp": {
+        "building_f1": {
+          "mean_diff": 0.09674837074409154,
+          "ci9833_low": 0.06069921738852987,
+          "ci9833_high": 0.13206040000649602
+        },
+        "event_f1": {
+          "mean_diff": 0.08713260793544494,
+          "ci9833_low": 0.021986721073603614,
+          "ci9833_high": 0.16156114711568278
+        }
+      },
+      "learned_hyperprior_q1_8": {
+        "building_f1": {
+          "mean_diff": 0.025320426066604014,
+          "ci9833_low": 0.0018143297474885675,
+          "ci9833_high": 0.04972972904264351
+        },
+        "event_f1": {
+          "mean_diff": -0.001075750794394436,
+          "ci9833_low": -0.03932798636155183,
+          "ci9833_high": 0.04324147683336364
+        }
+      },
+      "gaussian_20261029": {
+        "building_f1": {
+          "mean_diff": 0.054204200551107744,
+          "ci9833_low": 0.03458165450470813,
+          "ci9833_high": 0.0797345703554311
+        },
+        "event_f1": {
+          "mean_diff": 0.048106870905745544,
+          "ci9833_low": 0.007998727303302089,
+          "ci9833_high": 0.09266815418305832
+        }
+      }
+    },
+    "131072": {
+      "full_webp": {
+        "building_f1": {
+          "mean_diff": 0.0262410736635982,
+          "ci9833_low": 0.015424407132641628,
+          "ci9833_high": 0.035003379530880376
+        },
+        "event_f1": {
+          "mean_diff": 0.02494334439776286,
+          "ci9833_low": -0.0012045177489729663,
+          "ci9833_high": 0.05262220695610249
+        }
+      },
+      "learned_hyperprior_q1_8": {
+        "building_f1": {
+          "mean_diff": 0.00012220833190693808,
+          "ci9833_low": -0.008947703137924612,
+          "ci9833_high": 0.008433276681178346
+        },
+        "event_f1": {
+          "mean_diff": -0.016793465529223697,
+          "ci9833_low": -0.04099540891965973,
+          "ci9833_high": 0.00698983792058591
+        }
+      },
+      "gaussian_20261029": {
+        "building_f1": {
+          "mean_diff": 0.05872166907599713,
+          "ci9833_low": 0.03552425616092218,
+          "ci9833_high": 0.08914580846379148
+        },
+        "event_f1": {
+          "mean_diff": 0.06534643789772308,
+          "ci9833_low": 0.018865929126933387,
+          "ci9833_high": 0.11985788957920182
+        }
+      }
+    }
+  },
+  "output_sha256": {
+    "quality_records.csv": "090ac7a168b984be4f7360c27981566afa75867d24a62f7ac7afa6183b4a12d2",
+    "oof_records.csv": "9d5360c189c0b519876d67637eb72e844362aabb7bedb0f190e5df94c0a7b265",
+    "exp0200_records.csv": "2ff0057a05e48119c8b0598cbbd283a0924d7d442c0e4ea813ae686220ecd010"
+  }
+}
