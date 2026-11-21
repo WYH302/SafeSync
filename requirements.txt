@@ -1,5 +1,8 @@
-numpy>=1.26
+# Lightweight CPU runtime dependencies for SafeSync protocol verification and plotting
+numpy>=1.26,<3.0
 Pillow>=10.0
 matplotlib>=3.8
 scipy>=1.11
+python-pptx>=1.0
+pypdf>=4.0
 pytest>=8.0

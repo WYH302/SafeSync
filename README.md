@@ -163,8 +163,8 @@ All benchmark experiments in our study were conducted without any model training
 - **Hardware**: AMD Ryzen 7 5700X CPU (pinned to 4 threads for sender benchmarks) + NVIDIA GeForce RTX 3090 GPU (24 GB VRAM)
 - **Software**: Python 3.11 / 3.12, PyTorch `2.8.0+cu128`, CUDA `12.8`, NumPy `2.4`, Pillow `12.2`, OpenJPEG `2.5.4`
 - **Total Campaign Compute**:
-  - **6.48 RTX 3090 GPU-hours** in total across all neural baselines and downstream evaluations (`1.70 h` SpaceNet 7 `LIC-TCM`, `1.69 h` SECOND `LIC-TCM`, `0.82 h` SpaceNet 7 `Scale-Hyperprior`, `1.19 h` SECOND `Hyperprior`/`DINOv2-S/14`, and `1.08 h` `U-Net` receiver evaluation).
-  - **0.00 GPU-hours** for **SafeSync's pixel-tier sender** (`117.5 ms/update` on 4 CPU threads for `SafeSync-ASF+`, `20.9 s` per 178-update pass; `254.7 ms` for legacy `ZFSS/DGAD`).
+  - **6.48 RTX 3090 GPU-hours** in total across all neural baselines and downstream evaluations (`1.70 h` SpaceNet 7 `LIC-TCM`, `1.69 h` SECOND `LIC-TCM`, `0.82 h` SpaceNet 7 `Scale-Hyperprior` under a 1.8 GB VRAM cap, `1.19 h` SECOND `Hyperprior`/`DINOv2-S/14`, and `1.08 h` `U-Net` receiver evaluation; **0.00 training hours**).
+  - **0.00 GPU-hours / 0 MB VRAM / 0 neural params / 0.157 GFLOPs per 1024² frame** for **SafeSync's pixel-tier sender** (`117.5 ms` / **`8.51 FPS`** at 32 KiB, `136.7 ms` / `7.32 FPS` at 64 KiB, `173.7 ms` / `5.76 FPS` at 128 KiB on 4 CPU threads; `20.9 s` per 178-update pass).
   - **5.32 CPU-hours** across all stateful protocol transactions, orbital-drift tests, archive profiling, and 10,000-resample paired geographic bootstrap intervals.
 
 ---
