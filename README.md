@@ -100,11 +100,11 @@ SafeSync 从底层彻底打破传统无状态压缩与朴素历史缩略图的�
 | SECOND Cohort 3 Method (8-KiB Cap, Building Held-Out) | Base Codec Weights | Mean Payload | Held-Out $U_{30}$ $\uparrow$ | Gain vs. Standalone | Held-Out FNR $\downarrow$ | Global / Refined Later F1 $\uparrow$ |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | Stateless Full WebP | 0 B (+DINO task) | 7.91 KiB | 0.5380 | — | 0.1699 | 0.8332 / 0.8332 |
-| **SafeSync TC-PCR (WebP Base)** | **0 B (+DINO task)** | 7.88 KiB | **0.6913** | **+15.33 pp** ($>$ Hyperprior!) | 0.1739 | 0.8222 / — |
+| **SafeSync TC-PCR (WebP Base)** | **0 B (+DINO task)** | 7.88 KiB | **0.6913** | **+15.33 pp** ($>$ Hyperprior!) | 0.1739 (0.1302 ref.) | 0.8222 / **0.8616** |
 | Full Scale-Hyperprior | 61.1 MB | 7.36 KiB | 0.6379 | — | 0.1965 | 0.8212 / 0.8212 |
-| **SafeSync TC-PCR (Hyperprior Base)** | **61.1 MB** | 7.72 KiB | **0.7594** | **+12.15 pp** (-33.6% UMR) | 0.1763 | 0.8154 / **0.8503** |
+| **SafeSync TC-PCR (Hyperprior Base)** | **61.1 MB** | 7.72 KiB | **0.7594** | **+12.15 pp** (-33.6% UMR) | 0.1763 (0.1538 ref.) | 0.8154 / 0.8503 |
 | Full LIC-TCM (35-cand. GPU SOTA) | 4,179.9 MB | **7.31 KiB** | 0.7688 | — | 0.1891 | 0.8268 / 0.8268 |
-| **SafeSync TC-PCR (LIC-TCM Base)** | **4,179.9 MB** | 7.55 KiB | **0.8233** | **+5.45 pp** (-23.6% UMR) | 0.1728 | 0.8257 / — |
+| **SafeSync TC-PCR (LIC-TCM Base)** | **4,179.9 MB** | 7.55 KiB | **0.8233** | **+5.45 pp** (-23.6% UMR) | 0.1728 (0.1658 ref.) | 0.8257 / 0.8445 |
 | **SafeSync TC-PCR (LIC-TCM Raw)** | **4,179.9 MB** | 7.82 KiB | 0.7994 | +3.06 pp | **0.1571** | 0.8244 / — |
 | Post-Hoc Hyperprior GT Oracle | 61.1 MB | 7.80 KiB | 0.8163 | Offline GT ceiling | 0.1576 | 0.8214 / — |
 
@@ -163,7 +163,7 @@ All benchmark experiments in our study were conducted without any model training
 - **Hardware**: AMD Ryzen 7 5700X CPU (pinned to 4 threads for sender benchmarks) + NVIDIA GeForce RTX 3090 GPU (24 GB VRAM)
 - **Software**: Python 3.11 / 3.12, PyTorch `2.8.0+cu128`, CUDA `12.8`, NumPy `2.4`, Pillow `12.2`, OpenJPEG `2.5.4`
 - **Total Campaign Compute**:
-  - **6.48 RTX 3090 GPU-hours** in total across all neural baselines and downstream evaluations (`1.70 h` SpaceNet 7 `LIC-TCM`, `1.69 h` SECOND `LIC-TCM`, `0.82 h` SpaceNet 7 `Scale-Hyperprior` under a 1.8 GB VRAM cap, `1.19 h` SECOND `Hyperprior`/`DINOv2-S/14`, and `1.08 h` `U-Net` receiver evaluation; **0.00 training hours**).
+  - **8.22 RTX 3090 GPU-hours** in total across all neural baselines, downstream evaluations, and supplementary audits (`1.70 h` SpaceNet 7 `LIC-TCM`, `1.69 h` SECOND `LIC-TCM`, `0.82 h` SpaceNet 7 `Scale-Hyperprior` under a 1.8 GB VRAM cap, `1.19 h` SECOND `Hyperprior`/`DINOv2-S/14`, `1.08 h` primary `U-Net` evaluation, and `1.74 h` supplementary `exp0200`/orbital-drift/refined-ROI/cross-architecture audits; **0.00 training hours**).
   - **0.00 GPU-hours / 0 MB VRAM / 0 neural params / 0.157 GFLOPs per 1024² frame** for **SafeSync's pixel-tier sender** (`117.5 ms` / **`8.51 FPS`** at 32 KiB, `136.7 ms` / `7.32 FPS` at 64 KiB, `173.7 ms` / `5.76 FPS` at 128 KiB on 4 CPU threads; `20.9 s` per 178-update pass).
   - **5.32 CPU-hours** across all stateful protocol transactions, orbital-drift tests, archive profiling, and 10,000-resample paired geographic bootstrap intervals.
 
