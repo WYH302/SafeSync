@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use SafeSync in your research, please cite our paper."
-title: "SafeSync: Asymmetric Space-Ground State Synchronization and Evidence-Preserving Co-Construction for Repeated Earth Observation"
+title: "SafeSync: Zero-Footprint Certified State Synchronization and Open-World Semantic Routing for Bandwidth-Constrained LEO Earth Observation"
 authors:
   - family-names: "Wu"
     given-names: "Yonghao"

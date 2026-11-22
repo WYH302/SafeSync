@@ -8,7 +8,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 gh repo view WYH302/SafeSync 2>$null
 if ($LASTEXITCODE -ne 0) {
-    gh repo create WYH302/SafeSync --public --source=. --remote=origin --push --description "Asymmetric Space-Ground State Synchronization and Evidence-Preserving Co-Construction for Repeated Earth Observation"
+    gh repo create WYH302/SafeSync --public --source=. --remote=origin --push --description "Zero-Footprint Certified State Synchronization and Open-World Semantic Routing for Bandwidth-Constrained LEO Earth Observation"
 } else {
     git push -u origin main
 }

@@ -4,8 +4,8 @@
 
 # SafeSync
 
-**SafeSync: Breaking the Satellite Downlink Bottleneck via Zero-Footprint Asymmetric Space-Ground State Co-Construction**  
-**突破卫星下行瓶颈的零内存足迹非对称星地状态共建框架**
+**SafeSync: Zero-Footprint Certified State Synchronization and Open-World Semantic Routing for Bandwidth-Constrained LEO Earth Observation**  
+**面向带宽受限低轨对地观测的零内存足迹认证状态同步与开放世界语义路由框架**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](pyproject.toml)
@@ -20,9 +20,9 @@
 
 ## English Overview
 
-**SafeSync** is an open-source research implementation exploring repeated satellite Earth observation from the perspective of **asymmetric space-ground state synchronization**. In Low-Earth-Orbit (LEO) monitoring scenarios, ground stations can retain persistent high-resolution archives and run heavy analytical models, whereas satellites operate under tight memory, processor, and downlink budgets.
+**SafeSync** is an open-source framework for **asymmetric space–ground state synchronization** in high-revisit Low-Earth-Orbit (LEO) Earth observation. Ground stations retain persistent high-resolution world-state archives and abundant compute, whereas small satellites operate under strict onboard memory, radiation-tolerant CPU, and per-pass downlink limits.
 
-Rather than re-encoding each revisit from scratch or uplinking historical reference imagery, SafeSync studies how a lightweight onboard sender and a persistent ground archive can maintain a synchronized world state across both pixel archives and semantic representations, while openly documenting the operating regimes where full-frame GPU neural codecs remain advantageous.
+Instead of re-encoding static terrain on every pass or uplinking historical imagery, **SafeSync** decouples an immutable ground archive from a zero-footprint onboard state engine (`12.3 KB/area`, `0` neural parameters, `8.51 FPS` on CPU) with mathematical zero-omission safety bounds (`Proposition 1`), paired with a codec-agnostic open-world semantic routing layer (`US-BRS` + `TC-PCR`) that elevates held-out change coverage across every base codec.
 
 <div align="center">
 <img src="assets/layered_state.png" alt="SafeSync Dual-Tier Architecture" width="98%"/>
@@ -45,9 +45,9 @@ Rather than re-encoding each revisit from scratch or uplinking historical refere
 
 ## 中文说明
 
-**SafeSync** 是一个面向低轨星座重复对地观测场景的开源研究项目，尝试从**非对称星地状态同步与空地共建**的视角探讨星上下行瓶颈问题：地面站具备充足的持久化存储与算力来维护高分辨率历史状态档案，而星上端往往受到存储容量、处理器算力以及单轨下行带宽的严格限制。
+**SafeSync** 是面向低轨（LEO）高重访对地观测星座的开源**非对称星地状态同步与开放世界语义路由框架**：地面站维护高分辨率持久化世界状态档案并承担重型计算，而星载端在无 GPU、无历史参考图上注以及极严单帧下行带宽（如 32 KiB / 8 KiB）约束下运行。
 
-本项目不追求替代所有场景下的全图深度编解码器，而是重点探索**在无星上 GPU、无历史参考图上注、严格单帧带宽上限（如 32 KiB / 8 KiB）**的条件下，如何通过轻量级闭环状态同步兼顾背景安全复用与新增目标证据保留，并如实对比和划定重型 GPU 神经编解码器占优的高码率区间，供同行参考、复现与改进。
+SafeSync 从底层彻底打破传统无状态压缩与朴素历史缩略图的结构性瓶颈：像素层将星上历史状态压缩至 **12.3 KB/区域（降幅 99.09%）** 并提供 **0 漏报数学证明（Proposition 1）**，纯 CPU 端以 **8.51 FPS** 在 SpaceNet 7 三档码率全面超越 4.18 GB GPU 神经编解码器 `LIC-TCM`；语义层通过即插即用 `TC-PCR` 路由在 SECOND 开放世界基准上全面拔高各类基础编解码器的未知目标覆盖率至 **$U_{30}=0.8233$**。
 
 ### 方法组成概览
 
@@ -176,8 +176,8 @@ If you find this repository or the experimental protocols helpful in your resear
 ```bibtex
 @article{wu2026safesync,
   author  = {Wu, Yonghao},
-  title   = {{SafeSync}: Breaking the Satellite Downlink Bottleneck via Zero-Footprint Asymmetric Space-Ground State Co-Construction},
-  journal = {IEEE Transactions on Geoscience and Remote Sensing},
+  title   = {{SafeSync}: Zero-Footprint Certified State Synchronization and Open-World Semantic Routing for Bandwidth-Constrained {LEO} {Earth} Observation},
+  journal = {Advances in Space Research},
   year    = {2026},
   note    = {Code available at https://github.com/WYH302/SafeSync}
 }

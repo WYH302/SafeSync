@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "safesync"
 version = "1.0.0"
-description = "Asymmetric Space-Ground State Synchronization and Evidence-Preserving Co-Construction for Repeated Earth Observation"
+description = "Zero-Footprint Certified State Synchronization and Open-World Semantic Routing for Bandwidth-Constrained LEO Earth Observation"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
