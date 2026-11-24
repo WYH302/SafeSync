@@ -169,6 +169,23 @@ All benchmark experiments in our study were conducted without any model training
 
 ---
 
+## Design Reflections, Pitfalls & Empirical Observations / 真实思考、踩坑复盘与独特观察
+
+Building **SafeSync** under strict zero-training, hard byte-cap, and frozen-evaluator constraints uncovered four non-obvious engineering lessons that directly shaped the final architecture:
+
+1. **Why our early block-piecewise `ASF` lost `-8.18 pp` to our own `SafeSync-ASF+` (`0.3943 -> 0.4760`)**: Our first working prototype used $16\times 16$ nearest-neighbor coarse tiling (`LB01` JPEG) plus quality-60 block JPEG. Mathematically, it satisfied Proposition 1 with 0 violations—yet its Author-OOF building F1 trailed GPU `LIC-TCM` by `-4.31 pp`! Visualizing decoded crops immediately exposed the culprit: $16\times 16$ staircase seams across reused blocks injected fake grid edges into frozen EfficientNet-B3 early conv layers, while JPEG coarse encoding silently ate `8.40 KiB` of a `32 KiB` cap. Switching to WebP85 coarse (`1.33 KiB`), smooth bilinear transfer $\widetilde U$, $r=7$-px feathering, and calibration-locked position-invariant JPEG 4:4:4 preserved Proposition 1 unchanged while flipping CPU SafeSync to **#1 across all three caps**.
+2. **The hidden `2.36 MB` projection-matrix trap at $N=1$**: Classic random-projection sketching looks tiny on paper (`12.3 KB/area`), until you count the $24\times 12{,}288$ `float64` matrix `A` itself (`2.36 MB`—bigger than a lossless PNG archive for a single area!). Streaming orthonormal rows in 512-coordinate chunks from a 32-bit `SC02` header seed eliminated all `2.36 MB` of persistent matrix RAM while remaining bit-identical across all 47,616 blocks (max float diff $5.55\times 10^{-16}$).
+3. **Why matched-storage `4x WebP` thumbnails deceive clean benchmarks yet fail in orbit**: Downsampling a reference frame $4\times$ fits inside `10.7 KB`, but averages away 4-pixel rooftop construction edges (**1,495 false-stable violations / 21.79%**) and collapses under pass-to-pass solar/radiometric shift (**79.80%** background false triggers vs. **19.14%–19.37%** under SafeSync's orthogonal `ASF` projection).
+4. **Why rate–distortion SSIM / DINOv2 cosine diverges from native 4-m task utility—and how active-support voting saved `TC-PCR`**: Across 2,136 decoded SpaceNet 7 frames, stateless codecs achieve higher current-frame SSIM (`0.9602` vs. `0.8414`) because they re-encode pass-$t$ seasonal shading, yet blur tiny 4-px buildings by up to `-19.66 pp` F1. Similarly, on SECOND Cohort 3, naive full-image residual routing got outvoted by ~53 static background cells until we restricted packet selection strictly to active changed support and prioritized 30-dB threshold crossings.
+
+> **中文复盘精华**：
+> 1. **早期分块 `ASF` 为什么差点输给神经编解码器（`-8.18 pp` 踩坑）**：初版 $16\times 16$ 最近邻块拼接虽满足 0 违约证明，但会在复用区引入棋盘格伪边缘干扰冻结 U-Net，且粗光照场 JPEG 偷走了 `8.40 KiB` 带宽；改为 WebP85（`1.33 KiB`）+ 双线性平滑对齐 + 位置无关 JPEG 4:4:4 后，在 **0 权重、不破坏 Proposition 1** 的前提下实现纯 CPU 三档全第一。
+> 2. **单区域 `2.36 MB` 投影矩阵陷阱**：若把 $24\times 12288$ 双精度矩阵常驻内存，单区域（$N=1$）反而比无损 PNG 历史更占空间；通过 `SC02` 头部 32-bit 种子按 512 维流式重生成正交行，才真正做到单/多区域均稳定减容 **99.09%**。
+> 3. **缩略图参考的“干净假象”**：$4\times$ WebP 缩略图在无漂移时看似够用，但下采样会抹平 4 像素新建屋顶（导致 **1,495 次伪稳定漏报**），在真实轨间辐射漂移下背景误触发飙升至 **79.80%**（SafeSync 仅 **19.14%–19.37%**）。
+> 4. **为何像素指标（PSNR/SSIM）与 4 米建筑分割背离**：无状态编解码器重编码当轨季节色差而拿到更高全局 SSIM，却糊掉了小目标屋顶；在 SECOND 开放世界路由中，同样只有把数据包裁决限定在**有效变化支撑集**并显式奖励 **30 dB 跨阈块**，才能避免 53 个静态背景块“票决淹没”真正的未知目标增益。
+
+---
+
 ## Citation / 引用说明
 
 If you find this repository or the experimental protocols helpful in your research, please consider citing:
