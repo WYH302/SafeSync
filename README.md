@@ -194,9 +194,9 @@ If you find this repository or the experimental protocols helpful in your resear
 @article{wu2026safesync,
   author  = {Wu, Yonghao},
   title   = {{SafeSync}: Zero-Footprint Certified State Synchronization and Open-World Semantic Routing for Bandwidth-Constrained {LEO} {Earth} Observation},
-  journal = {IEEE Transactions on Geoscience and Remote Sensing},
+  journal = {IEEE Transactions},
   year    = {2026},
-  note    = {Submitted; code available at https://github.com/WYH302/SafeSync}
+  note    = {Manuscript under review; code available at https://github.com/WYH302/SafeSync}
 }
 ```
 
