@@ -180,7 +180,7 @@ def main() -> None:
     ax.text(51.8, 57.6,
             "ZFSS: 32-bit seed $\\rightarrow$ 0 B matrix (-99.09%)\n"
             "ASF+: #1 OOF F1 (0.476/0.522) in 118 ms CPU\n"
-            "TC-PCR: $U_{30}$=0.823 (+5.5 pp vs. 4.18G TCM)",
+            "TC-PCR: $U_{30}$=0.834 (+6.5 pp vs. 4.18G TCM)",
             color="#052E16", fontsize=6.3, ha="center", va="center", linespacing=1.22, zorder=5)
 
     # Right mini bar chart: Single-Area Persistent State (N=1)
@@ -370,7 +370,7 @@ def main() -> None:
     ax.scatter([ecx + 2.4], [ecy + 2.0], s=20, marker="*", color=c_rose, zorder=6)
     ax.text(ecx, ecy - 2.9, "Ledoit-Wolf", color=c_blue, fontsize=5.65, fontweight="bold", ha="center", zorder=5)
     ax.text(36.2, 9.4,
-            "424-B Ref (-66%)\nActive-Support\n30-dB Crossing\nCalib. Novelty\nRE01 Residuals",
+            "424-B Ref (-66%)\nActive-Support\n30-dB Crossing\n0-1 Knapsack\nRE01 WebP75",
             color=c_navy, fontsize=5.95, ha="center", va="center", linespacing=1.22, zorder=5)
     arrow((21.3, 10.0), (22.1, 10.0), color=c_purple, lw=1.1, scale=8)
 
@@ -405,7 +405,7 @@ def main() -> None:
         ("WebP", 0.5380, "#64748B"),
         ("Hyperprior", 0.6379, "#9333EA"),
         ("LIC-TCM", 0.7688, "#D55E00"),
-        ("TC-PCR(TCM)", 0.8233, c_blue),
+        ("TC-PCR(TCM)", 0.8336, c_blue),
     ]):
         by = 14.8 - idx * 2.0
         is_best = mlbl == "TC-PCR(TCM)"
@@ -418,7 +418,7 @@ def main() -> None:
         ax.text(82.9 + bw, by, f"{uval:.3f}", color=col, fontsize=5.9, fontweight="bold", va="center", zorder=5)
 
     badge(74.7, 2.5, 22.9, 5.1,
-          "#1 $U_{30}$: +5.45 pp vs. 4.18G LIC-TCM\n+15.3 pp WebP | FNR 0.157 | F1 0.850",
+          "#1 $U_{30}$: +6.48 pp vs. 4.18G LIC-TCM\n+17.4 pp WebP | FNR 0.152 | F1 0.872",
           fill="#FFFFFF", edge=c_amber, color=c_navy, fs=5.55)
     arrow((73.3, 10.0), (74.0, 10.0), color=c_teal, lw=1.15, scale=8.5)
 

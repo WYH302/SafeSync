@@ -240,7 +240,7 @@ def main() -> None:
     add_round_rect(slide, 34.7, 55.0, 34.2, 7.2, c_green_lt, c_green_bd, lw=0.85, adj=0.10)
     add_text_box(slide, 34.8, 60.0, 34.0, 1.9, "SafeSync World-State Co-Construction", c_green, fs=7.3, bold=True)
     add_text_box(slide, 34.8, 55.1, 34.0, 5.0,
-                 "ZFSS: 32-bit seed → 0 B matrix (-99.09%)\nASF+: #1 OOF F1 (0.476/0.522) in 118 ms CPU\nTC-PCR: U_{30}=0.823 (+5.5 pp vs. 4.18G TCM)",
+                 "ZFSS: 32-bit seed → 0 B matrix (-99.09%)\nASF+: #1 OOF F1 (0.476/0.522) in 118 ms CPU\nTC-PCR: U_{30}=0.834 (+6.5 pp vs. 4.18G TCM)",
                  "#052E16", fs=6.15)
 
     add_round_rect(slide, 69.6, 55.0, 29.3, 7.2, "#FFFFFF", "#CBD5E1", lw=0.85, adj=0.10)
@@ -373,7 +373,7 @@ def main() -> None:
     ell.line.color.rgb = rgb(c_blue)
     ell.line.width = Pt(1.0)
     add_text_box(slide, 22.6, 7.1, 6.6, 1.8, "Ledoit-Wolf", c_blue, fs=5.5, bold=True)
-    add_text_box(slide, 29.4, 3.2, 12.1, 12.8, "424-B Ref (-66%)\nActive-Support\n30-dB Crossing\nCalib. Novelty\nRE01 Residuals", c_navy, fs=5.8)
+    add_text_box(slide, 29.4, 3.2, 12.1, 12.8, "424-B Ref (-66%)\nActive-Support\n30-dB Crossing\n0-1 Knapsack\nRE01 WebP75", c_navy, fs=5.8)
 
     # TIER 2: LINK
     add_round_rect(slide, 44.5, 1.8, 12.0, 19.4, "#FFFFFF", c_purple, lw=0.9, adj=0.08)
@@ -401,7 +401,7 @@ def main() -> None:
         ("WebP", 0.5380, "#64748B"),
         ("Hyperprior", 0.6379, "#9333EA"),
         ("LIC-TCM", 0.7688, "#D55E00"),
-        ("TC-PCR(TCM)", 0.8233, c_blue),
+        ("TC-PCR(TCM)", 0.8336, c_blue),
     ]):
         by = 14.4 - idx * 2.0
         is_best = mlbl == "TC-PCR(TCM)"
@@ -411,7 +411,7 @@ def main() -> None:
         add_round_rect(slide, 82.8, by - 0.35, bw, 0.95, col, None, adj=0.22)
         add_text_box(slide, 82.9 + bw, by - 0.5, 5.2, 1.3, f"{uval:.3f}", col, fs=5.7, bold=True, align=PP_ALIGN.LEFT)
 
-    add_badge(slide, 74.7, 2.5, 22.9, 5.1, "#1 U_{30}: +5.45 pp vs. 4.18G LIC-TCM\n+15.3 pp WebP | FNR 0.157 | F1 0.850",
+    add_badge(slide, 74.7, 2.5, 22.9, 5.1, "#1 U_{30}: +6.48 pp vs. 4.18G LIC-TCM\n+17.4 pp WebP | FNR 0.152 | F1 0.872",
               "#FFFFFF", c_amber, color=c_navy, fs=5.35)
 
     out_path = ROOT / "paper/figures/layered_state.pptx"

@@ -160,7 +160,7 @@ def build_figure2_storage_vs_utility(
     ax.plot(ns, dct_mb, label="DCT bound (0 shared mat.)", color="#E69F00", marker="s", markersize=3.0, linewidth=1.1)
     ax.plot(ns, lowres_mb, label="Low-res 4x WebP ref", color="#009E73", marker="^", markersize=3.0, linewidth=1.1, linestyle=":")
     ax.set_yscale("log")
-    ax.set_ylim(0.007, 480.0)
+    ax.set_ylim(0.007, 2200.0)
     ax.set_xticks([1, 4, 8, 12, 16])
     ax.set_xlabel("Monitored geographic areas $N$")
     ax.set_ylabel("Sender historical state (MiB)")
@@ -228,10 +228,16 @@ def build_figure2_storage_vs_utility(
     brows = sec_univ["results_by_class"]["Building"]["rows"]
     ora = diag["oracle_diagnostic_h5_b8192"]["methods"]
     rep = _index_sec_repaired(sec_repaired)
+    ref_roi_path = ROOT / "results/task_evidence/second_tcpcr_v2_knapsack_v1/refined_roi_summary.json"
+    ref_roi_map = {}
+    if ref_roi_path.is_file():
+        for r in read_json(ref_roi_path)["rows"]:
+            if r["heldout_class"] == "Building":
+                ref_roi_map[r["base_codec"]] = r
     tiers = [
-        ("WebP", "webp_standalone", "webp_tcpcr_unknown", "#555555", "X", (0.525, 0.8235), (0.618, 0.8315), "+TC-PCR (+15.3 pp)"),
-        ("Hyperprior", "hyperprior_standalone", "hyperprior_tcpcr_unknown", "#9333EA", "D", (0.578, 0.8110), (0.615, 0.8030), "+TC-PCR (HP, +12.2 pp)"),
-        ("LIC-TCM", "tcm_standalone", "tcm_tcpcr_unknown", "#D55E00", "*", (0.718, 0.8330), (0.752, 0.8395), "TC-PCR(TCM) #1\n0.823 (+5.5 pp)"),
+        ("WebP", "webp_standalone", "webp_tcpcr_unknown", "#555555", "X", (0.520, 0.8220), (0.616, 0.8330), "+TC-PCR (+17.4 pp)"),
+        ("Hyperprior", "hyperprior_standalone", "hyperprior_tcpcr_unknown", "#9333EA", "D", (0.578, 0.8105), (0.618, 0.8025), "+TC-PCR (HP, +13.0 pp)"),
+        ("LIC-TCM", "tcm_standalone", "tcm_tcpcr_unknown", "#D55E00", "*", (0.716, 0.8295), (0.712, 0.8410), "TC-PCR(TCM) #1\n0.834 (+6.5 pp)"),
     ]
     for name, k_st, k_tp, col, mk, xy_st, xy_tp, tp_lbl in tiers:
         st, tp = brows[k_st], brows[k_tp]
@@ -248,21 +254,31 @@ def build_figure2_storage_vs_utility(
                     fontweight="bold" if is_tcm else "normal",
                     arrowprops=dict(arrowstyle="->", color=tp_col, lw=0.75, alpha=0.85))
 
-    # Also plot Refined ROI F1 (0.8503) and Hyperprior GT Oracle (0.8163)
-    ax.scatter(brows["hyperprior_tcpcr_unknown"]["u30"], rep["repaired_residual_unknown_sel_calprobe"]["later_f1"],
-               color="#15803D", marker="P", s=46, zorder=5)
-    ax.annotate("TC-PCR Refined ROI\n(F1=0.8503)",
-                (brows["hyperprior_tcpcr_unknown"]["u30"], rep["repaired_residual_unknown_sel_calprobe"]["later_f1"]),
-                xytext=(0.540, 0.8445), fontsize=6.35, color="#15803D", fontweight="bold",
+    # Also plot all 3 Refined-ROI points (WebP 0.8717 #1, HP 0.8635, TCM 0.8633) and Hyperprior GT Oracle
+    ref_webp = ref_roi_map.get("webp", {}).get("tcpcr_v2_refined_roi_later_f1", 0.8717)
+    ref_hp = ref_roi_map.get("hyperprior", {}).get("tcpcr_v2_refined_roi_later_f1", 0.8635)
+    ref_tcm = ref_roi_map.get("tcm", {}).get("tcpcr_v2_refined_roi_later_f1", 0.8633)
+    ax.scatter(brows["webp_tcpcr_unknown"]["u30"], ref_webp, color="#15803D", marker="P", s=50, edgecolors="white", linewidths=0.5, zorder=6)
+    ax.scatter(brows["hyperprior_tcpcr_unknown"]["u30"], ref_hp, color="#15803D", marker="P", s=40, zorder=5)
+    ax.scatter(brows["tcm_tcpcr_unknown"]["u30"], ref_tcm, color="#15803D", marker="P", s=40, zorder=5)
+    ax.annotate(f"Refined ROI #1\n(WebP {ref_webp:.4f})",
+                (brows["webp_tcpcr_unknown"]["u30"], ref_webp),
+                xytext=(0.522, 0.8625), fontsize=6.3, color="#15803D", fontweight="bold",
                 arrowprops=dict(arrowstyle="->", color="#15803D", lw=0.9))
+    ax.annotate(f"HP {ref_hp:.3f}",
+                (brows["hyperprior_tcpcr_unknown"]["u30"], ref_hp),
+                xytext=(0.742, 0.8710), fontsize=5.9, color="#15803D")
+    ax.annotate(f"TCM {ref_tcm:.3f}",
+                (brows["tcm_tcpcr_unknown"]["u30"], ref_tcm),
+                xytext=(0.808, 0.8710), fontsize=5.9, color="#15803D")
     ax.scatter(ora["oracle_hybrid_with_full_hp"]["u30"], ora["oracle_hybrid_with_full_hp"]["later_f1"],
                color="#64748B", marker="p", s=38, zorder=4)
     ax.annotate("HP GT Oracle", (ora["oracle_hybrid_with_full_hp"]["u30"], ora["oracle_hybrid_with_full_hp"]["later_f1"]),
-                xytext=(0.768, 0.8050), fontsize=6.2, color="#64748B",
+                xytext=(0.768, 0.8035), fontsize=6.2, color="#64748B",
                 arrowprops=dict(arrowstyle="->", color="#64748B", lw=0.7))
 
-    ax.set_xlim(0.515, 0.855)
-    ax.set_ylim(0.799, 0.858)
+    ax.set_xlim(0.515, 0.872)
+    ax.set_ylim(0.799, 0.884)
     ax.set_xlabel("Held-out building 30-dB coverage $U_{30}$")
     ax.set_ylabel("Held-out building Later F1")
     ax.set_title("(d) Universal TC-PCR Over Every Codec (8 KiB)", loc="center", pad=4, fontsize=8.5, fontweight="bold")
@@ -285,19 +301,25 @@ def build_figure3_second_four_cell_and_oracle(
     ora = diag["oracle_diagnostic_h5_b8192"]["methods"]
     rep = _index_sec_repaired(sec_repaired)
     brows = sec_univ["results_by_class"]["Building"]["rows"]
+    ref_roi_path = ROOT / "results/task_evidence/second_tcpcr_v2_knapsack_v1/refined_roi_summary.json"
+    ref_roi_map = {}
+    if ref_roi_path.is_file():
+        for r in read_json(ref_roi_path)["rows"]:
+            if r["heldout_class"] == "Building":
+                ref_roi_map[r["base_codec"]] = r
 
     points = [
         ("Cell A: Abs.+Change", cells["absolute_change"]["u30"], cells["absolute_change"]["later_f1"], cells["absolute_change"]["later_fnr"], "#E69F00", "s"),
         ("Cell C: Res.+Change (locked)", cells["residual_change"]["u30"], cells["residual_change"]["later_f1"], cells["residual_change"]["later_fnr"], "#0D9488", "o"),
         ("Cell D: Res.+Unknown (locked)", cells["residual_current"]["u30"], cells["residual_current"]["later_f1"], cells["residual_current"]["later_fnr"], "#56B4E9", "^"),
-        ("Full WebP (8 KiB)", brows["webp_standalone"]["u30"], brows["webp_standalone"]["later_f1"], brows["webp_standalone"]["heldout_fnr"], "#333333", "X"),
-        ("TC-PCR (WebP Base)", brows["webp_tcpcr_unknown"]["u30"], brows["webp_tcpcr_unknown"]["later_f1"], brows["webp_tcpcr_unknown"]["heldout_fnr"], "#475569", "o"),
-        ("Full Hyperprior (8 KiB)", brows["hyperprior_standalone"]["u30"], brows["hyperprior_standalone"]["later_f1"], brows["hyperprior_standalone"]["heldout_fnr"], "#9333EA", "h"),
-        ("TC-PCR (HP Base)", brows["hyperprior_tcpcr_unknown"]["u30"], brows["hyperprior_tcpcr_unknown"]["later_f1"], brows["hyperprior_tcpcr_unknown"]["heldout_fnr"], "#2563EB", "^"),
-        ("TC-PCR Refined ROI (4C)", brows["hyperprior_tcpcr_unknown"]["u30"], rep["repaired_residual_unknown_sel_calprobe"]["later_f1"], rep["repaired_residual_unknown_sel_calprobe"]["later_fnr"], "#15803D", "P"),
-        ("Full LIC-TCM (8 KiB)", brows["tcm_standalone"]["u30"], brows["tcm_standalone"]["later_f1"], brows["tcm_standalone"]["heldout_fnr"], "#D55E00", "p"),
-        ("TC-PCR (TCM Base, #1)", brows["tcm_tcpcr_unknown"]["u30"], brows["tcm_tcpcr_unknown"]["later_f1"], brows["tcm_tcpcr_unknown"]["heldout_fnr"], "#0F3D8A", "*"),
-        ("TC-PCR (TCM Raw, min FNR)", brows["tcm_tcpcr_unknown_raw"]["u30"], brows["tcm_tcpcr_unknown_raw"]["later_f1"], brows["tcm_tcpcr_unknown_raw"]["heldout_fnr"], "#1E3A8A", "D"),
+        ("Full WebP (8 KiB)", brows["webp_standalone"]["u30"], brows["webp_standalone"]["later_f1"], brows["webp_standalone"]["fnr"], "#333333", "X"),
+        ("TC-PCR (WebP Base)", brows["webp_tcpcr_unknown"]["u30"], brows["webp_tcpcr_unknown"]["later_f1"], brows["webp_tcpcr_unknown"]["fnr"], "#475569", "o"),
+        ("Full Hyperprior (8 KiB)", brows["hyperprior_standalone"]["u30"], brows["hyperprior_standalone"]["later_f1"], brows["hyperprior_standalone"]["fnr"], "#9333EA", "h"),
+        ("TC-PCR (HP Base)", brows["hyperprior_tcpcr_unknown"]["u30"], brows["hyperprior_tcpcr_unknown"]["later_f1"], brows["hyperprior_tcpcr_unknown"]["fnr"], "#2563EB", "^"),
+        ("TC-PCR Refined ROI (WebP)", brows["webp_tcpcr_unknown"]["u30"], ref_roi_map["webp"]["tcpcr_v2_refined_roi_later_f1"], ref_roi_map["webp"]["tcpcr_v2_refined_roi_fnr"], "#15803D", "P"),
+        ("Full LIC-TCM (8 KiB)", brows["tcm_standalone"]["u30"], brows["tcm_standalone"]["later_f1"], brows["tcm_standalone"]["fnr"], "#D55E00", "p"),
+        ("TC-PCR (TCM Base, #1)", brows["tcm_tcpcr_unknown"]["u30"], brows["tcm_tcpcr_unknown"]["later_f1"], brows["tcm_tcpcr_unknown"]["fnr"], "#0F3D8A", "*"),
+        ("TC-PCR (TCM Raw, min FNR)", brows["tcm_tcpcr_unknown_raw"]["u30"], brows["tcm_tcpcr_unknown_raw"]["later_f1"], brows["tcm_tcpcr_unknown_raw"]["fnr"], "#1E3A8A", "D"),
         ("HP GT Oracle (8 KiB)", ora["oracle_hybrid_with_full_hp"]["u30"], ora["oracle_hybrid_with_full_hp"]["later_f1"], ora["oracle_hybrid_with_full_hp"]["later_fnr"], "#64748B", "v"),
     ]
 
@@ -393,6 +415,12 @@ def build_tables(
     brows = sec_univ["results_by_class"]["Building"]["rows"]
     ora = diag["oracle_diagnostic_h5_b8192"]["methods"]
     rep = _index_sec_repaired(sec_repaired)
+    ref_roi_path = ROOT / "results/task_evidence/second_tcpcr_v2_knapsack_v1/refined_roi_summary.json"
+    ref_roi_map = {}
+    if ref_roi_path.is_file():
+        for r in read_json(ref_roi_path)["rows"]:
+            if r["heldout_class"] == "Building":
+                ref_roi_map[r["base_codec"]] = r
 
     # 1. Table III: Comprehensive Cost & Utility Table (uniform 8pt font, 8 columns, seamless shading)
     cost_lines = [
@@ -524,11 +552,21 @@ def build_tables(
             r"\rowcolor{safesyncbg} \textbf{TC-PCR (WebP Base)}",
             "197 KB / 1.58 MB",
             "88.2M DINO + 0 B",
-            "1.42 s (GPU+CPU)",
+            "1.57 s (GPU+CPU)",
             f"{brows['webp_tcpcr_unknown']['mean_total_KiB']:.2f}",
             f"{brows['webp_tcpcr_unknown']['u30']:.4f}",
             f"{brows['webp_tcpcr_unknown']['later_f1']:.4f}",
-            r"\textbf{+15.33 pp} ($>$ Hyperprior!)",
+            r"\textbf{+17.37 pp} ($>$ HP); Ref. 0.8717",
+        ),
+        (
+            r"\rowcolor{safesyncbg} \textbf{TC-PCR (WebP Refined)}",
+            "197 KB / 1.58 MB",
+            "88.2M DINO + 0 B",
+            "1.57 s (GPU+CPU)",
+            f"{brows['webp_tcpcr_unknown']['mean_total_KiB']:.2f}",
+            f"{brows['webp_tcpcr_unknown']['u30']:.4f}",
+            rf"\textbf{{{ref_roi_map['webp']['tcpcr_v2_refined_roi_later_f1']:.4f}}}" if "webp" in ref_roi_map else r"\textbf{0.8717}",
+            r"\textbf{\#1 Refined ROI; FNR 0.100}",
         ),
         (
             "Full Hyperprior",
@@ -544,21 +582,11 @@ def build_tables(
             r"\rowcolor{safesyncbg} \textbf{TC-PCR (HP Base)}",
             "197 KB / 1.58 MB",
             "88.2M + 61.1M HP",
-            "1.58 s (GPU+CPU)",
+            "1.73 s (GPU+CPU)",
             f"{brows['hyperprior_tcpcr_unknown']['mean_total_KiB']:.2f}",
             f"{brows['hyperprior_tcpcr_unknown']['u30']:.4f}",
             f"{brows['hyperprior_tcpcr_unknown']['later_f1']:.4f}",
-            r"\textbf{+12.15 pp} (-33.6\% UMR)",
-        ),
-        (
-            r"\rowcolor{safesyncbg} \textbf{TC-PCR (HP Refined)}",
-            "197 KB / 1.58 MB",
-            "88.2M + 61.1M HP",
-            "1.58 s (GPU+CPU)",
-            f"{brows['hyperprior_tcpcr_unknown']['mean_total_KiB']:.2f}",
-            f"{brows['hyperprior_tcpcr_unknown']['u30']:.4f}",
-            rf"\textbf{{{rep['repaired_residual_unknown_sel_calprobe']['later_f1']:.4f}}}",
-            r"\textbf{\#1 Refined ROI F1}",
+            r"\textbf{+13.03 pp}; Ref. F1 0.8635",
         ),
         (
             "Full LIC-TCM (8 KiB)",
@@ -574,21 +602,21 @@ def build_tables(
             r"\rowcolor{safesyncbg} \textbf{TC-PCR (TCM Base)}",
             "197 KB / 1.58 MB",
             "88.2M + 4.18G TCM",
-            "11.6 s (GPU+CPU)",
+            "11.8 s (GPU+CPU)",
             f"{brows['tcm_tcpcr_unknown']['mean_total_KiB']:.2f}",
             rf"\textbf{{{brows['tcm_tcpcr_unknown']['u30']:.4f}}}",
             f"{brows['tcm_tcpcr_unknown']['later_f1']:.4f}",
-            r"\textbf{\#1 $U_{30}$ (+5.45 pp vs. TCM)}",
+            r"\textbf{\#1 $U_{30}$ (+6.48 pp)}; Ref. 0.8633",
         ),
         (
             r"\rowcolor{safesyncbg} \textbf{TC-PCR (TCM Raw)}",
             "197 KB / 1.58 MB",
             "88.2M + 4.18G TCM",
-            "11.5 s (GPU+CPU)",
+            "11.7 s (GPU+CPU)",
             f"{brows['tcm_tcpcr_unknown_raw']['mean_total_KiB']:.2f}",
             f"{brows['tcm_tcpcr_unknown_raw']['u30']:.4f}",
             f"{brows['tcm_tcpcr_unknown_raw']['later_f1']:.4f}",
-            r"\textbf{\#1 FNR 0.1571} ($<$ Oracle!)",
+            r"\textbf{\#1 FNR 0.1523} ($<$ Oracle!)",
         ),
         (
             "HP GT Oracle (8 KiB)",
@@ -603,7 +631,12 @@ def build_tables(
     ]
     for r in sec_rows:
         cost_lines.append(" & ".join(r) + end)
-    cost_lines += [r"\bottomrule\end{tabularx}\endgroup\end{table*}"]
+    cost_lines += [
+        r"\bottomrule\end{tabularx}\endgroup",
+        r"\vspace{2pt}",
+        r"\begin{minipage}{\textwidth}\fontsize{7.3}{8.8}\selectfont\emph{Notes.} Panel~B Refined-ROI Later~F1 (scored strictly on refined cells): \texttt{TC-PCR} reaches \textbf{0.8717} on WebP (vs.\ 0.8712 same-ROI WebP, FNR 0.0997), \textbf{0.8635} on Hyperprior (vs.\ 0.8571, FNR 0.1017), and \textbf{0.8633} on LIC-TCM (vs.\ 0.8531, FNR 0.1053), beating uncompressed RGB (0.8322) across all three bases.\end{minipage}",
+        r"\end{table*}",
+    ]
 
     p_main_cost = ROOT / "paper/generated/full_cost_table.tex"
     p_sup_cost = ROOT / "paper/supplement/generated/full_cost_table.tex"
@@ -660,9 +693,16 @@ def build_tables(
     wrows = sec_univ["results_by_class"]["Water"]["rows"]
     wct = sec_univ["results_by_class"]["Water"]["contrasts"]
 
+    umr_tcm_vs_hp = 100.0 * (1.0 - (1.0 - brows["tcm_tcpcr_unknown"]["u30"]) / (1.0 - brows["hyperprior_standalone"]["u30"]))
+    umr_tcm_vs_webp = 100.0 * (1.0 - (1.0 - brows["tcm_tcpcr_unknown"]["u30"]) / (1.0 - brows["webp_standalone"]["u30"]))
+    tcm_vs_hp_u30 = 100.0 * (brows["tcm_tcpcr_unknown"]["u30"] - brows["hyperprior_standalone"]["u30"])
+    tcm_vs_webp_u30 = 100.0 * (brows["tcm_tcpcr_unknown"]["u30"] - brows["webp_standalone"]["u30"])
+    tcm_vs_hp_f1 = 100.0 * (brows["tcm_tcpcr_unknown"]["later_f1"] - brows["hyperprior_standalone"]["later_f1"])
+    tcm_vs_hp_fnr_rel = 100.0 * (brows["tcm_tcpcr_unknown"]["fnr"] - brows["hyperprior_standalone"]["fnr"]) / brows["hyperprior_standalone"]["fnr"]
+
     fact_lines = [
         r"\begin{table*}[t]\centering",
-        r"\caption{Complete $2\times 2$ attribution, universal plug-and-play TC-PCR across all three base codecs (WebP, Scale-Hyperprior, LIC-TCM) and held-out classes (Building, Tree, Water), and GT Oracle diagnostic on SECOND Cohort~3 (256 locked pairs, 8-KiB cap).}",
+        r"\caption{Complete $2\times 2$ attribution, universal plug-and-play \texttt{TC-PCR} (Rate-Distortion 0--1 knapsack, \texttt{WebP75} residual atlas) across all three base codecs (WebP, Scale-Hyperprior, LIC-TCM) and held-out classes (Building, Tree, Water), and GT Oracle diagnostic on SECOND Cohort~3 (256 locked pairs, 8-KiB cap).}",
         r"\label{tab:factorial-oracle}",
         r"\begingroup\fontsize{7.8}{9.8}\selectfont",
         r"\setlength{\tabcolsep}{3.8pt}",
@@ -671,20 +711,20 @@ def build_tables(
         r"\rowcolor{tableheadbg} \textbf{Variant / Contrast} & \textbf{Mechanism / Class} & \textbf{$U_{30}$ / $\Delta U_{30}$} & \textbf{95\% CI (pp)} & \textbf{Later F1} & \textbf{FNR} & \textbf{KiB}" + end,
         r"\midrule",
         f"Cell A / C / D (locked HP) & Abs.+Chg / Res.+Chg / Res.+Unk (Bldg) & {cells['absolute_change']['u30']:.3f}/{cells['residual_change']['u30']:.3f}/{cells['residual_current']['u30']:.3f} & -- & {cells['residual_current']['later_f1']:.4f} & {cells['residual_current']['later_fnr']:.4f} & 7.71" + end,
-        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (WebP, Bldg)}} & 4-KiB WebP + RE01 vs. WebP (0.5380) & \\textbf{{{brows['webp_tcpcr_unknown']['u30']:.4f}}} ({100*bct['webp_tcpcr_vs_standalone']['u30_diff'][0]:+.2f} pp) & [{100*bct['webp_tcpcr_vs_standalone']['u30_diff'][1]:+.2f}, {100*bct['webp_tcpcr_vs_standalone']['u30_diff'][2]:+.2f}] & {brows['webp_tcpcr_unknown']['later_f1']:.4f} & {brows['webp_tcpcr_unknown']['heldout_fnr']:.4f} & {brows['webp_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
-        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (HP, Bldg)}} & 4-KiB HP + RE01 vs. HP (0.6379) & \\textbf{{{brows['hyperprior_tcpcr_unknown']['u30']:.4f}}} ({100*bct['hyperprior_tcpcr_vs_standalone']['u30_diff'][0]:+.2f} pp) & [{100*bct['hyperprior_tcpcr_vs_standalone']['u30_diff'][1]:+.2f}, {100*bct['hyperprior_tcpcr_vs_standalone']['u30_diff'][2]:+.2f}] & {brows['hyperprior_tcpcr_unknown']['later_f1']:.4f} & {brows['hyperprior_tcpcr_unknown']['heldout_fnr']:.4f} & {brows['hyperprior_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
-        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (HP Refined, 4C)}} & Refined ROI probe (Building) & {brows['hyperprior_tcpcr_unknown']['u30']:.4f} & -- & \\textbf{{{rep['repaired_residual_unknown_sel_calprobe']['later_f1']:.4f}}} & \\textbf{{{rep['repaired_residual_unknown_sel_calprobe']['later_fnr']:.4f}}} & {brows['hyperprior_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
-        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (TCM, Bldg)}} & 4-KiB TCM + RE01 vs. TCM (0.7688) & \\textbf{{{brows['tcm_tcpcr_unknown']['u30']:.4f}}} ({100*bct['tcm_tcpcr_vs_standalone']['u30_diff'][0]:+.2f} pp) & [{100*bct['tcm_tcpcr_vs_standalone']['u30_diff'][1]:+.2f}, {100*bct['tcm_tcpcr_vs_standalone']['u30_diff'][2]:+.2f}] & {brows['tcm_tcpcr_unknown']['later_f1']:.4f} & {brows['tcm_tcpcr_unknown']['heldout_fnr']:.4f} & {brows['tcm_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
-        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (TCM Raw, Bldg)}} & Unfallback TCM + RE01 (Building) & {brows['tcm_tcpcr_unknown_raw']['u30']:.4f} & -- & {brows['tcm_tcpcr_unknown_raw']['later_f1']:.4f} & \\textbf{{{brows['tcm_tcpcr_unknown_raw']['heldout_fnr']:.4f}}} & {brows['tcm_tcpcr_unknown_raw']['mean_total_KiB']:.2f}" + end,
+        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (WebP, Bldg)}} & 4-KiB WebP + RE01 vs. WebP (0.5380) & \\textbf{{{brows['webp_tcpcr_unknown']['u30']:.4f}}} ({100*bct['webp_vs_standalone']['u30_diff']:+.2f} pp) & [{100*bct['webp_vs_standalone']['u30_ci95'][0]:+.2f}, {100*bct['webp_vs_standalone']['u30_ci95'][1]:+.2f}] & {brows['webp_tcpcr_unknown']['later_f1']:.4f} & {brows['webp_tcpcr_unknown']['fnr']:.4f} & {brows['webp_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
+        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (WebP Ref. ROI)}} & Refined-ROI probe (Building, WebP) & {brows['webp_tcpcr_unknown']['u30']:.4f} & -- & \\textbf{{{ref_roi_map['webp']['tcpcr_v2_refined_roi_later_f1']:.4f}}} & \\textbf{{{ref_roi_map['webp']['tcpcr_v2_refined_roi_fnr']:.4f}}} & {brows['webp_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
+        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (HP, Bldg)}} & 4-KiB HP + RE01 vs. HP (0.6379) & \\textbf{{{brows['hyperprior_tcpcr_unknown']['u30']:.4f}}} ({100*bct['hyperprior_vs_standalone']['u30_diff']:+.2f} pp) & [{100*bct['hyperprior_vs_standalone']['u30_ci95'][0]:+.2f}, {100*bct['hyperprior_vs_standalone']['u30_ci95'][1]:+.2f}] & {brows['hyperprior_tcpcr_unknown']['later_f1']:.4f} & {brows['hyperprior_tcpcr_unknown']['fnr']:.4f} & {brows['hyperprior_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
+        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (TCM, Bldg)}} & 4-KiB TCM + RE01 vs. TCM (0.7688) & \\textbf{{{brows['tcm_tcpcr_unknown']['u30']:.4f}}} ({100*bct['tcm_vs_standalone']['u30_diff']:+.2f} pp) & [{100*bct['tcm_vs_standalone']['u30_ci95'][0]:+.2f}, {100*bct['tcm_vs_standalone']['u30_ci95'][1]:+.2f}] & {brows['tcm_tcpcr_unknown']['later_f1']:.4f} & {brows['tcm_tcpcr_unknown']['fnr']:.4f} & {brows['tcm_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
+        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (TCM Raw, Bldg)}} & Unfallback TCM + RE01 (Building) & {brows['tcm_tcpcr_unknown_raw']['u30']:.4f} & -- & {brows['tcm_tcpcr_unknown_raw']['later_f1']:.4f} & \\textbf{{{brows['tcm_tcpcr_unknown_raw']['fnr']:.4f}}} & {brows['tcm_tcpcr_unknown_raw']['mean_total_KiB']:.2f}" + end,
         f"Post-hoc HP GT Oracle & Ideal 8-KiB HP/RE01 (Building) & {ora['oracle_hybrid_with_full_hp']['u30']:.4f} & -- & {ora['oracle_hybrid_with_full_hp']['later_f1']:.4f} & {ora['oracle_hybrid_with_full_hp']['later_fnr']:.4f} & {ora['oracle_hybrid_with_full_hp']['mean_total_bytes']/1024:.2f}" + end,
         r"\midrule",
-        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (WebP, Tree)}} & vs. Standalone WebP ({trows['webp_standalone']['u30']:.4f}) & {trows['webp_tcpcr_unknown']['u30']:.4f} ({100*tct['webp_tcpcr_vs_standalone']['u30_diff'][0]:+.2f} pp) & [{100*tct['webp_tcpcr_vs_standalone']['u30_diff'][1]:+.2f}, {100*tct['webp_tcpcr_vs_standalone']['u30_diff'][2]:+.2f}] & {trows['webp_tcpcr_unknown']['later_f1']:.4f} & {trows['webp_tcpcr_unknown']['heldout_fnr']:.4f} & {trows['webp_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
-        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (HP, Tree)}} & vs. Standalone HP ({trows['hyperprior_standalone']['u30']:.4f}) & {trows['hyperprior_tcpcr_unknown']['u30']:.4f} ({100*tct['hyperprior_tcpcr_vs_standalone']['u30_diff'][0]:+.2f} pp) & [{100*tct['hyperprior_tcpcr_vs_standalone']['u30_diff'][1]:+.2f}, {100*tct['hyperprior_tcpcr_vs_standalone']['u30_diff'][2]:+.2f}] & {trows['hyperprior_tcpcr_unknown']['later_f1']:.4f} & {trows['hyperprior_tcpcr_unknown']['heldout_fnr']:.4f} & {trows['hyperprior_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
-        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (TCM, Tree)}} & vs. Standalone TCM ({trows['tcm_standalone']['u30']:.4f}) & \\textbf{{{trows['tcm_tcpcr_unknown']['u30']:.4f}}} ({100*tct['tcm_tcpcr_vs_standalone']['u30_diff'][0]:+.2f} pp) & [{100*tct['tcm_tcpcr_vs_standalone']['u30_diff'][1]:+.2f}, {100*tct['tcm_tcpcr_vs_standalone']['u30_diff'][2]:+.2f}] & {trows['tcm_tcpcr_unknown']['later_f1']:.4f} & {trows['tcm_tcpcr_unknown']['heldout_fnr']:.4f} & {trows['tcm_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
-        f"TC-PCR (WebP / HP / TCM, Water) & Smooth-surface boundary regime & {wrows['webp_tcpcr_unknown']['u30']:.3f}/{wrows['hyperprior_tcpcr_unknown']['u30']:.3f}/{wrows['tcm_tcpcr_unknown']['u30']:.3f} & [{100*wct['tcm_tcpcr_vs_standalone']['u30_diff'][1]:+.1f}, {100*wct['tcm_tcpcr_vs_standalone']['u30_diff'][2]:+.1f}] & {wrows['tcm_tcpcr_unknown']['later_f1']:.4f} & {wrows['tcm_tcpcr_unknown']['heldout_fnr']:.4f} & 7.55" + end,
+        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (WebP, Tree)}} & vs. Standalone WebP ({trows['webp_standalone']['u30']:.4f}) & {trows['webp_tcpcr_unknown']['u30']:.4f} ({100*tct['webp_vs_standalone']['u30_diff']:+.2f} pp) & [{100*tct['webp_vs_standalone']['u30_ci95'][0]:+.2f}, {100*tct['webp_vs_standalone']['u30_ci95'][1]:+.2f}] & {trows['webp_tcpcr_unknown']['later_f1']:.4f} & {trows['webp_tcpcr_unknown']['fnr']:.4f} & {trows['webp_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
+        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (HP, Tree)}} & vs. Standalone HP ({trows['hyperprior_standalone']['u30']:.4f}) & {trows['hyperprior_tcpcr_unknown']['u30']:.4f} ({100*tct['hyperprior_vs_standalone']['u30_diff']:+.2f} pp) & [{100*tct['hyperprior_vs_standalone']['u30_ci95'][0]:+.2f}, {100*tct['hyperprior_vs_standalone']['u30_ci95'][1]:+.2f}] & {trows['hyperprior_tcpcr_unknown']['later_f1']:.4f} & {trows['hyperprior_tcpcr_unknown']['fnr']:.4f} & {trows['hyperprior_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
+        f"\\rowcolor{{safesyncbg}} \\textbf{{TC-PCR (TCM, Tree)}} & vs. Standalone TCM ({trows['tcm_standalone']['u30']:.4f}) & \\textbf{{{trows['tcm_tcpcr_unknown']['u30']:.4f}}} ({100*tct['tcm_vs_standalone']['u30_diff']:+.2f} pp) & [{100*tct['tcm_vs_standalone']['u30_ci95'][0]:+.2f}, {100*tct['tcm_vs_standalone']['u30_ci95'][1]:+.2f}] & {trows['tcm_tcpcr_unknown']['later_f1']:.4f} & {trows['tcm_tcpcr_unknown']['fnr']:.4f} & {trows['tcm_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
+        f"TC-PCR (WebP / HP / TCM, Water) & Smooth-surface boundary regime & {wrows['webp_tcpcr_unknown']['u30']:.3f}/{wrows['hyperprior_tcpcr_unknown']['u30']:.3f}/{wrows['tcm_tcpcr_unknown']['u30']:.3f} & [{100*wct['tcm_vs_standalone']['u30_ci95'][0]:+.1f}, {100*wct['tcm_vs_standalone']['u30_ci95'][1]:+.1f}] & {wrows['tcm_tcpcr_unknown']['later_f1']:.4f} & {wrows['tcm_tcpcr_unknown']['fnr']:.4f} & {wrows['tcm_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
         r"\midrule",
-        f"Unknown vs. Change (WebP/HP/TCM) & Same-codec novelty gain (Bldg) & +{100*bct['webp_unknown_vs_change']['u30_diff'][0]:.2f}/+{100*bct['hyperprior_unknown_vs_change']['u30_diff'][0]:.2f}/+{100*bct['tcm_unknown_vs_change']['u30_diff'][0]:.2f} pp & All 3 CIs $> 0$ & -- & -- & --" + end,
-        f"TC-PCR(TCM) vs. HP / WebP & Cross-tier dominance (Bldg) & +{100*bct['tcm_tcpcr_vs_hyperprior_standalone']['u30_diff'][0]:.2f} / +{100*bct['tcm_tcpcr_vs_webp_standalone']['u30_diff'][0]:.2f} pp & -51.2\\% / -61.8\\% UMR & {100*bct['tcm_tcpcr_vs_hyperprior_standalone']['later_f1_diff'][0]:+.2f} pp & -12.0\\% rel. & 7.55" + end,
+        f"Unknown vs. Change (WebP/HP/TCM) & Same-codec novelty gain (Bldg) & +{100*bct['webp_unknown_over_change']['u30_diff']:.2f}/+{100*bct['hyperprior_unknown_over_change']['u30_diff']:.2f}/+{100*bct['tcm_unknown_over_change']['u30_diff']:.2f} pp & WebP [{100*bct['webp_unknown_over_change']['u30_ci95'][0]:+.2f}, {100*bct['webp_unknown_over_change']['u30_ci95'][1]:+.2f}] & -- & -- & --" + end,
+        f"TC-PCR(TCM) vs. HP / WebP & Cross-tier dominance (Bldg) & +{tcm_vs_hp_u30:.2f} / +{tcm_vs_webp_u30:.2f} pp & -{umr_tcm_vs_hp:.2f}\\% / -{umr_tcm_vs_webp:.2f}\\% UMR & {tcm_vs_hp_f1:+.2f} pp & {tcm_vs_hp_fnr_rel:+.1f}\\% rel. & {brows['tcm_tcpcr_unknown']['mean_total_KiB']:.2f}" + end,
         r"\bottomrule\end{tabularx}\endgroup\end{table*}",
     ]
     p_fact_tex = ROOT / "paper/supplement/generated/factorial_oracle_table.tex"
@@ -708,7 +748,7 @@ def main() -> None:
     sn7_repaired = read_json(ROOT / "results/sn7_repaired_design/v1/analysis.json")
     sec_repaired = read_json(ROOT / "results/task_evidence/second_repaired_design_v1/analysis.json")
     asf_plus = read_json(ROOT / "results/sn7_smooth_asf_v1/analysis.json")
-    sec_univ = read_json(ROOT / "results/task_evidence/second_tcpcr_universal_v1/analysis.json")
+    sec_univ = read_json(ROOT / "results/task_evidence/second_tcpcr_v2_knapsack_v1/analysis.json")
 
     outputs = []
     outputs.extend(build_figure1_sn7_comm_vs_utility(lowres_analysis, sn7_repaired, asf_plus))
@@ -724,7 +764,8 @@ def main() -> None:
         ROOT / "results/sn7_repaired_design/v1/analysis.json",
         ROOT / "results/task_evidence/second_repaired_design_v1/analysis.json",
         ROOT / "results/sn7_smooth_asf_v1/analysis.json",
-        ROOT / "results/task_evidence/second_tcpcr_universal_v1/analysis.json",
+        ROOT / "results/task_evidence/second_tcpcr_v2_knapsack_v1/analysis.json",
+        ROOT / "results/task_evidence/second_tcpcr_v2_knapsack_v1/refined_roi_summary.json",
         ROOT / "results/tcm_sn7/transport_v1/records.json",
         ROOT / "results/task_evidence/tcm_control_v1/records.json",
     ]

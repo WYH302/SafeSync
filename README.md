@@ -22,7 +22,7 @@
 
 **SafeSync** is an open-source framework for **asymmetric space–ground state synchronization** in high-revisit Low-Earth-Orbit (LEO) Earth observation. Ground stations retain persistent high-resolution world-state archives and abundant compute, whereas small satellites operate under strict onboard memory, radiation-tolerant CPU, and per-pass downlink limits.
 
-Instead of re-encoding static terrain on every pass or uplinking historical imagery, **SafeSync** decouples an immutable ground archive from a zero-footprint onboard state engine (`12.3 KB/area`, `0` neural parameters, `8.51 FPS` on CPU) with mathematical zero-omission safety bounds (`Proposition 1`), paired with a codec-agnostic open-world semantic routing layer (`US-BRS` + `TC-PCR`) that elevates held-out change coverage across every base codec.
+Instead of re-encoding static terrain on every pass or uplinking historical imagery, **SafeSync** decouples an immutable ground archive from a zero-footprint onboard state engine (`12.3 KB/area`, `0` neural parameters, `8.51 FPS` on CPU) with mathematical zero-omission safety bounds (`Proposition 1` + anytime-valid infinite-horizon `Corollary 1`), paired with a codec-agnostic open-world semantic routing layer (`US-BRS` + rate–distortion 0-1 knapsack `TC-PCR`) that elevates held-out change coverage across every base codec up to $U_{30}=0.8336$.
 
 <div align="center">
 <img src="assets/layered_state.png" alt="SafeSync Dual-Tier Architecture" width="98%"/>
@@ -33,13 +33,13 @@ Instead of re-encoding static terrain on every pass or uplinking historical imag
 
 1. **Asymmetric State Factorization (`ASF`) & Adaptive-History Reuse Certificate**
    - Separates an immutable ground archive of acknowledged absolute image blocks from a pass-specific $4\times 4$ coarse illumination field (`LB01`), committing updates via a **60-byte uplink-free ACK**.
-   - Restricts adaptive archive histories to a finite candidate set, enabling a union-bound reuse certificate (`Proposition 1`) with **0 false-stable block violations** across 118,317 evaluated blocks across all three caps.
+   - Restricts adaptive archive histories to a finite candidate set, enabling a union-bound reuse certificate (`Proposition 1`) with **0 false-stable block violations** across 118,317 evaluated blocks across all three caps, plus an anytime-valid log-polynomial extension (`Corollary 1`) that remains bounded through $t=1{,}000$ passes without expiration.
 2. **Zero-Footprint Seeded Sketching (`ZFSS`) & Dual-Gate Asymmetric Decoupling (`DGAD`)**
    - Streams row-orthonormal Gaussian projections in 512-coordinate chunks directly from a 32-bit seed stored in the 24-byte `SC02` header (**0 bytes** persistent matrix memory), keeping persistent historical state at **12,328 bytes per $1024\times 1024$ area** ($99.09\%$ smaller than lossless PNG history even at $N=1$).
    - Decouples conservative $\chi^2_{24}(\alpha)$ safety certification (`STABLE`) from unbiased point-estimate candidate ranking (`UPDATED`).
 3. **Unit-Sphere Bounded Residual Synchronization (`US-BRS`) & Prototype-Calibrated Routing (`TC-PCR`)**
    - Exploits unit-sphere token concentration on frozen `DINOv2-S/14` features ($\max|\Delta q|=41 \le 127$) for **100% lossless closed-loop `int8` residuals** ($20.62\%\text{--}35.37\%$ byte savings over open-loop delta coding) alongside NACK-triggered `Risk Anchor` erasure recovery.
-   - Combines active-support packet selection, sender-visible 30-dB threshold-crossing prioritization, and Ledoit–Wolf shrinkage-calibrated prototype distances for open-world semantic change discovery (`TE01/RE01`).
+   - Combines active-support packet selection, sender-visible 30-dB threshold-crossing prioritization, Ledoit–Wolf shrinkage-calibrated prototype distances, and per-cell rate–distortion 0-1 knapsack routing over `WebP75` residuals for open-world semantic change discovery (`TE01/RE01`).
 
 ---
 
@@ -47,7 +47,7 @@ Instead of re-encoding static terrain on every pass or uplinking historical imag
 
 **SafeSync** 是面向低轨（LEO）高重访对地观测星座的开源**非对称星地状态同步与开放世界语义路由框架**：地面站维护高分辨率持久化世界状态档案并承担重型计算，而星载端在无 GPU、无历史参考图上注以及极严单帧下行带宽（如 32 KiB / 8 KiB）约束下运行。
 
-SafeSync 从底层彻底打破传统无状态压缩与朴素历史缩略图的结构性瓶颈：像素层将星上历史状态压缩至 **12.3 KB/区域（降幅 99.09%）** 并提供 **0 漏报数学证明（Proposition 1）**，纯 CPU 端以 **8.51 FPS** 在 SpaceNet 7 三档码率全面超越 4.18 GB GPU 神经编解码器 `LIC-TCM`；语义层通过即插即用 `TC-PCR` 路由在 SECOND 开放世界基准上全面拔高各类基础编解码器的未知目标覆盖率至 **$U_{30}=0.8233$**。
+SafeSync 从底层彻底打破传统无状态压缩与朴素历史缩略图的结构性瓶颈：像素层将星上历史状态压缩至 **12.3 KB/区域（降幅 99.09%）** 并提供 **0 漏报数学证明（Proposition 1 + 无限轨道寿命 Corollary 1）**，纯 CPU 端以 **8.51 FPS** 在 SpaceNet 7 三档码率全面超越 4.18 GB GPU 神经编解码器 `LIC-TCM`；语义层通过即插即用 0-1 背包 `TC-PCR` 路由在 SECOND 开放世界基准上全面拔高各类基础编解码器的未知目标覆盖率至 **$U_{30}=0.8336$**（精细 ROI F1 达 **0.8717**、三类宏平均 $U_{30}$ 与 FNR 双第一）。
 
 ### 方法组成概览
 
@@ -100,12 +100,12 @@ SafeSync 从底层彻底打破传统无状态压缩与朴素历史缩略图的�
 | SECOND Cohort 3 Method (8-KiB Cap, Building Held-Out) | Base Codec Weights | Mean Payload | Held-Out $U_{30}$ $\uparrow$ | Gain vs. Standalone | Held-Out FNR $\downarrow$ | Global / Refined Later F1 $\uparrow$ |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | Stateless Full WebP | 0 B (+DINO task) | 7.91 KiB | 0.5380 | — | 0.1699 | 0.8332 / 0.8332 |
-| **SafeSync TC-PCR (WebP Base)** | **0 B (+DINO task)** | 7.88 KiB | **0.6913** | **+15.33 pp** ($>$ Hyperprior!) | 0.1739 (0.1302 ref.) | 0.8222 / **0.8616** |
+| **SafeSync TC-PCR (WebP Base)** | **0 B (+DINO task)** | 7.86 KiB | **0.7117** | **+17.37 pp** ($>$ Hyperprior!) | 0.1747 (**0.0997** ref.) | 0.8209 / **0.8717** |
 | Full Scale-Hyperprior | 61.1 MB | 7.36 KiB | 0.6379 | — | 0.1965 | 0.8212 / 0.8212 |
-| **SafeSync TC-PCR (Hyperprior Base)** | **61.1 MB** | 7.72 KiB | **0.7594** | **+12.15 pp** (-33.6% UMR) | 0.1763 (0.1538 ref.) | 0.8154 / 0.8503 |
+| **SafeSync TC-PCR (Hyperprior Base)** | **61.1 MB** | 7.73 KiB | **0.7682** | **+13.03 pp** (-36.0% UMR) | 0.1776 (0.1017 ref.) | 0.8133 / 0.8635 |
 | Full LIC-TCM (35-cand. GPU SOTA) | 4,179.9 MB | **7.31 KiB** | 0.7688 | — | 0.1891 | 0.8268 / 0.8268 |
-| **SafeSync TC-PCR (LIC-TCM Base)** | **4,179.9 MB** | 7.55 KiB | **0.8233** | **+5.45 pp** (-23.6% UMR) | 0.1728 (0.1658 ref.) | 0.8257 / 0.8445 |
-| **SafeSync TC-PCR (LIC-TCM Raw)** | **4,179.9 MB** | 7.82 KiB | 0.7994 | +3.06 pp | **0.1571** | 0.8244 / — |
+| **SafeSync TC-PCR (LIC-TCM Base)** | **4,179.9 MB** | 7.57 KiB | **0.8336** | **+6.48 pp** (-28.0% UMR) | 0.1693 (0.1053 ref.) | 0.8237 / 0.8633 |
+| **SafeSync TC-PCR (LIC-TCM Raw)** | **4,179.9 MB** | 7.86 KiB | 0.8116 | +4.29 pp | **0.1523** | 0.8239 / — |
 | Post-Hoc Hyperprior GT Oracle | 61.1 MB | 7.80 KiB | 0.8163 | Offline GT ceiling | 0.1576 | 0.8214 / — |
 
 ---
@@ -163,7 +163,7 @@ All benchmark experiments in our study were conducted without any model training
 - **Hardware**: AMD Ryzen 7 5700X CPU (pinned to 4 threads for sender benchmarks) + NVIDIA GeForce RTX 3090 GPU (24 GB VRAM)
 - **Software**: Python 3.11 / 3.12, PyTorch `2.8.0+cu128`, CUDA `12.8`, NumPy `2.4`, Pillow `12.2`, OpenJPEG `2.5.4`
 - **Total Campaign Compute**:
-  - **8.22 RTX 3090 GPU-hours** in total across all neural baselines, downstream evaluations, and supplementary audits (`1.70 h` SpaceNet 7 `LIC-TCM`, `1.69 h` SECOND `LIC-TCM`, `0.82 h` SpaceNet 7 `Scale-Hyperprior` under a 1.8 GB VRAM cap, `1.19 h` SECOND `Hyperprior`/`DINOv2-S/14`, `1.08 h` primary `U-Net` evaluation, and `1.74 h` supplementary `exp0200`/orbital-drift/refined-ROI/cross-architecture audits; **0.00 training hours**).
+  - **8.42 RTX 3090 GPU-hours** in total across all neural baselines, downstream evaluations, and supplementary audits (`1.70 h` SpaceNet 7 `LIC-TCM`, `1.69 h` SECOND `LIC-TCM`, `0.82 h` SpaceNet 7 `Scale-Hyperprior` under a 1.8 GB VRAM cap, `1.39 h` SECOND `Hyperprior`/`DINOv2-S/14`/`TC-PCR v2`, `1.08 h` primary `U-Net` evaluation, and `1.74 h` supplementary `exp0200`/orbital-drift/refined-ROI/cross-architecture audits; **0.00 training hours**).
   - **0.00 GPU-hours / 0 MB VRAM / 0 neural params / 0.157 GFLOPs per 1024² frame** for **SafeSync's pixel-tier sender** (`117.5 ms` / **`8.51 FPS`** at 32 KiB, `136.7 ms` / `7.32 FPS` at 64 KiB, `173.7 ms` / `5.76 FPS` at 128 KiB on 4 CPU threads; `20.9 s` per 178-update pass).
   - **5.32 CPU-hours** across all stateful protocol transactions, orbital-drift tests, archive profiling, and 10,000-resample paired geographic bootstrap intervals.
 

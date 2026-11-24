@@ -1,0 +1,59 @@
+{
+  "software_environment": {
+    "primary_python": "D:\\App1\\environment\\python.exe",
+    "os": "Windows 10 (build 26200)",
+    "cpu": "AMD Ryzen 7 5700X (8 cores, pinned to 4 threads for sender benchmarks)",
+    "gpu": "NVIDIA GeForce RTX 3090 (24 GB VRAM)",
+    "cuda": "12.8",
+    "pytorch": "2.8.0+cu128",
+    "total_gpu_hours": 8.42,
+    "total_cpu_hours": 5.32,
+    "neural_training_hours": 0.0
+  },
+  "spacenet7_safesync_asf_plus": {
+    "cohort": "8 confirmation AOIs, 178 monthly updates (534 real transactions)",
+    "neural_parameters": 0,
+    "gpu_vram_mb": 0,
+    "flops_per_1024_frame": 157286400,
+    "gflops_per_1024_frame": 0.1573,
+    "persistent_state_bytes_per_aoi": 12328,
+    "persistent_matrix_bytes": 0,
+    "state_reduction_vs_png_pct": 99.09,
+    "false_stable_violations": 0,
+    "audited_valid_blocks": 118317,
+    "drift_false_trigger_reduction": "4.1x-4.5x (19.14% ASF+ / 19.37% ZFSS vs 79.80% direct 4x WebP)",
+    "drift_32k_safesync_asf_plus": {
+      "oof_building_f1": 0.4690,
+      "oof_event_f1": 0.1875,
+      "delta_vs_drifted_webp_b_f1_pp": 19.16,
+      "delta_vs_direct_4x_webp_b_f1_pp": 7.32,
+      "background_false_trigger_pct": 19.14,
+      "false_stable_violations": 0,
+      "audited_valid_blocks": 39439
+    },
+    "by_cap_kib": {
+      "32": {"oof_building_f1": 0.4760, "oof_event_f1": 0.1899, "exp_building_f1": 0.5677, "exp_event_f1": 0.2910, "tcm_exp_building_f1": 0.5375, "sender_ms": 117.55, "fps": 8.51},
+      "64": {"oof_building_f1": 0.4964, "oof_event_f1": 0.2288, "exp_building_f1": 0.5838, "exp_event_f1": 0.3345, "tcm_exp_building_f1": 0.5828, "sender_ms": 136.69, "fps": 7.32},
+      "128": {"oof_building_f1": 0.5216, "oof_event_f1": 0.2654, "exp_building_f1": 0.6027, "exp_event_f1": 0.3752, "tcm_exp_building_f1": 0.5912, "sender_ms": 173.71, "fps": 5.76}
+    }
+  },
+  "second_cohort3_universal_tcpcr_8kib_building": {
+    "cohort": "256 pre-access-locked pairs, 8-KiB cap (TC-PCR v2: 0-1 knapsack + WebP75, RE01 unchanged)",
+    "webp": {"standalone_u30": 0.5380, "tcpcr_u30": 0.7117, "delta_pp": 17.37, "umr_reduction_pct": 37.59, "refined_roi_later_f1": 0.8717, "same_roi_standalone_f1": 0.8712, "refined_roi_fnr": 0.0997},
+    "hyperprior": {"standalone_u30": 0.6379, "tcpcr_u30": 0.7682, "delta_pp": 13.03, "umr_reduction_pct": 35.97, "refined_roi_later_f1": 0.8635, "same_roi_standalone_f1": 0.8571, "refined_roi_fnr": 0.1017},
+    "lic_tcm": {"standalone_u30": 0.7688, "tcpcr_u30": 0.8336, "delta_pp": 6.48, "umr_reduction_pct": 28.03, "refined_roi_later_f1": 0.8633, "same_roi_standalone_f1": 0.8531, "refined_roi_fnr": 0.1053, "global_fnr": 0.1693, "raw_min_fnr": 0.1523, "macro_3class_u30": 0.8053, "macro_3class_fnr": 0.4688}
+  },
+  "anytime_valid_corollary1_inflation": {
+    "k": 24,
+    "N": 256,
+    "alpha": 0.05,
+    "static_H32": 6.81,
+    "log_poly_by_pass": {"t1": 3.92, "t5": 6.13, "t32": 9.75, "t365": 16.57, "t1000": 20.33}
+  },
+  "us_brs_semantic_feature_sync": {
+    "max_abs_delta_q": 41,
+    "int8_distortion_vs_int16": 0.0,
+    "savings_vs_naive_dino_delta_pct": [35.37, 35.10, 33.90, 30.29, 20.62],
+    "nack_p95_staleness_steps": {"timeout_only": 3.25, "risk_anchor": 2.79}
+  }
+}
