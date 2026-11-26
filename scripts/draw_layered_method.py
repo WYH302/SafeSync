@@ -239,7 +239,7 @@ def main() -> None:
     ax.text(9.6, 32.6, "ZFSS Sketch $s_t$", color=c_green, fontsize=6.5, fontweight="bold", ha="center", va="center", zorder=5)
     badge(2.15, 28.5, 6.7, 2.5, "32-bit Seed", fill="#FFFFFF", edge=c_green, color=c_green, fs=5.55)
     arrow((8.95, 29.75), (10.15, 29.75), color=c_green, lw=1.1, scale=8)
-    badge(10.25, 28.5, 6.7, 2.5, "q16 (48 B)", fill=c_green, edge=c_green, color="#FFFFFF", fs=5.65)
+    badge(10.25, 28.5, 6.7, 2.5, "int16 (48 B)", fill=c_green, edge=c_green, color="#FFFFFF", fs=5.55)
     ax.text(9.6, 25.8, "Stream $A$: 0 B Matrix\n12.3 KB/AOI (-99.09%)",
             color="#052E16", fontsize=5.95, fontweight="bold", ha="center", va="center", linespacing=1.2, zorder=5)
 
@@ -370,16 +370,16 @@ def main() -> None:
     ax.scatter([ecx + 2.4], [ecy + 2.0], s=20, marker="*", color=c_rose, zorder=6)
     ax.text(ecx, ecy - 2.9, "Ledoit-Wolf", color=c_blue, fontsize=5.65, fontweight="bold", ha="center", zorder=5)
     ax.text(36.2, 9.4,
-            "424-B Ref (-66%)\nActive-Support\n30-dB Crossing\n0-1 Knapsack\nRE01 WebP75",
+            "424-B Ref (-66%)\nActive-Support\n30-dB Crossing\n0-1 Knapsack\nWebP75 Crops",
             color=c_navy, fontsize=5.95, ha="center", va="center", linespacing=1.22, zorder=5)
     arrow((21.3, 10.0), (22.1, 10.0), color=c_purple, lw=1.1, scale=8)
 
     # --- Link Tier 2 ---
     card(44.5, 1.8, 12.0, 19.4, fill="#FFFFFF", edge=c_purple, lw=0.9, r=0.7, shadow=False, zorder=3)
-    ax.text(50.5, 19.7, "TE01 Frame", color=c_purple, fontsize=6.8, fontweight="bold", ha="center", va="center", zorder=5)
+    ax.text(50.5, 19.7, "Semantic Frame", color=c_purple, fontsize=6.4, fontweight="bold", ha="center", va="center", zorder=5)
     badge(45.2, 16.7, 10.6, 1.9, "≤ 8 KiB", fill=c_purple_lt, edge=c_purple, color=c_purple, fs=6.3)
     ax.text(50.5, 11.7,
-            "Exact 16×16\nTask State +\nBase + RE01\nResidual ROIs",
+            "Exact 16×16\nTask State +\nBase + Crops\nResidual ROIs",
             color=c_navy, fontsize=5.95, ha="center", va="center", linespacing=1.22, zorder=5)
     badge(45.2, 2.6, 10.6, 3.6, "ACK / NACK\nRisk Anchor", fill=c_rose_lt, edge=c_rose, color=c_rose, fs=5.9)
     arrow((41.9, 11.5), (44.5, 11.5), color=c_purple, lw=1.5, scale=9.5)
@@ -389,13 +389,13 @@ def main() -> None:
 
     # --- Ground Tier 2 ---
     card(58.5, 1.1, 40.4, 20.8, fill="#FFFFFF", edge=c_purple_bd, lw=0.85, r=0.8, shadow=False, zorder=2)
-    badge(59.1, 19.2, 39.2, 2.05, "(d) Open-World Semantic Discovery (SECOND Cohort 3)",
-          fill=c_purple_lt, edge=c_purple, color=c_purple, fs=6.35)
+    badge(59.1, 19.2, 39.2, 2.05, "(d) Open-World Semantic Discovery (SECOND, 256 Pairs)",
+          fill=c_purple_lt, edge=c_purple, color=c_purple, fs=6.25)
 
     card(59.1, 1.8, 14.2, 16.7, fill=c_teal_lt, edge=c_teal_bd, lw=0.8, r=0.65, shadow=False, zorder=3)
     ax.text(66.2, 17.2, "Hybrid Fusion", color=c_teal, fontsize=6.7, fontweight="bold", ha="center", va="center", zorder=5)
     ax.text(66.2, 9.5,
-            "Exact known\nchange +\nBase + RE01\n>30 dB novel\nROI recovery",
+            "Exact known\nchange +\nBase + Crops\n>30 dB novel\nROI recovery",
             color="#042F2E", fontsize=6.0, ha="center", va="center", linespacing=1.24, zorder=5)
 
     card(74.0, 1.8, 24.3, 16.7, fill=c_amber_lt, edge=c_amber, lw=0.9, r=0.7, shadow=False, zorder=3)

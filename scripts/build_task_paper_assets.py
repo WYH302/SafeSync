@@ -35,12 +35,12 @@ NAMES = {"gaussian_20261029": "Gaussian", "dct_bound": "DCT", "full_cache_gate25
 ADDED = {"full_cache_gate30", "learned_hyperprior_q1_8"}
 PLOT_METHODS = ["gaussian_20261029", "dct_bound", "random_1729", "full_cache_gate30", "full_webp", "learned_hyperprior_q1_8"]
 STYLE = {
-    "gaussian_20261029": ("#0F3D8A", "o", "-"),
-    "dct_bound": ("#D97706", "s", (0, (4, 2))),
-    "random_1729": ("#64748B", "^", (0, (1.5, 2))),
-    "full_cache_gate30": ("#0D9488", "D", "-."),
-    "full_webp": ("#38BDF8", "v", (0, (6, 2, 1, 2))),
-    "learned_hyperprior_q1_8": ("#9333EA", "P", "-")}
+    "gaussian_20261029": ("#56B4E9", "o", "--"),
+    "dct_bound": ("#E69F00", "s", (0, (4, 2))),
+    "random_1729": ("#8C96A5", "^", (0, (1.5, 2))),
+    "full_cache_gate30": ("#009E73", "P", "-."),
+    "full_webp": ("#4B5563", "v", (0, (5, 2))),
+    "learned_hyperprior_q1_8": ("#CC79A7", "D", "-")}
 INPUTS = {}
 
 
@@ -266,8 +266,35 @@ def load_asf_plus():
     return out, data.get("paired_contrasts_exp0200", {})
 
 
-def tex_table(table, asf_plus=None):
+def load_tcm_exp0200():
+    tcm_path = ROOT / "results/tcm_sn7/exp0200_v1/summary.json"
+    if not tcm_path.is_file():
+        return {}
+    data = read_json(tcm_path)
+    out = {}
+    for cap in CAPS:
+        b = data["by_budget"][str(cap)]
+        out[cap] = {
+            "cap_bytes": cap,
+            "cap_KiB": cap // 1024,
+            "method": "tcm",
+            "display_name": "LIC-TCM",
+            "additional_control": True,
+            "AOIs": 8,
+            "actual_update_bytes_mean": float(b["update_kib"]) * 1024.0,
+            "actual_update_KiB_mean": float(b["update_kib"]),
+            "building_f1": float(b["building_f1"]),
+            "event_f1": float(b["event_f1"]),
+            "event_U30": float(b["u30_pct"]) / 100.0,
+            "event_U30_percent": float(b["u30_pct"]),
+            "global_PSNR_dB": float(b["psnr_db"]),
+        }
+    return out
+
+
+def tex_table(table, asf_plus=None, tcm_exp=None):
     asf_plus = asf_plus or {}
+    tcm_exp = tcm_exp or {}
     paradigms = {
         "safesync_asf_plus": "Smooth ASF+ / ZFSS",
         "gaussian_20261029": "Legacy Block ASF (Abl.)",
@@ -279,6 +306,7 @@ def tex_table(table, asf_plus=None):
         "full_jpeg2000": "Stateless Wavelet",
         "full_webp": "Stateless Transform",
         "learned_hyperprior_q1_8": "Learned Neural Codec",
+        "tcm": "Transformer--CNN Codec",
     }
     disp_override = {
         "safesync_asf_plus": r"\textbf{SafeSync-ASF+ (Ours)}",
@@ -291,9 +319,9 @@ def tex_table(table, asf_plus=None):
         r"\caption{Multi-temporal building segmentation, change-event detection, and localized evidence coverage across eight confirmation AOIs (178 updates) under the fixed EfficientNet-B3 U-Net (\texttt{exp0200}) evaluator. Best and second-best non-oracle methods per downlink cap are \textbf{bolded} and \underline{underlined}.}",
         r"\label{tab:task-exp0200}",
         r"\begingroup",
-        r"\fontsize{8}{9.8}\selectfont",
+        r"\fontsize{8}{9.4}\selectfont",
         r"\setlength{\tabcolsep}{5.2pt}",
-        r"\renewcommand{\arraystretch}{1.04}",
+        r"\renewcommand{\arraystretch}{0.97}",
         r"\begin{tabularx}{\textwidth}{clXrrrrr}",
         r"\toprule",
         r"\rowcolor{tableheadbg} \textbf{Cap (KiB)} & \textbf{Method} & \textbf{Paradigm} & \textbf{Update (KiB)} $\downarrow$ & \textbf{Building F1} $\uparrow$ & \textbf{Event F1} $\uparrow$ & \textbf{$U_{30}$ (\%)} $\uparrow$ & \textbf{PSNR (dB)} $\uparrow$ \\",
@@ -302,7 +330,7 @@ def tex_table(table, asf_plus=None):
     for cap in CAPS:
         if cap != CAPS[0]:
             lines.append(r"\cmidrule(lr){1-8}")
-        cap_rows = ([asf_plus[cap]] if cap in asf_plus else []) + [r for r in table if r["cap_bytes"] == cap]
+        cap_rows = ([asf_plus[cap]] if cap in asf_plus else []) + [r for r in table if r["cap_bytes"] == cap] + ([tcm_exp[cap]] if cap in tcm_exp else [])
         # Rank practical methods (excluding full-archive upper-reference controls) for bold/underline
         practical = [r for r in cap_rows if not r["method"].startswith("full_cache")]
         def fmt_metric(r, field, fmt_str):
@@ -338,7 +366,7 @@ def tex_table(table, asf_plus=None):
         r"\vspace{3pt}",
         r"\begin{minipage}{\textwidth}",
         r"\fontsize{7.5}{9.2}\selectfont",
-        r"\emph{Notes.} Update reports mean actual bidirectional payload per pass (downlink packet plus 60-byte ACK); bootstrap initialization is accounted separately. \textbf{SafeSync-ASF+} adds smooth bilinear coarse rendering and budget-matched position-invariant JPEG~4:4:4 ($q\in\{80,86,90\}$ locked on the two calibration AOIs) with identical 0-B matrix, 12.3-KB state, and zero false-stable violations. $^{\dagger}$ denotes appended controls under identical frozen evaluators.",
+        r"\emph{Notes.} Update reports mean actual bidirectional payload per pass (downlink packet plus 60-byte ACK), while bootstrap initialization is accounted separately. \textbf{SafeSync-ASF+} adds smooth bilinear coarse rendering and budget-matched position-invariant JPEG~4:4:4 ($q\in\{80,86,90\}$ locked on the two calibration AOIs) with identical 0-B matrix, 12.3-KB state, and zero false-stable violations. $^{\dagger}$ denotes appended controls under identical frozen evaluators.",
         r"\end{minipage}",
         r"\end{table*}",
         "",
@@ -355,6 +383,8 @@ def setup_style():
     plt.rcParams.update({"font.family": "serif", "font.serif": [family], "font.size": 8.5,
         "axes.labelsize": 8.5, "axes.titlesize": 9, "legend.fontsize": 8,
         "xtick.labelsize": 8, "ytick.labelsize": 8, "axes.spines.top": False, "axes.spines.right": False,
+        "text.color": "#000000", "axes.labelcolor": "#000000", "axes.edgecolor": "#000000",
+        "xtick.color": "#000000", "ytick.color": "#000000",
         "axes.linewidth": .65, "axes.grid": True, "grid.alpha": .18, "grid.linewidth": .5,
         "pdf.fonttype": 42, "ps.fonttype": 42, "svg.fonttype": "none", "svg.hashsalt": "safesync-task-assets-v1", "savefig.dpi": 300,
         "figure.facecolor": "white", "axes.facecolor": "white"})
@@ -368,10 +398,11 @@ def export(fig, stem):
     plt.close(fig)
 
 
-def plot_tradeoff(table, asf_plus=None):
+def plot_tradeoff(table, asf_plus=None, tcm_exp=None):
     asf_plus = asf_plus or {}
-    fig, axes = plt.subplots(1, 2, figsize=(7.16, 2.70))
-    fig.subplots_adjust(left=.075, right=.992, bottom=.185, top=.74, wspace=.25)
+    tcm_exp = tcm_exp or {}
+    fig, axes = plt.subplots(1, 2, figsize=(7.16, 2.74))
+    fig.subplots_adjust(left=.075, right=.992, bottom=.182, top=.735, wspace=.25)
     plot_names = {**NAMES, "gaussian_20261029": "SafeSync-ZFSS (Legacy)"}
     for axis, metric, title in [(axes[0], "building_f1", "(a) Static Building Segmentation"), (axes[1], "event_f1", "(b) New-Track Change Events")]:
         if asf_plus:
@@ -380,27 +411,41 @@ def plot_tradeoff(table, asf_plus=None):
                 [r["actual_update_KiB_mean"] for r in arows],
                 [r[metric] for r in arows],
                 label="SafeSync-ASF+ (Ours, CPU)",
-                color="#0F3D8A",
+                color="#004488",
                 linestyle="-",
                 marker="o",
-                markersize=4.5,
-                markerfacecolor="#0F3D8A",
+                markersize=4.7,
+                markerfacecolor="#004488",
                 markeredgecolor="white",
                 markeredgewidth=0.65,
-                linewidth=1.55,
+                linewidth=1.85,
+                zorder=6,
+            )
+        if tcm_exp:
+            trows = [tcm_exp[cap] for cap in CAPS if cap in tcm_exp]
+            axis.plot(
+                [r["actual_update_KiB_mean"] for r in trows],
+                [r[metric] for r in trows],
+                label="LIC-TCM† (4.18 GB GPU)",
+                color="#D55E00",
+                linestyle="-",
+                marker="*",
+                markersize=5.6,
+                markerfacecolor="#D55E00",
+                markeredgecolor="white",
+                markeredgewidth=0.4,
+                linewidth=1.45,
                 zorder=5,
             )
         for method in PLOT_METHODS:
             rows = sorted([r for r in table if r["method"] == method], key=lambda r: r["cap_bytes"])
             color, marker, line = STYLE[method]
-            if method == "gaussian_20261029":
-                color, line = "#2563EB", "--"
             name = plot_names[method] + ("†" if method in ADDED else "")
             axis.plot([r["actual_update_KiB_mean"] for r in rows], [r[metric] for r in rows],
-                label=name, color=color, linestyle=line, marker=marker, markersize=3.8,
+                label=name, color=color, linestyle=line, marker=marker, markersize=3.9,
                 markerfacecolor="white" if method not in ["learned_hyperprior_q1_8"] else color,
-                markeredgewidth=.85, linewidth=1.25 if method == "learned_hyperprior_q1_8" else 1.1, zorder=3)
-        axis.set_title(title, loc="center", pad=5, fontweight="bold")
+                markeredgewidth=.85, linewidth=1.35 if method == "learned_hyperprior_q1_8" else 1.15, zorder=3)
+        axis.set_title(title, loc="center", pad=5, fontweight="bold", color="#000000")
         axis.set_xlabel("Actual bidirectional payload (downlink + ACK, KiB)")
         axis.set_ylabel("Task F1")
         axis.set_xlim(22, 134)
@@ -475,9 +520,10 @@ def main():
     FIG.mkdir(parents=True, exist_ok=True)
     table, per_aoi, intervals, original = build_data()
     asf_plus, asf_contrasts = load_asf_plus()
+    tcm_exp = load_tcm_exp0200()
     save_csv(GEN / "task_table.csv", table)
     save_csv(GEN / "task_per_aoi.csv", per_aoi)
-    tex_table(table, asf_plus)
+    tex_table(table, asf_plus, tcm_exp)
     source_hash = sha(Path(__file__))
     common = {"builder_sha256": source_hash, "input_sha256": INPUTS, "task_model_hash": original["model_hash"],
         "task_threshold_hash": original["threshold_hash"], "AOI_count": 8, "OOF_results_included": False,
@@ -491,7 +537,7 @@ def main():
         "bootstrap_draws": 10000, "bootstrap_seed": 20261029,
         "multiplicity_scope": "three caps per specified contrast/outcome, not every contrast/outcome jointly"})
     font = setup_style()
-    plot_tradeoff(table, asf_plus)
+    plot_tradeoff(table, asf_plus, tcm_exp)
     plot_uncertainty(intervals, asf_contrasts)
     claims = {**common, "main_table_rows": 27, "per_aoi_rows": 216, "all_caps_retained_bytes": CAPS,
         "additional_controls": {method: "post-initial-confirmation, not original blind preregistration" for method in sorted(ADDED)},

@@ -1,6 +1,6 @@
 {
   "software_environment": {
-    "primary_python": "D:\\App1\\environment\\python.exe",
+    "primary_python": "python3 (Python 3.11 / 3.12)",
     "os": "Windows 10 (build 26200)",
     "cpu": "AMD Ryzen 7 5700X (8 cores, pinned to 4 threads for sender benchmarks)",
     "gpu": "NVIDIA GeForce RTX 3090 (24 GB VRAM)",

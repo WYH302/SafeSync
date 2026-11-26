@@ -21,6 +21,11 @@ plt.rcParams.update({
     "xtick.labelsize": 8.0,
     "ytick.labelsize": 8.0,
     "legend.fontsize": 7.5,
+    "text.color": "#000000",
+    "axes.labelcolor": "#000000",
+    "axes.edgecolor": "#000000",
+    "xtick.color": "#000000",
+    "ytick.color": "#000000",
     "axes.linewidth": 0.65,
     "pdf.fonttype": 42,
     "ps.fonttype": 42,
@@ -70,15 +75,15 @@ def build_figure1_sn7_comm_vs_utility(
         }
 
     methods_cfg = [
-        ("safesync_asf_plus", "SafeSync-ASF+ (Ours, 12.3 KB, CPU)", "#0F3D8A", "o", "-", 1.55),
-        ("gaussian_decoupled", "SafeSync-DGAD (Legacy, 12.3 KB)", "#2563EB", "o", "--", 1.15),
-        ("dct_bound", "DCT bound (13.9 KB, CPU)", "#E69F00", "s", "-", 1.1),
-        ("lowres_4x_webp_12k", "4x WebP ref (<=12.3 KB, 1,495 viol.)", "#56B4E9", "^", "--", 1.1),
-        ("lowres_16x16_coarse_only", "Coarse-only 16x16 (1,190 viol.)", "#94A3B8", "d", ":", 1.05),
-        ("full_cache_gate30", "Full history (30 dB, 1.35 MB PNG)", "#0D9488", "P", "-.", 1.15),
-        ("full_webp", "Stateless WebP (0 hist.)", "#555555", "X", "-", 1.1),
-        ("learned_hyperprior_q1_8", "Hyperprior (61.1 MB weights)", "#9333EA", "D", "-", 1.25),
-        ("tcm", "LIC-TCM (4.18 GB GPU weights)", "#D55E00", "*", "-", 1.35),
+        ("safesync_asf_plus", "SafeSync-ASF+ (Ours, 12.3 KB, CPU)", "#004488", "o", "-", 1.85),
+        ("gaussian_decoupled", "SafeSync-DGAD (Legacy, 12.3 KB)", "#0072B2", "o", "--", 1.25),
+        ("dct_bound", "DCT bound (13.9 KB, CPU)", "#E69F00", "s", "-", 1.15),
+        ("lowres_4x_webp_12k", "4x WebP ref (<=12.3 KB, 1,495 viol.)", "#56B4E9", "^", "--", 1.2),
+        ("lowres_16x16_coarse_only", "Coarse-only 16x16 (1,190 viol.)", "#8C96A5", "d", ":", 1.1),
+        ("full_cache_gate30", "Full history (30 dB, 1.35 MB PNG)", "#009E73", "P", "-.", 1.2),
+        ("full_webp", "Stateless WebP (0 hist.)", "#4B5563", "v", "-", 1.2),
+        ("learned_hyperprior_q1_8", "Hyperprior (61.1 MB weights)", "#CC79A7", "D", "-", 1.35),
+        ("tcm", "LIC-TCM (4.18 GB GPU weights)", "#D55E00", "*", "-", 1.45),
     ]
 
     fig, axes = plt.subplots(1, 2, figsize=(7.16, 2.76))
@@ -153,77 +158,77 @@ def build_figure2_storage_vs_utility(
     lowres_mb = (lookup32["lowres_4x_webp_12k"]["mean_sender_summary_bytes"] * ns) / (1024**2)
 
     ax = axes[0, 0]
-    ax.plot(ns, raw_rgb_mb, label="Full history (Raw RGB)", color="#888888", linestyle="--", linewidth=1.1)
-    ax.plot(ns, png_hist_mb, label="Full history (Lossless PNG)", color="#0D9488", marker="P", markersize=3.2, linewidth=1.2)
-    ax.plot(ns, gauss_cached_mb, label="SafeSync (cached 2.36M mat.)", color="#56B4E9", marker="o", markersize=2.6, linewidth=1.1, linestyle="--")
-    ax.plot(ns, gauss_stream_mb, label="SafeSync-ASF+/ZFSS (0 B mat.)", color="#0F3D8A", marker="o", markersize=3.5, linewidth=1.45)
-    ax.plot(ns, dct_mb, label="DCT bound (0 shared mat.)", color="#E69F00", marker="s", markersize=3.0, linewidth=1.1)
-    ax.plot(ns, lowres_mb, label="Low-res 4x WebP ref", color="#009E73", marker="^", markersize=3.0, linewidth=1.1, linestyle=":")
+    ax.plot(ns, raw_rgb_mb, label="Full history (Raw RGB)", color="#8C96A5", linestyle="--", linewidth=1.15)
+    ax.plot(ns, png_hist_mb, label="Full history (Lossless PNG)", color="#009E73", marker="P", markersize=3.3, linewidth=1.25)
+    ax.plot(ns, gauss_cached_mb, label="SafeSync (cached 2.36M mat.)", color="#CC79A7", marker="D", markersize=2.6, linewidth=1.15, linestyle="--")
+    ax.plot(ns, gauss_stream_mb, label="SafeSync-ASF+/ZFSS (0 B mat.)", color="#004488", marker="o", markersize=3.8, linewidth=1.65)
+    ax.plot(ns, dct_mb, label="DCT bound (0 shared mat.)", color="#E69F00", marker="s", markersize=3.0, linewidth=1.15)
+    ax.plot(ns, lowres_mb, label="Low-res 4x WebP ref", color="#56B4E9", marker="^", markersize=3.1, linewidth=1.15, linestyle=":")
     ax.set_yscale("log")
     ax.set_ylim(0.007, 2200.0)
     ax.set_xticks([1, 4, 8, 12, 16])
     ax.set_xlabel("Monitored geographic areas $N$")
     ax.set_ylabel("Sender historical state (MiB)")
-    ax.set_title("(a) Multi-AOI Onboard State Scaling", loc="center", pad=4, fontsize=8.8, fontweight="bold")
+    ax.set_title("(a) Multi-AOI Onboard State Scaling", loc="center", pad=4, fontsize=8.8, fontweight="bold", color="#000000")
     ax.grid(alpha=0.18, which="both", linewidth=0.5)
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(frameon=True, facecolor="white", framealpha=0.92, edgecolor="none", fontsize=6.4, ncol=2, loc="upper left", columnspacing=0.75, handlelength=1.7)
 
     # Panel (b): Reuse Certificate Violations & Pass-to-Pass Orbital-Drift False Triggers (32 KiB)
     ax = axes[0, 1]
-    methods_bar = ["SafeSync\n(ASF+ / ZFSS)", "Coarse-Only\n16x16 Ref", "Direct 4x\nWebP Ref"]
+    methods_bar = ["SafeSync-ASF+\n(Ours)", "Coarse-Only\n16x16 Ref", "Direct 4x\nWebP Ref"]
     viol_pct = [0.00, 17.35, 21.79]
-    drift_pct = [19.37, 23.15, 79.80]
+    drift_pct = [19.14, 23.15, 79.80]
     xb = np.arange(len(methods_bar))
     wb = 0.34
-    b1 = ax.bar(xb - wb / 2, viol_pct, width=wb, color="#DC2626", alpha=0.88, label="False-Stable Violation Rate (%)")
-    b2 = ax.bar(xb + wb / 2, drift_pct, width=wb, color="#2563EB", alpha=0.88, label="Orbital-Drift False Triggers (%)")
+    b1 = ax.bar(xb - wb / 2, viol_pct, width=wb, color="#D55E00", edgecolor="#000000", linewidth=0.55, alpha=0.90, label="False-Stable Violation Rate (%)")
+    b2 = ax.bar(xb + wb / 2, drift_pct, width=wb, color="#004488", edgecolor="#000000", linewidth=0.55, alpha=0.90, label="Orbital-Drift False Triggers (%)")
     for rect, v in zip(b1, viol_pct):
         lbl = "0% (0)" if v == 0 else f"{v:.1f}%"
         x_pos = rect.get_x() + rect.get_width() / 2 - (0.04 if v == 0 else 0.0)
-        ax.text(x_pos, v + 2.0, lbl, ha="center", fontsize=6.9, color="#991B1B", fontweight="bold")
+        ax.text(x_pos, v + 2.0, lbl, ha="center", fontsize=6.9, color="#000000", fontweight="bold")
     for rect, v in zip(b2, drift_pct):
-        ax.text(rect.get_x() + rect.get_width() / 2, v + 2.0, f"{v:.1f}%", ha="center", fontsize=6.9, color="#1E40AF", fontweight="bold")
+        ax.text(rect.get_x() + rect.get_width() / 2, v + 2.0, f"{v:.1f}%", ha="center", fontsize=6.9, color="#000000", fontweight="bold")
     ax.set_xticks(xb, methods_bar, fontsize=7.6)
     ax.set_ylim(0, 96.0)
     ax.set_ylabel("Error / False-trigger rate (%)")
-    ax.set_title("(b) Reuse Safety & Drift Immunity", loc="center", pad=4, fontsize=8.6, fontweight="bold")
+    ax.set_title("(b) Reuse Safety & Drift Immunity", loc="center", pad=4, fontsize=8.6, fontweight="bold", color="#000000")
     ax.legend(frameon=False, fontsize=6.9, loc="upper left")
     ax.grid(axis="y", alpha=0.18, linewidth=0.5)
     ax.spines[["top", "right"]].set_visible(False)
 
-    # Panel (c): N=8 Total Sender Historical State (MiB) vs 32-KiB Author-OOF Building F1 (decisive top-left dominance!)
+    # Panel (c): N=8 Total Sender Historical State (MiB) vs 32-KiB Author-OOF Building F1
     ax = axes[1, 0]
     asf32_b = float(asf_plus["by_budget"]["32768"]["oof_building_f1"])
     pts_b = [
-        ("SafeSync-ASF+ (#1)", (8 * 12328) / (1024**2), asf32_b, "#0F3D8A", "o", (0.28, 0.015)),
-        ("Legacy ZFSS", (8 * 12328) / (1024**2), lookup32["gaussian_20261029"]["building_f1"], "#2563EB", "o", (1.42, -0.008)),
+        ("SafeSync-ASF+ (#1)", (8 * 12328) / (1024**2), asf32_b, "#004488", "o", (0.28, 0.015)),
+        ("Legacy ZFSS", (8 * 12328) / (1024**2), lookup32["gaussian_20261029"]["building_f1"], "#0072B2", "o", (1.42, -0.006)),
         ("DCT", (8 * 13864) / (1024**2), lookup32["dct_bound"]["building_f1"], "#E69F00", "s", (1.45, -0.022)),
         ("4x WebP (1,495 viol.)", (8 * lookup32["lowres_4x_webp_12k"]["mean_sender_summary_bytes"]) / (1024**2), lookup32["lowres_4x_webp_12k"]["building_f1"], "#56B4E9", "^", (1.45, 0.004)),
-        ("Full PNG Hist.", cap32_png_8aoi / (1024**2), lookup32["full_cache_gate30"]["building_f1"], "#0D9488", "P", (0.20, 0.016)),
-        ("WebP", 0.002, lookup32["full_webp"]["building_f1"], "#555555", "X", (1.45, -0.004)),
-        ("Hyperprior*", 0.002, lookup32["learned_hyperprior_q1_8"]["building_f1"], "#9333EA", "D", (1.45, -0.004)),
+        ("Full PNG Hist.", cap32_png_8aoi / (1024**2), lookup32["full_cache_gate30"]["building_f1"], "#009E73", "P", (0.20, 0.016)),
+        ("WebP", 0.002, lookup32["full_webp"]["building_f1"], "#4B5563", "v", (1.45, -0.004)),
+        ("Hyperprior*", 0.002, lookup32["learned_hyperprior_q1_8"]["building_f1"], "#CC79A7", "D", (1.45, -0.004)),
         ("LIC-TCM*", 0.002, lookup32["tcm"]["building_f1"], "#D55E00", "*", (1.45, -0.004)),
     ]
     for name, st_mib, bf1, col, mk, (dx, dy) in pts_b:
         is_asf = "SafeSync-ASF+" in name
-        ax.scatter(st_mib, bf1, color=col, marker=mk, s=56 if is_asf else 38,
-                   edgecolors="white" if is_asf else col, linewidths=0.7, zorder=5 if is_asf else 3)
-        ax.annotate(name, (st_mib, bf1), xytext=(st_mib * dx, bf1 + dy), fontsize=6.6, color=col,
+        ax.scatter(st_mib, bf1, color=col, marker=mk, s=62 if is_asf else 42,
+                   edgecolors="#000000" if is_asf else "white", linewidths=0.8 if is_asf else 0.5, zorder=5 if is_asf else 3)
+        ax.annotate(name, (st_mib, bf1), xytext=(st_mib * dx, bf1 + dy), fontsize=6.5, color="#000000",
                     fontweight="bold" if is_asf else "normal")
     ax.annotate("", xy=((8 * 12328) / (1024**2), asf32_b - 0.006),
                 xytext=((8 * 12328) / (1024**2), lookup32["gaussian_20261029"]["building_f1"] + 0.006),
-                arrowprops=dict(arrowstyle="->", color="#0F3D8A", lw=1.2, ls="--"))
+                arrowprops=dict(arrowstyle="->", color="#004488", lw=1.25, ls="--"))
     ax.set_xscale("log")
     ax.set_xlim(0.001, 52.0)
     ax.set_ylim(0.255, 0.515)
     ax.set_xlabel("8-AOI sender state (MiB; *excl. 61M/4.18G weights)")
     ax.set_ylabel("32-KiB Author-OOF Building F1")
-    ax.set_title("(c) SpaceNet 7 State Footprint vs. Building F1", loc="center", pad=4, fontsize=8.6, fontweight="bold")
+    ax.set_title("(c) SpaceNet 7 State Footprint vs. Building F1", loc="center", pad=4, fontsize=8.6, fontweight="bold", color="#000000")
     ax.grid(alpha=0.18, linewidth=0.5)
     ax.spines[["top", "right"]].set_visible(False)
 
-    # Panel (d): Universal Plug-and-Play TC-PCR Across All 3 Codec Tiers on SECOND Cohort 3 (8 KiB, Building)
+    # Panel (d): Universal Plug-and-Play TC-PCR Across All 3 Codec Tiers on SECOND (8 KiB, Building)
     ax = axes[1, 1]
     brows = sec_univ["results_by_class"]["Building"]["rows"]
     ora = diag["oracle_diagnostic_h5_b8192"]["methods"]
@@ -235,53 +240,52 @@ def build_figure2_storage_vs_utility(
             if r["heldout_class"] == "Building":
                 ref_roi_map[r["base_codec"]] = r
     tiers = [
-        ("WebP", "webp_standalone", "webp_tcpcr_unknown", "#555555", "X", (0.520, 0.8220), (0.616, 0.8330), "+TC-PCR (+17.4 pp)"),
-        ("Hyperprior", "hyperprior_standalone", "hyperprior_tcpcr_unknown", "#9333EA", "D", (0.578, 0.8105), (0.618, 0.8025), "+TC-PCR (HP, +13.0 pp)"),
-        ("LIC-TCM", "tcm_standalone", "tcm_tcpcr_unknown", "#D55E00", "*", (0.716, 0.8295), (0.712, 0.8410), "TC-PCR(TCM) #1\n0.834 (+6.5 pp)"),
+        ("WebP", "webp_standalone", "webp_tcpcr_unknown", "#4B5563", "v", (0.520, 0.8215), (0.612, 0.8330), "+TC-PCR (+17.4 pp)"),
+        ("Hyperprior", "hyperprior_standalone", "hyperprior_tcpcr_unknown", "#CC79A7", "D", (0.576, 0.8100), (0.612, 0.8025), "+TC-PCR (HP, +13.0 pp)"),
+        ("LIC-TCM", "tcm_standalone", "tcm_tcpcr_unknown", "#D55E00", "*", (0.715, 0.8300), (0.708, 0.8415), "TC-PCR(TCM) #1\n0.834 (+6.5 pp)"),
     ]
     for name, k_st, k_tp, col, mk, xy_st, xy_tp, tp_lbl in tiers:
         st, tp = brows[k_st], brows[k_tp]
         is_tcm = name == "LIC-TCM"
-        tp_col = "#0F3D8A" if is_tcm else col
-        ax.scatter(st["u30"], st["later_f1"], color=col, marker=mk, s=42, alpha=0.88, zorder=3)
-        ax.scatter(tp["u30"], tp["later_f1"], color=tp_col, marker="o", s=56 if is_tcm else 44,
-                   edgecolors="white" if is_tcm else tp_col, linewidths=0.7, zorder=5)
+        tp_col = "#004488" if is_tcm else col
+        ax.scatter(st["u30"], st["later_f1"], color=col, marker=mk, s=44, alpha=0.92, zorder=3)
+        ax.scatter(tp["u30"], tp["later_f1"], color=tp_col, marker="o", s=60 if is_tcm else 46,
+                   edgecolors="#000000" if is_tcm else "white", linewidths=0.8 if is_tcm else 0.5, zorder=5)
         ax.annotate("", xy=(tp["u30"] - 0.005, tp["later_f1"]), xytext=(st["u30"] + 0.005, st["later_f1"]),
                     arrowprops=dict(arrowstyle="->", color=tp_col, lw=1.45))
-        ax.annotate(name, (st["u30"], st["later_f1"]), xytext=xy_st, fontsize=6.4, color=col,
-                    arrowprops=dict(arrowstyle="-", color=col, lw=0.5, alpha=0.6) if is_tcm else None)
-        ax.annotate(tp_lbl, (tp["u30"], tp["later_f1"]), xytext=xy_tp, fontsize=6.35, color=tp_col,
+        ax.annotate(name, (st["u30"], st["later_f1"]), xytext=xy_st, fontsize=6.35, color="#000000",
+                    arrowprops=dict(arrowstyle="-", color="#000000", lw=0.45, alpha=0.55) if is_tcm else None)
+        ax.annotate(tp_lbl, (tp["u30"], tp["later_f1"]), xytext=xy_tp, fontsize=6.3, color="#000000",
                     fontweight="bold" if is_tcm else "normal",
                     arrowprops=dict(arrowstyle="->", color=tp_col, lw=0.75, alpha=0.85))
 
-    # Also plot all 3 Refined-ROI points (WebP 0.8717 #1, HP 0.8635, TCM 0.8633) and Hyperprior GT Oracle
     ref_webp = ref_roi_map.get("webp", {}).get("tcpcr_v2_refined_roi_later_f1", 0.8717)
     ref_hp = ref_roi_map.get("hyperprior", {}).get("tcpcr_v2_refined_roi_later_f1", 0.8635)
     ref_tcm = ref_roi_map.get("tcm", {}).get("tcpcr_v2_refined_roi_later_f1", 0.8633)
-    ax.scatter(brows["webp_tcpcr_unknown"]["u30"], ref_webp, color="#15803D", marker="P", s=50, edgecolors="white", linewidths=0.5, zorder=6)
-    ax.scatter(brows["hyperprior_tcpcr_unknown"]["u30"], ref_hp, color="#15803D", marker="P", s=40, zorder=5)
-    ax.scatter(brows["tcm_tcpcr_unknown"]["u30"], ref_tcm, color="#15803D", marker="P", s=40, zorder=5)
+    ax.scatter(brows["webp_tcpcr_unknown"]["u30"], ref_webp, color="#009E73", marker="P", s=54, edgecolors="#000000", linewidths=0.6, zorder=6)
+    ax.scatter(brows["hyperprior_tcpcr_unknown"]["u30"], ref_hp, color="#009E73", marker="P", s=44, edgecolors="#000000", linewidths=0.5, zorder=5)
+    ax.scatter(brows["tcm_tcpcr_unknown"]["u30"], ref_tcm, color="#009E73", marker="P", s=44, edgecolors="#000000", linewidths=0.5, zorder=5)
     ax.annotate(f"Refined ROI #1\n(WebP {ref_webp:.4f})",
                 (brows["webp_tcpcr_unknown"]["u30"], ref_webp),
-                xytext=(0.522, 0.8625), fontsize=6.3, color="#15803D", fontweight="bold",
-                arrowprops=dict(arrowstyle="->", color="#15803D", lw=0.9))
+                xytext=(0.520, 0.8625), fontsize=6.25, color="#000000", fontweight="bold",
+                arrowprops=dict(arrowstyle="->", color="#009E73", lw=0.95))
     ax.annotate(f"HP {ref_hp:.3f}",
                 (brows["hyperprior_tcpcr_unknown"]["u30"], ref_hp),
-                xytext=(0.742, 0.8710), fontsize=5.9, color="#15803D")
+                xytext=(0.742, 0.8710), fontsize=5.95, color="#000000")
     ax.annotate(f"TCM {ref_tcm:.3f}",
                 (brows["tcm_tcpcr_unknown"]["u30"], ref_tcm),
-                xytext=(0.808, 0.8710), fontsize=5.9, color="#15803D")
+                xytext=(0.806, 0.8710), fontsize=5.95, color="#000000")
     ax.scatter(ora["oracle_hybrid_with_full_hp"]["u30"], ora["oracle_hybrid_with_full_hp"]["later_f1"],
-               color="#64748B", marker="p", s=38, zorder=4)
+               color="#8C96A5", marker="p", s=40, edgecolors="#000000", linewidths=0.45, zorder=4)
     ax.annotate("HP GT Oracle", (ora["oracle_hybrid_with_full_hp"]["u30"], ora["oracle_hybrid_with_full_hp"]["later_f1"]),
-                xytext=(0.768, 0.8035), fontsize=6.2, color="#64748B",
-                arrowprops=dict(arrowstyle="->", color="#64748B", lw=0.7))
+                xytext=(0.766, 0.8035), fontsize=6.15, color="#000000",
+                arrowprops=dict(arrowstyle="->", color="#000000", lw=0.65))
 
     ax.set_xlim(0.515, 0.872)
     ax.set_ylim(0.799, 0.884)
     ax.set_xlabel("Held-out building 30-dB coverage $U_{30}$")
     ax.set_ylabel("Held-out building Later F1")
-    ax.set_title("(d) Universal TC-PCR Over Every Codec (8 KiB)", loc="center", pad=4, fontsize=8.5, fontweight="bold")
+    ax.set_title("(d) Universal TC-PCR Over Every Codec (8 KiB)", loc="center", pad=4, fontsize=8.5, fontweight="bold", color="#000000")
     ax.grid(alpha=0.18, linewidth=0.5)
     ax.spines[["top", "right"]].set_visible(False)
 
