@@ -15,8 +15,12 @@ ROOT = Path(__file__).resolve().parents[1]
 LABELS = dict(residual_current="Residual + distance", residual_change="Residual + change", absolute_current="Absolute + distance",
     hyperprior="Hyperprior", full_webp="WebP", tcm="TCM", gaussian_20261029="Gaussian", dct_bound="DCT",
     full_cache_mse="Full history (25 dB)", full_cache_gate30="Full history (30 dB)", learned_hyperprior_q1_8="Hyperprior")
-COLORS = dict(residual_current="#0072B2",residual_change="#009E73",hyperprior="#CC79A7",full_webp="#555555",tcm="#D55E00",
-    gaussian_20261029="#0072B2",dct_bound="#E69F00",full_cache_gate30="#009E73",learned_hyperprior_q1_8="#CC79A7")
+COLORS = dict(residual_current="#1B4965",residual_change="#5C88AA",hyperprior="#4D7C6F",full_webp="#334155",tcm="#B5533C",
+    gaussian_20261029="#1B4965",dct_bound="#7B8A9B",full_cache_gate30="#8C6D46",learned_hyperprior_q1_8="#4D7C6F")
+MARKERS = dict(residual_current="o",residual_change="s",hyperprior="D",full_webp="v",tcm="*",
+    gaussian_20261029="o",dct_bound="s",full_cache_gate30="P",learned_hyperprior_q1_8="D")
+LSTYLES = dict(residual_current="-",residual_change="--",hyperprior="-",full_webp=":",tcm="-",
+    gaussian_20261029="-",dct_bound="-.",full_cache_gate30="-.",learned_hyperprior_q1_8="-")
 
 
 def sha(path):
@@ -32,7 +36,7 @@ def table(path, caption, label, columns, body):
     lines = [r"\begin{table*}[t]\centering",r"\caption{"+caption+"}",r"\label{"+label+"}",
         r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{5.5pt}\renewcommand{\arraystretch}{1.06}",
         r"\begin{tabularx}{\textwidth}{X"+"r"*(len(columns)-1)+r"}\toprule",
-        r"\rowcolor{tableheadbg} " + " & ".join(columns)+end+r"\midrule"]
+        r"\rowcolor{tableheadbg} " + " & ".join(rf"\textbf{{{c}}}" for c in columns)+end+r"\midrule"]
     for row in body:
         cells = list(map(str, row))
         prefix = r"\rowcolor{safesyncbg} " if cells[0] in ("Gaussian", "SafeSync-ZFSS") else ""
@@ -69,18 +73,25 @@ def build(study):
         for r in contrasts:
             report.append(f"| {r['method']} | {100*float(r['coverage_difference']):+.3f} | [{100*float(r['coverage_low']):+.3f}, {100*float(r['coverage_high']):+.3f}] | {100*float(r['later_f1_difference']):+.3f} | [{100*float(r['later_low']):+.3f}, {100*float(r['later_high']):+.3f}] |")
         report += ["", "该参照属于已获取第三批上的追加比较，保留原联合确认的失败判定。现代TCM编码及分离用途评价共3,072项，完整三类别四预算汇总保留。首要区间为描述性95%图像对重采样区间，其他类别预算采用原定家族区间。地理独立性缺少元数据支持。"]
+        plt.rcParams.update({"font.family":"serif","font.serif":["Times New Roman","Nimbus Roman","DejaVu Serif"],
+            "mathtext.fontset":"stix","font.size":8.2,"axes.labelsize":8.2,"axes.titlesize":8.6,
+            "xtick.labelsize":7.6,"ytick.labelsize":7.6,"text.color":"#000000","axes.labelcolor":"#000000",
+            "axes.edgecolor":"#1F2937","xtick.color":"#000000","ytick.color":"#000000",
+            "axes.linewidth":0.55,"xtick.major.width":0.55,"ytick.major.width":0.55,"pdf.fonttype":42,"ps.fonttype":42})
         methods = ("residual_current","residual_change","hyperprior","full_webp","tcm")
-        fig,axes = plt.subplots(2,3,figsize=(7.1,4),constrained_layout=True)
-        for column,(h,title) in enumerate(((5,"Building"),(3,"Trees"),(4,"Water"))):
-            axes[0,column].set_title(title)
+        fig,axes = plt.subplots(2,3,figsize=(7.16,3.85),constrained_layout=True)
+        for column,(h,title) in enumerate(((5,"(a) Building"),(3,"(b) Trees"),(4,"(c) Water"))):
+            axes[0,column].set_title(title, fontsize=8.6, fontweight="bold", loc="center")
             for method in methods:
                 group = sorted([r for r in summary if int(r["heldout"]) == h and r["method"] == method],key=lambda r:int(r["budget"]))
+                lw = 1.15 if method == "residual_current" else (1.00 if method == "tcm" else 0.88)
                 for line,field in enumerate(("unknown_coverage_30","later_class_f1")):
                     axes[line,column].plot([float(r["mean_total_bytes"])/1024 for r in group],[float(r[field]) for r in group],
-                        marker="o",markersize=3,linewidth=1.3,label=LABELS[method],color=COLORS[method])
+                        marker=MARKERS[method],linestyle=LSTYLES[method],markersize=3.2 if method=="tcm" else 2.8,linewidth=lw,label=LABELS[method],color=COLORS[method])
             for ax in axes[:,column]:
                 ax.set_xscale("log",base=2)
                 ax.set_xticks([4,8,16,32],labels=["4","8","16","32"])
+                ax.grid(alpha=.22, lw=.38, color="#CBD5E1")
             axes[1,column].set_xlabel("Actual transaction size (KiB)")
         axes[0,0].set_ylabel("Qualified evidence coverage")
         axes[1,0].set_ylabel("Later held-out-class F1")

@@ -35,12 +35,12 @@ NAMES = {"gaussian_20261029": "Gaussian", "dct_bound": "DCT", "full_cache_gate25
 ADDED = {"full_cache_gate30", "learned_hyperprior_q1_8"}
 PLOT_METHODS = ["gaussian_20261029", "dct_bound", "random_1729", "full_cache_gate30", "full_webp", "learned_hyperprior_q1_8"]
 STYLE = {
-    "gaussian_20261029": ("#56B4E9", "o", "--"),
-    "dct_bound": ("#E69F00", "s", (0, (4, 2))),
-    "random_1729": ("#8C96A5", "^", (0, (1.5, 2))),
-    "full_cache_gate30": ("#009E73", "P", "-."),
-    "full_webp": ("#4B5563", "v", (0, (5, 2))),
-    "learned_hyperprior_q1_8": ("#CC79A7", "D", "-")}
+    "gaussian_20261029": ("#5C88AA", "o", "--"),
+    "dct_bound": ("#7B8A9B", "s", (0, (4, 2))),
+    "random_1729": ("#9CA3AF", "^", (0, (1.5, 2))),
+    "full_cache_gate30": ("#8C6D46", "P", "-."),
+    "full_webp": ("#334155", "v", (0, (5, 2))),
+    "learned_hyperprior_q1_8": ("#4D7C6F", "D", "-")}
 INPUTS = {}
 
 
@@ -380,12 +380,14 @@ def setup_style():
         family = "Times New Roman"
     except ValueError:
         family = "DejaVu Serif"
-    plt.rcParams.update({"font.family": "serif", "font.serif": [family], "font.size": 8.5,
-        "axes.labelsize": 8.5, "axes.titlesize": 9, "legend.fontsize": 8,
-        "xtick.labelsize": 8, "ytick.labelsize": 8, "axes.spines.top": False, "axes.spines.right": False,
-        "text.color": "#000000", "axes.labelcolor": "#000000", "axes.edgecolor": "#000000",
+    plt.rcParams.update({"font.family": "serif", "font.serif": [family, "Nimbus Roman", "DejaVu Serif"],
+        "mathtext.fontset": "stix", "font.size": 8.2,
+        "axes.labelsize": 8.2, "axes.titlesize": 8.6, "legend.fontsize": 7.1,
+        "xtick.labelsize": 7.6, "ytick.labelsize": 7.6, "axes.spines.top": False, "axes.spines.right": False,
+        "text.color": "#000000", "axes.labelcolor": "#000000", "axes.edgecolor": "#1F2937",
         "xtick.color": "#000000", "ytick.color": "#000000",
-        "axes.linewidth": .65, "axes.grid": True, "grid.alpha": .18, "grid.linewidth": .5,
+        "axes.linewidth": .55, "xtick.major.width": .55, "ytick.major.width": .55,
+        "axes.grid": True, "grid.alpha": .22, "grid.linewidth": .38, "grid.color": "#CBD5E1",
         "pdf.fonttype": 42, "ps.fonttype": 42, "svg.fonttype": "none", "svg.hashsalt": "safesync-task-assets-v1", "savefig.dpi": 300,
         "figure.facecolor": "white", "axes.facecolor": "white"})
     return family
@@ -401,8 +403,8 @@ def export(fig, stem):
 def plot_tradeoff(table, asf_plus=None, tcm_exp=None):
     asf_plus = asf_plus or {}
     tcm_exp = tcm_exp or {}
-    fig, axes = plt.subplots(1, 2, figsize=(7.16, 2.74))
-    fig.subplots_adjust(left=.075, right=.992, bottom=.182, top=.735, wspace=.25)
+    fig, axes = plt.subplots(1, 2, figsize=(7.16, 2.58))
+    fig.subplots_adjust(left=.072, right=.994, bottom=.182, top=.728, wspace=.24)
     plot_names = {**NAMES, "gaussian_20261029": "SafeSync-ZFSS (Legacy)"}
     for axis, metric, title in [(axes[0], "building_f1", "(a) Static Building Segmentation"), (axes[1], "event_f1", "(b) New-Track Change Events")]:
         if asf_plus:
@@ -411,14 +413,14 @@ def plot_tradeoff(table, asf_plus=None, tcm_exp=None):
                 [r["actual_update_KiB_mean"] for r in arows],
                 [r[metric] for r in arows],
                 label="SafeSync-ASF+ (Ours, CPU)",
-                color="#004488",
+                color="#1B4965",
                 linestyle="-",
                 marker="o",
-                markersize=4.7,
-                markerfacecolor="#004488",
+                markersize=3.9,
+                markerfacecolor="#1B4965",
                 markeredgecolor="white",
-                markeredgewidth=0.65,
-                linewidth=1.85,
+                markeredgewidth=0.50,
+                linewidth=1.20,
                 zorder=6,
             )
         if tcm_exp:
@@ -427,14 +429,14 @@ def plot_tradeoff(table, asf_plus=None, tcm_exp=None):
                 [r["actual_update_KiB_mean"] for r in trows],
                 [r[metric] for r in trows],
                 label="LIC-TCM† (4.18 GB GPU)",
-                color="#D55E00",
+                color="#B5533C",
                 linestyle="-",
                 marker="*",
-                markersize=5.6,
-                markerfacecolor="#D55E00",
+                markersize=4.5,
+                markerfacecolor="#B5533C",
                 markeredgecolor="white",
-                markeredgewidth=0.4,
-                linewidth=1.45,
+                markeredgewidth=0.35,
+                linewidth=1.00,
                 zorder=5,
             )
         for method in PLOT_METHODS:
@@ -442,9 +444,9 @@ def plot_tradeoff(table, asf_plus=None, tcm_exp=None):
             color, marker, line = STYLE[method]
             name = plot_names[method] + ("†" if method in ADDED else "")
             axis.plot([r["actual_update_KiB_mean"] for r in rows], [r[metric] for r in rows],
-                label=name, color=color, linestyle=line, marker=marker, markersize=3.9,
+                label=name, color=color, linestyle=line, marker=marker, markersize=3.2,
                 markerfacecolor="white" if method not in ["learned_hyperprior_q1_8"] else color,
-                markeredgewidth=.85, linewidth=1.35 if method == "learned_hyperprior_q1_8" else 1.15, zorder=3)
+                markeredgewidth=.60, linewidth=0.92 if method == "learned_hyperprior_q1_8" else 0.84, zorder=3)
         axis.set_title(title, loc="center", pad=5, fontweight="bold", color="#000000")
         axis.set_xlabel("Actual bidirectional payload (downlink + ACK, KiB)")
         axis.set_ylabel("Task F1")
@@ -455,24 +457,24 @@ def plot_tradeoff(table, asf_plus=None, tcm_exp=None):
     axes[1].set_ylim(.12, .418)
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(.52, .995), ncol=4,
-               frameon=False, fontsize=7.2, handlelength=2.1, columnspacing=1.0, labelspacing=.35)
+               frameon=False, fontsize=7.0, handlelength=2.0, columnspacing=0.95, labelspacing=.32)
     export(fig, "task_tradeoff")
 
 
 def plot_uncertainty(intervals, asf_contrasts=None):
     asf_contrasts = asf_contrasts or {}
-    fig, axes = plt.subplots(2, 2, figsize=(7.15, 4.05), sharex=True, sharey=True)
-    fig.subplots_adjust(left=.09, right=.985, bottom=.15, top=.82, wspace=.23, hspace=.40)
+    fig, axes = plt.subplots(2, 2, figsize=(7.16, 3.88), sharex=True, sharey=True)
+    fig.subplots_adjust(left=.09, right=.988, bottom=.15, top=.82, wspace=.22, hspace=.38)
     for col, comparator in enumerate(["full_webp", "learned_hyperprior_q1_8"]):
-        color = STYLE[comparator][0]
+        color = "#5C88AA" if col == 0 else "#4D7C6F"
         for row, task in enumerate(["building", "event"]):
             axis = axes[row, col]
             entries = sorted([r for r in intervals if (r["comparator"], r["task"]) == (comparator, task)], key=lambda r: r["cap_bytes"])
             for y, value in zip([2, 1, 0], entries):
                 axis.errorbar(value["difference"], y - 0.16,
                     xerr=[[value["difference"]-value["lower"]], [value["upper"]-value["difference"]]],
-                    color=color, alpha=0.68, marker="o" if col == 0 else "s", markersize=3.6,
-                    elinewidth=1.05, capsize=2.5, capthick=.8, linestyle="none", zorder=2,
+                    color=color, alpha=0.80, marker="o" if col == 0 else "s", markersize=3.2,
+                    elinewidth=0.85, capsize=2.2, capthick=.65, linestyle="none", zorder=2,
                     label="Legacy SafeSync-ZFSS" if (y == 2 and row == 0 and col == 0) else None)
                 cap_k = str(value["cap_bytes"])
                 if cap_k in asf_contrasts and comparator in asf_contrasts[cap_k]:
@@ -481,10 +483,10 @@ def plot_uncertainty(intervals, asf_contrasts=None):
                     lo = float(ac["ci9833_low"])
                     hi = float(ac["ci9833_high"])
                     axis.errorbar(d, y + 0.16, xerr=[[d - lo], [hi - d]],
-                        color="#0F3D8A", marker="D", markersize=4.2,
-                        elinewidth=1.55, capsize=3.0, capthick=1.1, linestyle="none", zorder=4,
+                        color="#1B4965", marker="D", markersize=3.6,
+                        elinewidth=1.10, capsize=2.5, capthick=.80, linestyle="none", zorder=4,
                         label="SafeSync-ASF+ (Ours)" if (y == 2 and row == 0 and col == 0) else None)
-            axis.axvline(0, color="#333333", linewidth=.8, linestyle="--", zorder=1)
+            axis.axvline(0, color="#64748B", linewidth=.65, linestyle="--", zorder=1)
             axis.set_yticks([2, 1, 0], ["32", "64", "128"])
             axis.set_ylim(-.58, 2.58)
             axis.set_xlim(-.145, .295)
@@ -493,13 +495,13 @@ def plot_uncertainty(intervals, asf_contrasts=None):
             if col == 0:
                 axis.set_ylabel(("Building F1" if row == 0 else "New-track F1") + "\ncap (KiB)")
             if row == 0:
-                axis.set_title("(a) Primary: vs. Stateless WebP" if col == 0 else "(b) Secondary: vs. Learned Hyperprior†", loc="center", pad=8, fontweight="bold")
+                axis.set_title("(a) Primary: vs. Stateless WebP" if col == 0 else "(b) Secondary: vs. Learned Hyperprior†", loc="center", pad=7, fontweight="bold")
             if row == 1:
                 axis.set_xlabel("SafeSync − comparator (F1)")
     handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(.53, .985), ncol=2, frameon=False, fontsize=8.0)
+    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(.53, .985), ncol=2, frameon=False, fontsize=7.6)
     fig.text(.53, .03, "98.333% paired-AOI bootstrap CIs (10,000 resamples; three-cap family per contrast and outcome).",
-             ha="center", fontsize=7.7)
+             ha="center", fontsize=7.4)
     export(fig, "task_uncertainty")
 
 

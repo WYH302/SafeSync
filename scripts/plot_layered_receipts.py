@@ -203,7 +203,8 @@ def main():
 
         r_full = s_idx * 2
         r_zoom = s_idx * 2 + 1
-        red_box_color = "#D55E00"  # Okabe-Ito Vermilion-Red (colorblind-safe high visibility)
+        red_box_color = "#B5533C"  # Restrained Academic Terracotta (matches all paper charts)
+        gt_contour_color = "#7EB6D9"  # Soft academic light-blue (non-neon)
 
         for col, (rgb, title) in enumerate(zip(displayed, labels)):
             patch = rgb[crop]
@@ -213,9 +214,9 @@ def main():
             ax = axes[r_full, col]
             ax.imshow(patch)
             if crop_target.any():
-                ax.contour(crop_target, levels=[0.5], colors=["#56B4E9"], linewidths=0.55)
-            # Crisp red ROI zoom indicator box
-            ax.add_patch(Rectangle((zx, zy), zw, zh, fill=False, edgecolor=red_box_color, linewidth=1.25, zorder=5))
+                ax.contour(crop_target, levels=[0.5], colors=[gt_contour_color], linewidths=0.45)
+            # Crisp thin ROI zoom indicator box
+            ax.add_patch(Rectangle((zx, zy), zw, zh, fill=False, edgecolor=red_box_color, linewidth=0.85, zorder=5))
             ax.set_xticks([])
             ax.set_yticks([])
 
@@ -238,15 +239,15 @@ def main():
                     color="#FFFFFF" if is_ours else "#000000",
                     bbox=dict(
                         boxstyle="round,pad=0.16",
-                        facecolor="#004488" if is_ours else "#FFFFFF",
-                        edgecolor="#000000",
-                        linewidth=0.55,
+                        facecolor="#1B4965" if is_ours else "#FFFFFF",
+                        edgecolor="#1F2937",
+                        linewidth=0.45,
                         alpha=0.92,
                     ),
                 )
             ax.set_title(title if s_idx == 0 else "", fontsize=7.0, fontweight="bold", color="#000000", pad=4.5, loc="center")
-            bcol = "#004488" if col == 2 else "#64748B"
-            blw = 1.4 if col == 2 else 0.55
+            bcol = "#1B4965" if col == 2 else "#64748B"
+            blw = 0.95 if col == 2 else 0.45
             for spine in ax.spines.values():
                 spine.set_color(bcol)
                 spine.set_linewidth(blw)
@@ -255,12 +256,12 @@ def main():
             axz = axes[r_zoom, col]
             axz.imshow(zpatch, interpolation="nearest")
             if crop_target[zoom_sl].any():
-                axz.contour(crop_target[zoom_sl], levels=[0.5], colors=["#56B4E9"], linewidths=0.75)
+                axz.contour(crop_target[zoom_sl], levels=[0.5], colors=[gt_contour_color], linewidths=0.60)
             axz.set_xticks([])
             axz.set_yticks([])
             for spine in axz.spines.values():
                 spine.set_color(red_box_color)
-                spine.set_linewidth(1.25)
+                spine.set_linewidth(0.85)
 
         axes[r_full, 0].set_ylabel(f"Area {ai + 1}\n({month['month']})", fontsize=7.4, fontweight="bold", color="#000000", labelpad=4)
         axes[r_zoom, 0].set_ylabel("Zoom-in\n(2.7x)", fontsize=7.0, fontweight="bold", color="#000000", labelpad=4)

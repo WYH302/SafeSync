@@ -57,7 +57,7 @@ def main():
         r"\label{tab:context-primary}",
         r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{7.0pt}\renewcommand{\arraystretch}{1.06}",
         r"\begin{tabularx}{\textwidth}{Xrrrrr}\toprule",
-        r"\rowcolor{tableheadbg} Comparator & $\Delta U_{30}$ & 95\% interval & $\Delta$ later F1 & 95\% interval & Bytes, mix/base"+end+r"\midrule"]
+        r"\rowcolor{tableheadbg} \textbf{Comparator} & \textbf{$\Delta U_{30}$} & \textbf{95\% interval} & \textbf{$\Delta$ later F1} & \textbf{95\% interval} & \textbf{Bytes, mix/base}"+end+r"\midrule"]
     for name, row in analysis["primary"].items():
         label = dict(adaptive_change="Adaptive change", full_webp="Full WebP", hyperprior="Hyperprior")[name]
         lines.append(f"{label} & {100*row['coverage_difference']:+.2f} & {interval(row)} & {100*row['later_class_f1_difference']:+.2f} & {interval(row,'later_low','later_high')} & {row['mean_method_bytes']:.0f}/{row['mean_baseline_bytes']:.0f} "+end)
@@ -70,7 +70,7 @@ def main():
         r"\label{tab:context-all}",
         r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{5.2pt}\renewcommand{\arraystretch}{1.06}",
         r"\begin{tabularx}{\textwidth}{Xrrrrrrr}\toprule",
-        r"\rowcolor{tableheadbg} Class & KiB & "+" & ".join(label for _,label in METHODS)+" "+end+r"\midrule"]
+        r"\rowcolor{tableheadbg} \textbf{Class} & \textbf{KiB} & "+" & ".join(rf"\textbf{{{label}}}" for _,label in METHODS)+" "+end+r"\midrule"]
     for h in (5,3,4):
         for cap in (4096,8192,16384,32768):
             cells = []
@@ -87,7 +87,7 @@ def main():
         r"\label{tab:context-ablations}",
         r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{8.0pt}\renewcommand{\arraystretch}{1.06}",
         r"\begin{tabularx}{\textwidth}{Xrrrr}\toprule",
-        r"\rowcolor{tableheadbg} Comparator & $\Delta U_{30}$, pp & Interval & $\Delta$ later F1, pp & Interval"+end+r"\midrule"]
+        r"\rowcolor{tableheadbg} \textbf{Comparator} & \textbf{$\Delta U_{30}$, pp} & \textbf{Interval} & \textbf{$\Delta$ later F1, pp} & \textbf{Interval}"+end+r"\midrule"]
     for name,label in (("adaptive_random","Random ranking"),("adaptive_current_distance","Current known distance"),
         ("roi_mix","Context-free ROI"),("context_mix","Context without full-frame selection")):
         row = comparisons[5,8192,name]
@@ -100,23 +100,30 @@ def main():
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    plt.rcParams.update({"font.family":"serif", "font.serif":["Times New Roman", "DejaVu Serif"], "font.size":8.5, "pdf.fonttype":42,
-        "axes.spines.top":False, "axes.spines.right":False, "savefig.dpi":300})
-    colors = ["#D55E00", "#0072B2", "#CC79A7", "#999999", "#009E73", "#000000"]
+    plt.rcParams.update({"font.family":"serif", "font.serif":["Times New Roman", "Nimbus Roman", "DejaVu Serif"],
+        "mathtext.fontset":"stix", "font.size":8.2, "axes.labelsize":8.2, "axes.titlesize":8.6,
+        "xtick.labelsize":7.6, "ytick.labelsize":7.6, "text.color":"#000000", "axes.labelcolor":"#000000",
+        "axes.edgecolor":"#1F2937", "xtick.color":"#000000", "ytick.color":"#000000",
+        "axes.linewidth":0.55, "xtick.major.width":0.55, "ytick.major.width":0.55,
+        "pdf.fonttype":42, "ps.fonttype":42, "axes.spines.top":False, "axes.spines.right":False, "savefig.dpi":300})
+    colors = ["#1B4965", "#5C88AA", "#4D7C6F", "#8C6D46", "#64748B", "#334155"]
+    linestyles = ["-", "--", "-", "-.", ":", "-"]
     markers = ["o","s","^","v","D","x"]
-    fig, axes = plt.subplots(2,3,figsize=(7.15,4.75),sharex=True)
+    fig, axes = plt.subplots(2,3,figsize=(7.16,4.35),sharex=True)
+    tags = ("(a)", "(b)", "(c)")
     for col,h in enumerate((5,3,4)):
-        for (method,label), color, marker in zip(METHODS,colors,markers):
+        for idx, ((method,label), color, ls, marker) in enumerate(zip(METHODS,colors,linestyles,markers)):
             group = [summary[h,b,method] for b in (4096,8192,16384,32768)]
             x = [float(r["mean_total_bytes"])/1024 for r in group]
-            axes[0,col].plot(x,[float(r["unknown_coverage_30"]) for r in group],label=label,color=color,marker=marker,markersize=3,lw=1)
-            axes[1,col].plot(x,[float(r["later_class_f1"]) for r in group],color=color,marker=marker,markersize=3,lw=1)
-        axes[0,col].set_title(NAMES[h])
+            lw = 1.15 if idx == 0 else 0.88
+            axes[0,col].plot(x,[float(r["unknown_coverage_30"]) for r in group],label=label,color=color,linestyle=ls,marker=marker,markersize=2.8,lw=lw)
+            axes[1,col].plot(x,[float(r["later_class_f1"]) for r in group],color=color,linestyle=ls,marker=marker,markersize=2.8,lw=lw)
+        axes[0,col].set_title(f"{tags[col]} {NAMES[h]}", fontsize=8.6, fontweight="bold", loc="center")
         for axis in axes[:,col]:
             axis.set_xscale("log", base=2)
             axis.set_xticks([4,8,16,32],labels=["4","8","16","32"])
             axis.set_ylim(0,1.02)
-            axis.grid(alpha=.18)
+            axis.grid(alpha=.22, lw=.38, color="#CBD5E1")
         axes[1,col].set_xlabel("Actual mean bytes (KiB)")
     axes[0,0].set_ylabel("Evidence coverage $U_{30}$")
     axes[1,0].set_ylabel("Later held-out-class F1")

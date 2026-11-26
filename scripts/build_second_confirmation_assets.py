@@ -37,7 +37,7 @@ def main():
         r"\label{tab:second-primary}",
         r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{6.5pt}\renewcommand{\arraystretch}{1.06}",
         r"\begin{tabularx}{\textwidth}{Xrrrrrr}\toprule",
-        r"\rowcolor{tableheadbg} Protocol & KiB & $\Delta U_{30}$ & 95\% interval & $\Delta$ known F1 & 95\% interval & Mean bytes, new/base" + end + r"\midrule"]
+        r"\rowcolor{tableheadbg} \textbf{Protocol} & \textbf{KiB} & \textbf{$\Delta U_{30}$} & \textbf{95\% interval} & \textbf{$\Delta$ known F1} & \textbf{95\% interval} & \textbf{Mean bytes, new/base}" + end + r"\midrule"]
     for key, label in (("original_image", "Image routing"), ("hybrid_extension", "PQ extension")):
         r = analysis["primary"][key]
         lines.append(f"{label} & {r['budget']//1024} & {100*r['delta_unknown_coverage_30']:+.2f} & [{100*r['unknown_low']:+.2f},{100*r['unknown_high']:+.2f}] & {r['delta_known_macro_f1']:+.4f} & [{r['known_low']:+.4f},{r['known_high']:+.4f}] & {r['mean_new_bytes']:.0f}/{r['mean_old_bytes']:.0f} " + end)
@@ -49,7 +49,7 @@ def main():
         r"\label{tab:second-budgets}",
         r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{5.2pt}\renewcommand{\arraystretch}{1.06}",
         r"\begin{tabularx}{\textwidth}{Xrrrrrrrr}\toprule",
-        r"\rowcolor{tableheadbg} Held out & KiB & PQ change $U$ & PQ mix $U$ & WebP $U$ & Hyperprior $U$ & PQ known F1 & WebP known F1 & Hyperprior known F1" + end + r"\midrule"]
+        r"\rowcolor{tableheadbg} \textbf{Held out} & \textbf{KiB} & \textbf{PQ change $U$} & \textbf{PQ mix $U$} & \textbf{WebP $U$} & \textbf{Hyperprior $U$} & \textbf{PQ known F1} & \textbf{WebP known F1} & \textbf{Hyperprior known F1}" + end + r"\midrule"]
     labels = {5: "Building", 3: "Tree", 4: "Water"}
     for h in (5, 3, 4):
         for b in (4096, 8192, 16384, 32768):
@@ -63,7 +63,7 @@ def main():
         r"\label{tab:second-future}",
         r"\begingroup\fontsize{8}{10.0}\selectfont\setlength{\tabcolsep}{5.8pt}\renewcommand{\arraystretch}{1.06}",
         r"\begin{tabularx}{\textwidth}{Xrrrrrr}\toprule",
-        r"\rowcolor{tableheadbg} Target & Full RGB F1 & PQ-feature F1 & PQ-mix RGB F1 & WebP RGB F1 & Hyperprior RGB F1 & $\Delta$ mix/change, interval" + end + r"\midrule"]
+        r"\rowcolor{tableheadbg} \textbf{Target} & \textbf{Full RGB F1} & \textbf{PQ-feature F1} & \textbf{PQ-mix RGB F1} & \textbf{WebP RGB F1} & \textbf{Hyperprior RGB F1} & \textbf{$\Delta$ mix/change, interval}" + end + r"\midrule"]
     for h in (5, 3, 4):
         f = [future_summary[(h, b, method)] for b, method in ((0, "image_full_current"), (0, "hybrid_PQ_feature_only"),
             (8192, "hybrid_emergent_mix"), (8192, "image_full_webp"), (8192, "learned_hyperprior"))]
@@ -76,25 +76,34 @@ def main():
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    plt.rcParams.update({"font.family": "serif", "font.serif": ["Times New Roman", "DejaVu Serif"], "font.size": 8.5, "pdf.fonttype": 42, "ps.fonttype": 42, "axes.spines.top": False, "axes.spines.right": False})
-    fig, axes = plt.subplots(2, 3, figsize=(7.2, 4.4), constrained_layout=True)
-    styles = (("image_feature_change", "RGB change", "#777777", "o"),
-              ("image_emergent_mix", "RGB novelty", "#9467bd", "s"),
-              ("hybrid_emergent_mix", "PQ + evidence", "#277da8", "^"),
-              ("image_full_webp", "WebP", "#d18528", "d"),
-              ("image_hyperprior", "Hyperprior", "#278158", "v"))
+    plt.rcParams.update({"font.family": "serif", "font.serif": ["Times New Roman", "Nimbus Roman", "DejaVu Serif"],
+                         "mathtext.fontset": "stix", "font.size": 8.2, "axes.labelsize": 8.2, "axes.titlesize": 8.6,
+                         "xtick.labelsize": 7.6, "ytick.labelsize": 7.6, "text.color": "#000000",
+                         "axes.labelcolor": "#000000", "axes.edgecolor": "#1F2937",
+                         "xtick.color": "#000000", "ytick.color": "#000000",
+                         "axes.linewidth": 0.55, "xtick.major.width": 0.55, "ytick.major.width": 0.55,
+                         "pdf.fonttype": 42, "ps.fonttype": 42, "axes.spines.top": False, "axes.spines.right": False})
+    fig, axes = plt.subplots(2, 3, figsize=(7.16, 4.10), constrained_layout=True)
+    styles = (("image_feature_change", "RGB change", "#64748B", "--", "o"),
+              ("image_emergent_mix", "RGB novelty", "#5C88AA", "-.", "s"),
+              ("hybrid_emergent_mix", "PQ + evidence", "#1B4965", "-", "^"),
+              ("image_full_webp", "WebP", "#334155", ":", "d"),
+              ("image_hyperprior", "Hyperprior", "#4D7C6F", "-", "v"))
+    tags = ("(a)", "(b)", "(c)")
     for column, h in enumerate((5, 3, 4)):
-        for method, label, color, marker in styles:
+        for method, label, color, ls, marker in styles:
             values = [summary[(h, b, method)] for b in (4096, 8192, 16384, 32768)]
             x = [float(r["mean_total_bytes"]) / 1024 for r in values]
-            axes[0, column].plot(x, [float(r["unknown_coverage_30"]) for r in values], color=color, marker=marker, lw=1, ms=3, label=label)
-            axes[1, column].plot(x, [float(r["known_macro_f1"]) for r in values], color=color, marker=marker, lw=1, ms=3)
-        axes[0, column].set(title=labels[h], ylim=(-.02, 1.02))
+            lw = 1.15 if method == "hybrid_emergent_mix" else 0.88
+            axes[0, column].plot(x, [float(r["unknown_coverage_30"]) for r in values], color=color, linestyle=ls, marker=marker, lw=lw, ms=2.8, label=label)
+            axes[1, column].plot(x, [float(r["known_macro_f1"]) for r in values], color=color, linestyle=ls, marker=marker, lw=lw, ms=2.8)
+        axes[0, column].set_title(f"{tags[column]} {labels[h]}", fontsize=8.6, fontweight="bold", loc="center")
+        axes[0, column].set(ylim=(-.02, 1.02))
         axes[1, column].set(xlabel="Actual mean KiB / update")
         for row in range(2):
             axes[row, column].set_xscale("log", base=2)
             axes[row, column].set_xticks([4, 8, 16, 32], labels=["4", "8", "16", "32"])
-            axes[row, column].grid(alpha=.18, lw=.5)
+            axes[row, column].grid(alpha=.22, lw=.38, color="#CBD5E1")
     axes[0, 0].set_ylabel("Usable evidence coverage")
     axes[1, 0].set_ylabel("Known macro-F1")
     axes[0, 0].legend(frameon=False, fontsize=6, loc="lower right")

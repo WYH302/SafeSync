@@ -366,31 +366,38 @@ def make_plots(folder, status, macro, individual):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    plt.rcParams.update({"font.family": "serif", "font.serif": ["Times New Roman", "DejaVu Serif"],
-        "font.size": 9, "axes.labelsize": 9, "axes.titlesize": 9, "legend.fontsize": 7,
+    plt.rcParams.update({"font.family": "serif", "font.serif": ["Times New Roman", "Nimbus Roman", "DejaVu Serif"],
+        "mathtext.fontset": "stix", "font.size": 8.2, "axes.labelsize": 8.2, "axes.titlesize": 8.6, "legend.fontsize": 6.8,
+        "xtick.labelsize": 7.6, "ytick.labelsize": 7.6, "text.color": "#000000", "axes.labelcolor": "#000000",
+        "axes.edgecolor": "#1F2937", "xtick.color": "#000000", "ytick.color": "#000000",
+        "axes.linewidth": 0.55, "xtick.major.width": 0.55, "ytick.major.width": 0.55,
         "legend.frameon": False, "axes.spines.top": False, "axes.spines.right": False,
-        "axes.grid": True, "grid.alpha": .15, "lines.linewidth": 1.5, "lines.markersize": 4,
+        "axes.grid": True, "grid.alpha": .22, "grid.linewidth": .38, "grid.color": "#CBD5E1",
+        "lines.linewidth": 0.90, "lines.markersize": 3.2,
         "pdf.fonttype": 42, "ps.fonttype": 42, "savefig.dpi": 300})
-    colors = ["#0072B2", "#E69F00", "#000000", "#56B4E9", "#009E73", "#CC79A7", "#D55E00"]
+    colors = ["#1B4965", "#7B8A9B", "#8C6D46", "#9CA3AF", "#64748B", "#4D7C6F", "#334155"]
+    linestyles = ["-", "-.", "--", ":", "--", "-.", "-"]
     markers = ["o", "s", "^", "v", "D", "P", "X"]
     labels = ["Gaussian", "DCT + tail", "Full-cache MSE", "Random", "JPEG 4:2:0", "JPEG2000", "WebP"]
     plots = folder / "figures"; plots.mkdir(exist_ok=True)
     outputs = []
     for rate_field, suffix, xlabel in (("update_total_bytes_mean", "updates", "Actual update downlink + ACK (KiB/update)"),
             ("sequence_bytes_per_update", "amortized", "Actual bytes incl. bootstrap (KiB/update)")):
-        fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.65), constrained_layout=True)
-        for method, color, marker, label in zip(FAMILIES, colors, markers, labels):
+        fig, axes = plt.subplots(1, 2, figsize=(7.16, 2.58), constrained_layout=True)
+        for method, color, ls, marker, label in zip(FAMILIES, colors, linestyles, markers, labels):
             rows = sorted((row for row in macro if row["method"] == method), key=lambda row: row["budget"])
             for axis, metric, scale in ((axes[0], "new_track_psnr30_coverage", 100), (axes[1], "valid_psnr_db", 1)):
                 valid = [r for r in rows if r.get(metric) is not None]
                 axis.plot([r[rate_field] / 1024 for r in valid], [r[metric] * scale for r in valid],
-                          color=color, marker=marker, label=label, linewidth=2 if method == "gaussian" else 1.35)
+                          color=color, linestyle=ls, marker=marker, markersize=3.2, label=label,
+                          linewidth=1.15 if method == "gaussian" else 0.85)
                 axis.set_xlabel(xlabel)
-        axes[0].set_ylabel("New-ID evidence U30 (%)")
+        axes[0].set_title("(a) Localized Evidence Coverage ($U_{30}$)", fontsize=8.6, fontweight="bold", loc="center")
+        axes[1].set_title("(b) Global Valid-Pixel PSNR", fontsize=8.6, fontweight="bold", loc="center")
+        axes[0].set_ylabel("New-ID evidence $U_{30}$ (%)")
         axes[1].set_ylabel("Macro AOI PSNR (dB)")
         axes[0].set_ylim(-2, 102)
-        axes[0].legend(loc="best", ncol=2)
-        fig.suptitle(f"{status['scope'].capitalize()} — {status['complete_AOIs']} AOIs", fontsize=10)
+        axes[0].legend(loc="best", ncol=2, fontsize=6.6)
         name = f"rate_quality_{suffix}"
         for extension in ("pdf", "png", "svg"):
             file = plots / f"{name}.{extension}"
@@ -399,17 +406,17 @@ def make_plots(folder, status, macro, individual):
         plt.close(fig)
     selected = [row for row in individual if row["metric"] == "new_track_psnr30_coverage"]
     if selected:
-        fig, axes = plt.subplots(1, 3, figsize=(7, 2.8), sharey=True, constrained_layout=True)
-        for axis, budget in zip(axes, status["budgets"]):
+        fig, axes = plt.subplots(1, 3, figsize=(7.16, 2.60), sharey=True, constrained_layout=True)
+        sub_tags = ("(a)", "(b)", "(c)")
+        for tag, axis, budget in zip(sub_tags, axes, status["budgets"]):
             rows = sorted((r for r in selected if r["budget"] == budget), key=lambda r: r["area_index"])
             valid = [r for r in rows if r["difference"] is not None]
-            axis.axvline(0, color="#777777", linewidth=.8)
-            axis.scatter([r["difference"] * 100 for r in valid], [r["area_index"] for r in valid], color="#0072B2", s=24)
-            axis.set_title(f"Downlink cap {budget // 1024} KiB")
-            axis.set_xlabel("Gaussian − WebP U30 (pp)")
+            axis.axvline(0, color="#64748B", linewidth=.65, linestyle="--")
+            axis.scatter([r["difference"] * 100 for r in valid], [r["area_index"] for r in valid], color="#1B4965", s=22, edgecolors="white", linewidths=0.4)
+            axis.set_title(f"{tag} Downlink Cap {budget // 1024} KiB", fontsize=8.6, fontweight="bold", loc="center")
+            axis.set_xlabel("Gaussian − WebP $U_{30}$ (pp)")
             axis.set_yticks([r["area_index"] for r in rows], [f"AOI {r['area_index'] + 1}" for r in rows])
         axes[0].invert_yaxis()
-        fig.suptitle(f"{status['scope'].capitalize()}: original AOI order", fontsize=10)
         for extension in ("pdf", "png", "svg"):
             file = plots / f"per_aoi_difference.{extension}"
             fig.savefig(file, bbox_inches="tight")

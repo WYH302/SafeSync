@@ -110,21 +110,35 @@ def main():
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    fig, axes = plt.subplots(1, 2, figsize=(9.0, 3.0), constrained_layout=True)
-    axes[0].bar(np.arange(1, 9), [100*float(r["relative_update_saving"]) for r in rate], color="#287995")
-    axes[0].axhline(20, color="0.5", ls="--", lw=.8)
-    axes[0].set(xlabel="Reserved area", ylabel="Update-byte saving (%)", title="Identical received features")
-    for label, color, marker in (("delta_arq", "#666666", "o"), ("periodic_4", "#c78431", "s"), ("risk_anchor", "#287995", "^")):
+    plt.rcParams.update({"font.family": "serif", "font.serif": ["Times New Roman", "Nimbus Roman", "DejaVu Serif"],
+                         "mathtext.fontset": "stix", "font.size": 8.2, "axes.labelsize": 8.2, "axes.titlesize": 8.6,
+                         "xtick.labelsize": 7.6, "ytick.labelsize": 7.6, "text.color": "#000000",
+                         "axes.labelcolor": "#000000", "axes.edgecolor": "#1F2937",
+                         "xtick.color": "#000000", "ytick.color": "#000000",
+                         "axes.linewidth": 0.55, "xtick.major.width": 0.55, "ytick.major.width": 0.55,
+                         "pdf.fonttype": 42, "ps.fonttype": 42})
+    fig, axes = plt.subplots(1, 2, figsize=(7.16, 2.50), constrained_layout=True)
+    axes[0].bar(np.arange(1, 9), [100*float(r["relative_update_saving"]) for r in rate],
+                color="#1B4965", edgecolor="#1F2937", linewidth=0.45, alpha=0.92)
+    axes[0].axhline(20, color="#64748B", ls="--", lw=.65)
+    axes[0].set(xlabel="Reserved area", ylabel="Update-byte saving (%)")
+    axes[0].set_title("(a) Identical Received Features", fontsize=8.6, fontweight="bold", loc="center")
+    axes[0].grid(axis="y", alpha=0.22, linewidth=0.38, color="#CBD5E1")
+    for label, color, ls, marker in (("delta_arq", "#64748B", "--", "o"), ("periodic_4", "#8C6D46", "-.", "s"), ("risk_anchor", "#1B4965", "-", "^")):
         values = []
         for profile in ("iid10", "iid30", "burst"):
             selected = [v for k, v in per_area.items() if k[:2] == (profile, label)]
             values.append(float(np.mean([v["mean_world_mse"] for v in selected])) * 1e4)
-        axes[1].plot(range(3), values, marker=marker, color=color, label=label.replace("_", " "))
-    axes[1].set(xticks=range(3), xticklabels=["IID 10%", "IID 30%", "Burst"], ylabel="World feature MSE (x $10^{-4}$)", title="Actual encoded link simulation")
-    axes[1].legend(frameon=False, fontsize=8)
+        axes[1].plot(range(3), values, marker=marker, markersize=3.5, lw=1.10 if label == "risk_anchor" else 0.88,
+                     linestyle=ls, color=color, label=label.replace("_", " "))
+    axes[1].set(xticks=range(3), xticklabels=["IID 10%", "IID 30%", "Burst"], ylabel="World feature MSE ($\\times 10^{-4}$)")
+    axes[1].set_title("(b) Actual Encoded Link Simulation", fontsize=8.6, fontweight="bold", loc="center")
+    axes[1].legend(frameon=False, fontsize=7.2)
+    axes[1].grid(alpha=0.22, linewidth=0.38, color="#CBD5E1")
     for ax in axes:
         ax.spines[["top", "right"]].set_visible(False)
-        ax.tick_params(labelsize=8)
+        ax.grid(alpha=0.16, lw=0.5)
+        ax.tick_params(labelsize=7.8)
     figure = OUT / "recovery_summary"
     fig.savefig(figure.with_suffix(".png"), dpi=200)
     fig.savefig(figure.with_suffix(".pdf"))
