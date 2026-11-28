@@ -76,49 +76,49 @@ def main() -> None:
     ax1.text(0.073, 0.517, "Pareto CPU Zone", fontsize=6.4, fontweight="bold",
              color="#000000", ha="left", va="top", zorder=2)
 
+    # (label, x, y, color, marker, size, text_xy, ha, is_hero, use_leader)
+    # Only use a subtle leader line where two markers sit immediately adjacent (Legacy ZFSS vs. DCT).
     points = [
         ("SafeSync-ASF+ (Ours)\n0 B weights | 118 ms CPU", 0.1175, asf32_f1, PALETTE["safesync"], "o", 54,
-         (0.28, 0.474), "left", True),
+         (0.245, 0.471), "left", True, False),
         ("4x WebP Ref (1,495 viol.)", 0.2264, float(l32["lowres_4x_webp_12k"]["building_f1"]),
-         PALETTE["lowres"], "^", 32, (0.42, 0.438), "left", False),
+         PALETTE["lowres"], "^", 32, (0.280, 0.439), "left", False, False),
         ("Full Hist. (1.34 MiB)", 0.2575, float(l32["full_cache_gate30"]["building_f1"]),
-         PALETTE["full_hist"], "P", 34, (0.45, 0.409), "left", False),
+         PALETTE["full_hist"], "P", 34, (0.315, 0.410), "left", False, False),
         ("Legacy ZFSS", 0.2547, float(l32["gaussian_20261029"]["building_f1"]),
-         PALETTE["safesync_sub"], "o", 30, (0.18, 0.362), "right", False),
+         PALETTE["safesync_sub"], "o", 30, (0.195, 0.366), "right", False, True),
         ("DCT (13.9 KB)", 0.2912, float(l32["dct_bound"]["building_f1"]),
-         PALETTE["dct"], "s", 28, (0.48, 0.371), "left", False),
+         PALETTE["dct"], "s", 28, (0.360, 0.381), "left", False, False),
         ("Stateless WebP", 2.06, float(l32["full_webp"]["building_f1"]),
-         PALETTE["webp"], "v", 32, (2.75, 0.278), "left", False),
+         PALETTE["webp"], "v", 32, (2.65, 0.279), "left", False, False),
         ("Hyperprior\n(61.1 MB, GPU)", 11.54, float(l32["learned_hyperprior_q1_8"]["building_f1"]),
-         PALETTE["hyperprior"], "D", 36, (8.20, 0.338), "right", False),
+         PALETTE["hyperprior"], "D", 36, (9.0, 0.348), "right", False, False),
         ("LIC-TCM\n(4.18 GB, GPU)", 30.88, tcm32_f1,
-         PALETTE["tcm"], "*", 62, (23.0, 0.398), "center", False),
+         PALETTE["tcm"], "*", 62, (29.5, 0.409), "center", False, False),
     ]
 
-    for lbl, xs, ys, col, mk, sz, (tx, ty), ha, is_hero in points:
+    for lbl, xs, ys, col, mk, sz, (tx, ty), ha, is_hero, use_leader in points:
         ax1.scatter(xs, ys, color=col, marker=mk, s=sz,
                     edgecolors="#000000" if is_hero else "white",
                     linewidths=0.60 if is_hero else 0.40,
                     zorder=7 if is_hero else 5)
-        arrow_kw = dict(arrowstyle="-", color="#000000", lw=0.48, alpha=0.75) if is_hero else (
-            dict(arrowstyle="-", color="#334155", lw=0.38, alpha=0.55) if "WebP" != lbl.split()[-1] else None
-        )
+        arrow_kw = dict(arrowstyle="-", color="#475569", lw=0.42, alpha=0.65) if use_leader else None
         ax1.annotate(lbl, (xs, ys), xytext=(tx, ty), fontsize=6.45 if is_hero else 6.1,
                      color="#000000", fontweight="bold" if is_hero else "normal",
                      ha=ha, va="center", linespacing=1.12, arrowprops=arrow_kw, zorder=8)
 
-    # Clean upward sweeping arrow from 4.18-GB GPU LIC-TCM -> SafeSync-ASF+ (thin crisp stroke!)
-    ax1.annotate("", xy=(0.145, asf32_f1 + 0.008), xytext=(28.0, tcm32_f1 + 0.011),
-                 arrowprops=dict(arrowstyle="-|>", color=PALETTE["safesync"], lw=0.90,
-                                 linestyle="--", connectionstyle="arc3,rad=0.16"), zorder=6)
-    ax1.text(7.2, 0.506, "263x faster, +3.86 pp\n(0 B vs. 4.18 GB)", fontsize=6.25, fontweight="bold",
+    # Single narrative dashed arc from 4.18-GB GPU LIC-TCM -> SafeSync-ASF+ (cleanly clear of callout box)
+    ax1.annotate("", xy=(0.145, asf32_f1 + 0.010), xytext=(27.5, tcm32_f1 + 0.011),
+                 arrowprops=dict(arrowstyle="-|>", color=PALETTE["safesync"], lw=0.88,
+                                 linestyle="--", connectionstyle="arc3,rad=0.14"), zorder=6)
+    ax1.text(7.2, 0.514, "263x faster, +3.86 pp\n(0 B vs. 4.18 GB)", fontsize=6.2, fontweight="bold",
              color="#000000", ha="center", va="center",
-             bbox=dict(boxstyle="round,pad=0.18", facecolor="white", edgecolor=PALETTE["safesync"], lw=0.50, alpha=0.96),
+             bbox=dict(boxstyle="round,pad=0.16", facecolor="white", edgecolor=PALETTE["safesync"], lw=0.48, alpha=0.96),
              zorder=9)
 
     ax1.set_xscale("log")
     ax1.set_xlim(0.065, 62.0)
-    ax1.set_ylim(0.255, 0.534)
+    ax1.set_ylim(0.255, 0.542)
     ax1.set_xticks([0.1, 1.0, 10.0])
     ax1.set_xticklabels(["0.1", "1", "10"])
     ax1.set_xlabel("Onboard sender latency per frame (s, log scale)")

@@ -237,15 +237,19 @@ def build_figure2_storage_vs_utility(
     ax.spines[["top", "right"]].set_visible(False)
 
     # Panel (d): Universal Plug-and-Play TC-PCR Across All 3 Codec Tiers on SECOND (8 KiB, Building — strictly GLOBAL F1)
+    # Keep ONLY the 3 real uplift transition arrows (Standalone -> +TC-PCR); place all labels directly beside their markers.
     ax = axes[1, 1]
     brows = sec_univ["results_by_class"]["Building"]["rows"]
     ora = diag["oracle_diagnostic_h5_b8192"]["methods"]
     tiers = [
-        ("WebP", "webp_standalone", "webp_tcpcr_unknown", "#334155", "v", (0.525, 0.8370), (0.618, 0.8315), "+TC-PCR (+17.4 pp)"),
-        ("Hyperprior", "hyperprior_standalone", "hyperprior_tcpcr_unknown", "#4D7C6F", "D", (0.585, 0.8165), (0.662, 0.8045), "+TC-PCR (HP, +13.0 pp)"),
-        ("LIC-TCM", "tcm_standalone", "tcm_tcpcr_unknown", "#B5533C", "*", (0.720, 0.8315), (0.718, 0.8400), "TC-PCR(TCM) #1\n0.834 (+6.5 pp)"),
+        ("WebP", "webp_standalone", "webp_tcpcr_unknown", "#334155", "v",
+         (0.538, 0.8375), "center", (0.708, 0.8260), "center", "+TC-PCR (+17.4 pp)"),
+        ("Hyperprior", "hyperprior_standalone", "hyperprior_tcpcr_unknown", "#4D7C6F", "D",
+         (0.638, 0.8148), "center", (0.734, 0.8068), "center", "+TC-PCR (HP, +13.0 pp)"),
+        ("LIC-TCM", "tcm_standalone", "tcm_tcpcr_unknown", "#B5533C", "*",
+         (0.758, 0.8315), "center", (0.828, 0.8385), "center", "TC-PCR(TCM) #1\n0.834 (+6.5 pp)"),
     ]
-    for name, k_st, k_tp, col, mk, xy_st, xy_tp, tp_lbl in tiers:
+    for name, k_st, k_tp, col, mk, xy_st, ha_st, xy_tp, ha_tp, tp_lbl in tiers:
         st, tp = brows[k_st], brows[k_tp]
         is_tcm = name == "LIC-TCM"
         tp_col = "#1B4965" if is_tcm else col
@@ -254,22 +258,20 @@ def build_figure2_storage_vs_utility(
                    edgecolors="#000000" if is_tcm else "white", linewidths=0.55 if is_tcm else 0.40, zorder=5)
         ax.annotate("", xy=(tp["u30"] - 0.005, tp["later_f1"]), xytext=(st["u30"] + 0.005, st["later_f1"]),
                     arrowprops=dict(arrowstyle="->", color=tp_col, lw=0.95))
-        ax.annotate(name, (st["u30"], st["later_f1"]), xytext=xy_st, fontsize=6.3, color="#000000",
-                    arrowprops=dict(arrowstyle="-", color="#334155", lw=0.40, alpha=0.55) if is_tcm else None)
-        ax.annotate(tp_lbl, (tp["u30"], tp["later_f1"]), xytext=xy_tp, fontsize=6.25, color="#000000",
-                    fontweight="bold" if is_tcm else "normal",
-                    arrowprops=dict(arrowstyle="->", color=tp_col, lw=0.60, alpha=0.85))
+        ax.text(xy_st[0], xy_st[1], name, fontsize=6.3, color="#000000", ha=ha_st, va="bottom")
+        ax.text(xy_tp[0], xy_tp[1], tp_lbl, fontsize=6.2, color="#000000",
+                fontweight="bold" if is_tcm else "normal", ha=ha_tp, va="center", linespacing=1.08)
 
     # Show locked -0.02 global Later-F1 safety floor & Hyperprior GT Oracle strictly on the same global denominator
     f1_floor = brows["webp_standalone"]["later_f1"] - 0.02
     ax.axhline(f1_floor, color="#B5533C", linestyle="--", linewidth=0.65, alpha=0.75, zorder=2)
-    ax.text(0.522, f1_floor - 0.0020, "Locked -0.02 F1 floor (0.813)", fontsize=5.85, color="#000000", va="top")
+    ax.text(0.522, f1_floor - 0.0018, "Locked -0.02 F1 floor (0.813)", fontsize=5.8, color="#000000", va="top")
 
     ax.scatter(ora["oracle_hybrid_with_full_hp"]["u30"], ora["oracle_hybrid_with_full_hp"]["later_f1"],
                color="#64748B", marker="p", s=36, edgecolors="#1F2937", linewidths=0.40, zorder=4)
     ax.annotate("HP GT Oracle\n(0.816)", (ora["oracle_hybrid_with_full_hp"]["u30"], ora["oracle_hybrid_with_full_hp"]["later_f1"]),
-                xytext=(0.822, 0.8045), fontsize=6.0, color="#000000", ha="center",
-                arrowprops=dict(arrowstyle="->", color="#334155", lw=0.55))
+                xytext=(0.828, 0.8065), fontsize=5.95, color="#000000", ha="center", va="center", linespacing=1.06,
+                arrowprops=dict(arrowstyle="-", color="#475569", lw=0.45, alpha=0.75))
 
     ax.set_xlim(0.515, 0.872)
     ax.set_ylim(0.802, 0.852)
