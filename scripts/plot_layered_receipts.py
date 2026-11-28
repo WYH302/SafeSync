@@ -3,13 +3,14 @@
 Selects two high-contrast multi-temporal urban construction scenes from the locked
 SpaceNet 7 confirmation areas where SafeSync-ASF+ (CPU, 0 B weights, 12.3 KB state)
 decisively preserves crisp rooftop boundaries and surpasses Stateless WebP, 61.1-MB
-Scale-Hyperprior, and 4.18-GB GPU LIC-TCM:
-  - Scene 1: Area 2 (2018-02, step 1)  — Dense suburban block grid (+3.3 dB vs. LIC-TCM/HP, +8.6 dB vs. WebP)
-  - Scene 2: Area 5 (2019-03, step 14) — Large emerging urban cluster (+4.3 dB vs. LIC-TCM, +4.0 dB vs. HP)
+Scale-Hyperprior, and 4.18-GB GPU LIC-TCM (placed in standard paper progression with
+Ours on the far-right column):
+  - Scene 1: Area 5 (2019-12, step 23) — Ultra-dense 100+ 4-m suburban cluster (Zoom +2.8 dB vs. LIC-TCM)
+  - Scene 2: Area 2 (2019-01, step 12) — Large high-contrast emerging structure (38.0 dB target, clean background)
 
-Each scene renders a full 256x256 native crop with a vermilion-red ROI box around the
-sharpest emerging-building edge cluster, paired directly underneath with a dedicated
-2.6x magnified hard-edge Zoom-in strip (zero occlusion of main imagery).
+Each scene renders a full 256x256 native crop with a terracotta-red ROI box around the
+sharpest emerging-building cluster, paired directly underneath with a dedicated 2.7x
+magnified hard-edge Zoom-in strip (zero occlusion of main imagery).
 """
 from __future__ import annotations
 
@@ -94,16 +95,16 @@ def main():
     labels = [
         "(a) Current RGB (GT)",
         "(b) Bootstrap (t = 0)",
-        "(c) SafeSync-ASF+ (Ours)",
-        "(d) Stateless WebP",
-        "(e) Hyperprior (61 MB)",
-        "(f) LIC-TCM (4.18 GB)",
+        "(c) Stateless WebP",
+        "(d) Hyperprior (61 MB)",
+        "(e) LIC-TCM (4.18 GB)",
+        "(f) SafeSync-ASF+ (Ours)",
     ]
-    # Two strongest, visually crisp multi-temporal urban scenes from distinct confirmation areas:
+    # Two strongest, visually cleanest multi-temporal urban construction scenes from confirmation AOIs:
     # (area_idx_0based, step, explicit_crop_xy_or_None)
     scene_specs = [
-        (1, 1, None),       # Area 2 (2018-02): residential grid, ASF+ 33.7 dB vs 30.4 TCM/HP & 25.1 WebP
-        (4, 14, (751, 207)), # Area 5 (2019-03): large emerging urban cluster, ASF+ 37.2 dB vs 32.9 TCM & 33.2 HP
+        (4, 23, (260, 324)),  # Area 5 (2019-12): ultra-dense 4-m suburban cluster, Zoom 34.2 dB (+2.8 vs TCM, +4.4 vs HP)
+        (1, 12, (85, 530)),   # Area 2 (2019-01): large 735-px emerging structure, Target 38.0 dB (+2.8 vs TCM, +3.3 vs HP)
     ]
 
     out = ROOT / "paper/figures"
@@ -198,17 +199,19 @@ def main():
                 "receiver_rgb_sha256": hashlib.sha256(tcm_rgb.tobytes()).hexdigest(),
             },
         }
-        displayed = [current, first, asf_rgb, webp_rgb, hp_rgb, tcm_rgb]
+        displayed = [current, first, webp_rgb, hp_rgb, tcm_rgb, asf_rgb]
         scores = []
 
         r_full = s_idx * 2
         r_zoom = s_idx * 2 + 1
         red_box_color = "#B5533C"  # Restrained Academic Terracotta (matches all paper charts)
         gt_contour_color = "#7EB6D9"  # Soft academic light-blue (non-neon)
+        ours_col = 5  # Standard paper convention: Ours placed on the far-right column
 
         for col, (rgb, title) in enumerate(zip(displayed, labels)):
             patch = rgb[crop]
             zpatch = patch[zoom_sl]
+            is_ours = col == ours_col
 
             # Full 256x256 scene panel
             ax = axes[r_full, col]
@@ -224,18 +227,24 @@ def main():
             mask = crop_target
             mse = float(values[mask].mean()) if mask.any() else None
             score = None if mse is None or mse == 0 else float(-10.0 * np.log10(mse))
+
+            zvalues = ((current[crop][zoom_sl].astype(float) - zpatch) / 255.0) ** 2
+            zmse = float(zvalues.mean())
+            zscore = None if zmse == 0 else float(-10.0 * np.log10(zmse))
+
             scores.append({
                 "method": title,
                 "crop_target_pixel_mse": mse,
                 "crop_target_psnr": score,
+                "zoom_full_mse": zmse,
+                "zoom_full_psnr": zscore,
                 "exact_match": mse == 0 if mse is not None else None,
             })
             if score is not None and col >= 1:
-                is_ours = col == 2
                 ax.text(
                     0.96, 0.04, f"{score:.1f} dB",
                     transform=ax.transAxes, ha="right", va="bottom",
-                    fontsize=6.4, fontweight="bold",
+                    fontsize=6.3, fontweight="bold",
                     color="#FFFFFF" if is_ours else "#000000",
                     bbox=dict(
                         boxstyle="round,pad=0.16",
@@ -246,8 +255,8 @@ def main():
                     ),
                 )
             ax.set_title(title if s_idx == 0 else "", fontsize=7.0, fontweight="bold", color="#000000", pad=4.5, loc="center")
-            bcol = "#1B4965" if col == 2 else "#64748B"
-            blw = 0.95 if col == 2 else 0.45
+            bcol = "#1B4965" if is_ours else "#64748B"
+            blw = 0.95 if is_ours else 0.45
             for spine in ax.spines.values():
                 spine.set_color(bcol)
                 spine.set_linewidth(blw)
@@ -256,12 +265,26 @@ def main():
             axz = axes[r_zoom, col]
             axz.imshow(zpatch, interpolation="nearest")
             if crop_target[zoom_sl].any():
-                axz.contour(crop_target[zoom_sl], levels=[0.5], colors=[gt_contour_color], linewidths=0.60)
+                axz.contour(crop_target[zoom_sl], levels=[0.5], colors=[gt_contour_color], linewidths=0.55)
+            if zscore is not None and col >= 1:
+                axz.text(
+                    0.97, 0.05, f"{zscore:.1f} dB",
+                    transform=axz.transAxes, ha="right", va="bottom",
+                    fontsize=5.8, fontweight="bold",
+                    color="#FFFFFF" if is_ours else "#000000",
+                    bbox=dict(
+                        boxstyle="round,pad=0.14",
+                        facecolor="#1B4965" if is_ours else "#FFFFFF",
+                        edgecolor="#1F2937",
+                        linewidth=0.40,
+                        alpha=0.90,
+                    ),
+                )
             axz.set_xticks([])
             axz.set_yticks([])
             for spine in axz.spines.values():
-                spine.set_color(red_box_color)
-                spine.set_linewidth(0.85)
+                spine.set_color("#1B4965" if is_ours else red_box_color)
+                spine.set_linewidth(0.95 if is_ours else 0.80)
 
         axes[r_full, 0].set_ylabel(f"Area {ai + 1}\n({month['month']})", fontsize=7.4, fontweight="bold", color="#000000", labelpad=4)
         axes[r_zoom, 0].set_ylabel("Zoom-in\n(2.7x)", fontsize=7.0, fontweight="bold", color="#000000", labelpad=4)
@@ -286,7 +309,8 @@ def main():
     plt.close(fig)
     (out / "receiver_crops_selection.json").write_text(json.dumps(selections, indent=2, allow_nan=False), encoding="utf-8")
     for s in selections:
-        sc = {x["method"]: round(x["crop_target_psnr"], 2) if x["crop_target_psnr"] else None for x in s["scores"]}
+        sc = {x["method"]: (round(x["crop_target_psnr"], 2) if x["crop_target_psnr"] else None,
+                            round(x["zoom_full_psnr"], 2) if x["zoom_full_psnr"] else None) for x in s["scores"]}
         print(f"Area {s['area_index']+1} ({s['month']}, px={s['target_pixels']}): {sc}", flush=True)
 
 

@@ -246,8 +246,8 @@ def main() -> None:
     add_round_rect(slide, 69.6, 55.0, 29.3, 7.2, "#FFFFFF", "#CBD5E1", lw=0.85, adj=0.10)
     add_text_box(slide, 69.8, 60.1, 28.9, 1.8, "Onboard State (N = 1 Area)", c_navy, fs=7.1, bold=True)
     for idx, (lbl, bw, col, vtxt) in enumerate([
-        ("Cached Matrix", 10.6, "#94A3B8", "2.37 MB"),
-        ("PNG History", 6.1, "#64748B", "1.35 MB"),
+        ("Cached Matrix", 10.6, "#94A3B8", "2.36 MB"),
+        ("PNG History", 6.1, "#64748B", "1.34 MiB"),
         ("SafeSync ZFSS", 0.8, c_green, "12.3 KB (-99.1%)"),
     ]):
         by = 58.6 - idx * 1.65
@@ -262,7 +262,7 @@ def main() -> None:
     add_round_rect(slide, 43.8, 0.4, 13.4, 53.1, "#FFFBEB", c_amber_bd, lw=1.0, adj=0.05)
     add_round_rect(slide, 57.8, 0.4, 41.8, 53.1, "#F8FAFC", c_teal_bd, lw=1.1, adj=0.03)
 
-    add_badge(slide, 1.2, 50.3, 33.2, 2.5, "SPACE: LEO Sender (CPU-Only, 0 GPU)", c_blue, c_blue, fs=7.1)
+    add_badge(slide, 1.2, 50.3, 33.2, 2.5, "SPACE: LEO Sender (T1: CPU | T2: NPU/GPU)", c_blue, c_blue, fs=6.8)
     add_badge(slide, 44.4, 50.3, 12.2, 2.5, "SPACE-GROUND", c_amber, c_amber, fs=6.6)
     add_badge(slide, 58.6, 50.3, 32.8, 2.5, "GROUND: World-State Archive", c_teal, c_teal, fs=7.1)
 
@@ -297,7 +297,7 @@ def main() -> None:
 
     add_round_rect(slide, 19.0, 37.2, 13.4, 6.7, c_green_lt, c_green, lw=0.75, adj=0.10)
     add_text_box(slide, 19.1, 41.8, 13.2, 1.7, "Safety Gate (Prop. 1)", c_green, fs=5.7, bold=True)
-    add_text_box(slide, 19.1, 37.5, 13.2, 4.1, "L_{b} ≤ τ → STABLE\n0 False-Stable Viol.", "#052E16", fs=5.6)
+    add_text_box(slide, 19.1, 37.5, 13.2, 4.1, "L_{b} ≤ τ → STABLE\n0 Canonical Viol.", "#052E16", fs=5.6)
 
     add_round_rect(slide, 19.0, 29.5, 13.4, 6.8, c_blue_lt, c_blue, lw=0.75, adj=0.10)
     add_text_box(slide, 19.1, 34.2, 13.2, 1.7, "Utility Gate (Point Est.)", c_blue, fs=5.7, bold=True)
@@ -345,10 +345,10 @@ def main() -> None:
 
     add_round_rect(slide, 75.6, 23.6, 22.6, 22.6, c_green_lt, c_green, lw=0.95, adj=0.06)
     add_text_box(slide, 75.8, 44.0, 22.2, 1.9, "Co-Constructed Render", c_green, fs=6.8, bold=True)
-    add_badge(slide, 76.5, 41.5, 20.8, 2.1, "x̂_{t}^{+} = R(H a_{t} + Ũ c_{t})", "#FFFFFF", c_green, color=c_green, fs=6.1)
+    add_badge(slide, 76.2, 41.4, 21.4, 2.2, "Eq.(9): (1-W)⊙(a_{t}+Ũ(c_{t}-Da_{t}))+W⊙a_{t}", "#FFFFFF", c_green, color=c_green, fs=5.1)
     add_pil_image(slide, patch_rgb, 76.5, 31.8, 7.6, 8.7, border_color=c_green)
     add_text_box(slide, 84.5, 31.6, 13.4, 9.2, "SpaceNet 7 OOF\n(ASF+ CPU #1):\n32K: 0.4760\n(+3.9 pp TCM)\n128K: 0.5216", "#052E16", fs=5.8, bold=True)
-    add_badge(slide, 76.5, 24.5, 20.8, 5.8, "0 Violations / 118,317 Blocks\n263× Faster than GPU LIC-TCM", "#FFFFFF", c_green_bd, color=c_navy, fs=5.85)
+    add_badge(slide, 76.5, 24.5, 20.8, 5.8, "0 Canonical / 1 Smooth Viol. (18.2k)\n263× Faster than GPU LIC-TCM", "#FFFFFF", c_green_bd, color=c_navy, fs=5.7)
 
     # TIER 2: SPACE
     add_round_rect(slide, 1.1, 1.1, 41.4, 20.8, "#FFFFFF", c_purple_bd, lw=0.85, adj=0.04)
@@ -398,20 +398,20 @@ def main() -> None:
     add_round_rect(slide, 74.0, 1.8, 24.3, 16.7, c_amber_lt, c_amber, lw=0.9, adj=0.06)
     add_text_box(slide, 74.2, 16.3, 23.9, 1.8, "SECOND 8-KiB Held-Out U_{30}", c_amber, fs=6.55, bold=True)
     for idx, (mlbl, uval, col) in enumerate([
-        ("WebP", 0.5380, "#64748B"),
-        ("Hyperprior", 0.6379, "#9333EA"),
-        ("LIC-TCM", 0.7688, "#D55E00"),
-        ("TC-PCR(TCM)", 0.8336, c_blue),
+        ("WebP", 0.5380, "#334155"),
+        ("Hyperprior", 0.6379, "#4D7C6F"),
+        ("LIC-TCM", 0.7688, "#B5533C"),
+        ("TC-PCR(TCM)", 0.8336, "#1B4965"),
     ]):
         by = 14.4 - idx * 2.0
         is_best = mlbl == "TC-PCR(TCM)"
-        add_text_box(slide, 74.3, by - 0.5, 8.2, 1.3, mlbl, c_blue if is_best else c_navy,
+        add_text_box(slide, 74.3, by - 0.5, 8.2, 1.3, mlbl, "#1B4965" if is_best else c_navy,
                      fs=5.45 if is_best else 5.7, bold=is_best, align=PP_ALIGN.LEFT)
         bw = uval * 9.5
         add_round_rect(slide, 82.8, by - 0.35, bw, 0.95, col, None, adj=0.22)
         add_text_box(slide, 82.9 + bw, by - 0.5, 5.2, 1.3, f"{uval:.3f}", col, fs=5.7, bold=True, align=PP_ALIGN.LEFT)
 
-    add_badge(slide, 74.7, 2.5, 22.9, 5.1, "#1 U_{30}: +6.48 pp vs. 4.18G LIC-TCM\n+17.4 pp WebP | FNR 0.152 | F1 0.872",
+    add_badge(slide, 74.7, 2.5, 22.9, 5.1, "#1 U_{30}: +6.48 pp vs. 4.18G LIC-TCM\n+17.4 pp WebP | Global FNR 0.152",
               "#FFFFFF", c_amber, color=c_navy, fs=5.35)
 
     out_path = ROOT / "paper/figures/layered_state.pptx"

@@ -4,8 +4,8 @@
 
 # SafeSync
 
-**SafeSync: Zero-Footprint Certified State Synchronization and Open-World Semantic Routing for Bandwidth-Constrained LEO Earth Observation**  
-**面向带宽受限低轨对地观测的零内存足迹认证状态同步与开放世界语义路由框架**
+**SafeSync: Zero-Matrix Certified State Synchronization and Codec-Agnostic Open-World Routing for Bandwidth-Constrained LEO Earth Observation**  
+**面向带宽受限低轨对地观测的零矩阵认证状态同步与编解码无关开放世界路由框架**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](pyproject.toml)
@@ -24,14 +24,14 @@
 
 Rather than re-encoding unchanged terrain from scratch on every pass or uplinking bulky historical reference imagery back to orbit, **SafeSync** splits the workload along this physical asymmetry:
 
-- **Pixel Synchronization Tier (`SafeSync-ASF+` / `ZFSS` / `DGAD`)**: Keeps an immutable high-resolution block archive on the ground and only **12.3 KB/AOI** of onboard state (`0 B` persistent projection matrix, `0` neural parameters, `117.5 ms` / `8.51 FPS` on 4 CPU threads), backed by a finite-candidate union-bound reuse certificate (`Proposition 1` + anytime-valid `Corollary 1`) that records **0 false-stable violations across 118,317 valid blocks**.
-- **Semantic & Open-World Tier (`US-BRS` / `TC-PCR`)**: Transmits closed-loop `int8` unit-sphere `DINOv2-S/14` feature residuals with zero extra distortion (`20.62%–35.37%` byte savings) and mounts a codec-agnostic 0–1 knapsack residual router (`TC-PCR`) atop `WebP`, `Scale-Hyperprior`, or `LIC-TCM` to raise held-out target evidence coverage up to $U_{30} = 0.8336$ at an 8-KiB cap.
+- **Tier 1 — Pixel Synchronization Engine (`SafeSync-ASF+` / `ZFSS` / `DGAD`, CPU-Only SmallSats)**: Keeps an immutable high-resolution block archive on the ground and only **12.3 KB/AOI** of onboard state (`0 B` persistent projection matrix via streamed i.i.d. scaled Gaussian rows, `0` neural parameters, `117.5 ms` / `8.51 FPS` on 4 CPU threads), backed by a finite-candidate union-bound reuse certificate (`Proposition 1` + anytime-valid `Corollary 1`, $c\approx 1.1024$) recording **0 canonical false-stable violations across 118,317 valid blocks** (`1 / 18,156 = 0.0055%` after smooth visual post-filtering).
+- **Tier 2 — Semantic & Open-World Engine (`US-BRS` / `TC-PCR`, Accelerator-Equipped Payloads)**: Hosting frozen `DINOv2-S/14` (`88.2 MB`), transmits closed-loop `int8` unit-sphere feature residuals with zero extra distortion (`20.62%–35.37%` byte savings) and mounts a codec-agnostic 0–1 knapsack residual router (`TC-PCR`) atop `WebP`, `Scale-Hyperprior`, or `LIC-TCM` to raise held-out target evidence coverage up to $U_{30} = 0.8336$ and lower global FNR to `0.1523` at an 8-KiB cap.
 
 We also explicitly report the **operating regimes where heavy neural codecs remain advantageous** (e.g., high-bitrate 64–128 KiB change-event F1 and global pixel PSNR/SSIM when an onboard GPU is available), along with the failed ablations we encountered while developing this framework. Critique, replication reports, and pull requests are warmly welcome.
 
 <div align="center">
 <img src="assets/teaser_pareto.png" alt="SafeSync Performance-Efficiency Pareto Frontier and Open-World Uplift" width="96%"/>
-<p><em>Fig. 1. (a) Performance–efficiency Pareto frontier on SpaceNet 7 (32-KiB cap, 4-fold Author-OOF): CPU-only <code>SafeSync-ASF+</code> runs 263× faster than 4.18-GB GPU <code>LIC-TCM</code> while improving building F1 by +3.87 pp. (b) Codec-agnostic <code>TC-PCR</code> consistently lifts held-out building coverage U<sub>30</sub> across all three base codecs on SECOND Cohort 3 (8-KiB cap, 256 pairs).</em></p>
+<p><em>Fig. 1. (a) Performance–efficiency Pareto frontier on SpaceNet 7 (32-KiB cap, 4-fold Author-OOF): CPU-only <code>SafeSync-ASF+</code> runs 263× faster than 4.18-GB GPU <code>LIC-TCM</code> while improving building F1 by +3.86 pp. (b) Codec-agnostic <code>TC-PCR</code> consistently lifts held-out building coverage U<sub>30</sub> across all three base codecs on SECOND Cohort 3 (8-KiB cap, 256 pairs).</em></p>
 </div>
 
 <div align="center">
@@ -49,10 +49,10 @@ We also explicitly report the **operating regimes where heavy neural codecs rema
 
 1. **像素档案同步层（`SafeSync-ASF+` + `ZFSS` + `DGAD`）**：
    - **非对称状态分解（ASF）与平滑重建（ASF+）**：地面维护不可变的高分辨率已确认像素块档案 $a_t$，每轨仅用 1.33 KiB 的 WebP85 粗光照场 $c_t$ 吸收轨间太阳角与季节辐射漂移，配合 60 字节免图像上注确认帧（ACK）保持星地状态一致。通过双线性平滑对齐、7 像素羽化融合及校准集锁定的位置不变 JPEG 4:4:4，在 **0 神经网络参数、4 线程 CPU 仅 117.5 ms（8.51 FPS）** 的开销下，在 SpaceNet 7 四折交叉验证（Author-OOF）的 32 / 64 / 128 KiB 三档预算上分别取得 `0.4760 / 0.4964 / 0.5216` 的建筑分割 F1。
-   - **零持久矩阵种子流式草图（ZFSS）与安全复用证明**：从 24 字节事务头部的 32-bit 种子按 512 维分块流式生成正交高斯投影行（持久投影矩阵占 **0 字节**），将每区域星上历史状态压至 **12,328 字节**（较无损 PNG 历史档案降低 **99.09%**）；有限候选集联合界（Proposition 1 + 任意时域有效 Corollary 1）在全部 118,317 个有效块上实测 **0 伪稳定违约**，轨间辐射漂移下背景误触发率控制在 **19.14%–19.37%**（仅为直接 $4\times$ WebP 的约 $1/4$）。
-2. **语义特征与开放世界共建层（`US-BRS` + `TC-PCR`）**：
-   - **单位球有界残差同步（US-BRS）**：利用冻结 `DINOv2-S/14` 单位球归一化特征的坐标集中性（实测 2,770 万维坐标 $\max|\Delta q| = 41 \le 127$），实现零额外失真的闭环 `int8` 残差编码（节省 **20.62%–35.37%** 字节），并结合 NACK 风险锚点机制在 10%–30% 丢包下加速重同步。
-   - **通用即插即用开放世界路由（TC-PCR）**：面向星上未见过的未知新类别变化，结合有效变化支撑集筛选、发送端可见 30 dB 跨阈指示、Ledoit–Wolf 协方差收缩原型距离与逐格 `WebP75` 率失真 0–1 背包，可直接挂载在 `WebP`、`Scale-Hyperprior` 或 `LIC-TCM` 之上，在 SECOND Cohort 3（256 对图像，8 KiB 预算）分别带来 **`+17.37 pp` / `+13.03 pp` / `+6.48 pp`** 的建筑证据覆盖率 $U_{30}$ 提升（最高达 **`0.8336`**，精炼区 Later F1 最高达 **`0.8717`**）。
+   - **零持久矩阵种子流式草图（ZFSS）与安全复用证明**：从 24 字节事务头部的 32-bit 种子按 512 维分块单趟流式生成独立同分布缩放高斯（i.i.d. scaled Gaussian）投影行（持久投影矩阵占 **0 字节**），将每区域星上历史状态压至 **12,328 字节**（较无损 PNG 历史档案降低 **99.09%**）；有限候选集联合界（Proposition 1 + 任意时域有效 Corollary 1，归一化常数 $c\approx 1.1024$）在全部 118,317 个有效块上实测 **0 规范渲染违约**（Eq. (9) 平滑视觉后处理仅 `1 / 18,156 = 0.0055%`），轨间辐射漂移下背景误触发率控制在 **19.14%–19.37%**（仅为直接 $4\times$ WebP 的约 $1/4$）。
+2. **Tier 2 语义特征与开放世界共建层（`US-BRS` + `TC-PCR`，面向配备星上加速器的载荷）**：
+   - **单位球有界残差同步（US-BRS）**：利用冻结 `DINOv2-S/14`（88.2 MB）单位球归一化特征的坐标集中性（实测 2,770 万维坐标 $\max|\Delta q| = 41 \le 127$），实现零额外失真的闭环 `int8` 残差编码（节省 **20.62%–35.37%** 字节），并结合 NACK 风险锚点机制在 10%–30% 丢包下加速重同步。
+   - **通用即插即用开放世界路由（TC-PCR）**：面向星上未见过的未知新类别变化，结合有效变化支撑集筛选、发送端可见 30 dB 跨阈指示、Ledoit–Wolf 协方差收缩原型距离与逐格 `WebP75` 率失真 0–1 背包，可直接挂载在 `WebP`、`Scale-Hyperprior` 或 `LIC-TCM` 之上，在 SECOND Cohort 3（256 对图像，8 KiB 预算）分别带来 **`+17.37 pp` / `+13.03 pp` / `+6.48 pp`** 的建筑证据覆盖率 $U_{30}$ 提升（最高达 **`0.8336`**，全图漏检率 FNR 降至 **`0.1523`**，且全部变体严格保持在 `-2.0 pp` 全局 Later F1 安全容忍线以内）。
 
 同时，我们也在文档与实验中如实记录了**高码率 GPU 神经编解码器（`LIC-TCM` / `Hyperprior`）仍然占优的场景**（例如 64–128 KiB 的新目标变化事件 F1 和全局 PSNR/SSIM），以及我们在开发过程中亲自踩过的若干负结果坑，真诚欢迎学术界与工业界同行复现、批评与指正。
 
@@ -69,7 +69,7 @@ We also explicitly report the **operating regimes where heavy neural codecs rema
 
 | Method / 配置 | Onboard State ($N=1$) | Model / Matrix Weights | Sender Time | 32-KiB B-F1 $\uparrow$ | 64-KiB B-F1 $\uparrow$ | 128-KiB B-F1 $\uparrow$ | 32-KiB E-F1 $\uparrow$ | False-Stable Viol. $\downarrow$ |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **SafeSync-ASF+ (Ours)** | **12.3 KB** | **0 B (streamed)** | **117.5 ms (4-thr CPU)** | **0.4760** | **0.4964** | **0.5216** | 0.1899 | **0 / 118,317 (0%)** |
+| **SafeSync-ASF+ (Ours)** | **12.3 KB** | **0 B (streamed)** | **117.5 ms (4-thr CPU)** | **0.4760** | **0.4964** | **0.5216** | 0.1899 | **0 canonical** (`1/18,156` smooth) |
 | SafeSync-DGAD (Legacy Block) | 12.3 KB | 0 B (streamed) | 254.7 ms (4-thr CPU) | 0.4250 | 0.4377 | 0.4431 | 0.1337 | 0 (0.00%) |
 | SafeSync-ZFSS (Legacy Coupled) | 12.3 KB | 0 B (streamed) | 254.7 ms (4-thr CPU) | 0.3943 | 0.4122 | 0.4308 | 0.1418 | 0 (0.00%) |
 | Deterministic DCT Bound | 13.9 KB | 0 B | 291.2 ms (4-thr CPU) | 0.3852 | 0.3975 | 0.4316 | 0.1050 | 0 (0.00%) |
@@ -82,7 +82,7 @@ We also explicitly report the **operating regimes where heavy neural codecs rema
 
 <div align="center">
 <img src="assets/receiver_crops.png" alt="Six-Way Native-Resolution Visual Comparison with 2.7x Zoom-In" width="96%"/>
-<p><em>Fig. 4. Six-way native-resolution 32-KiB visual comparison on SpaceNet 7 Test Area 2 (2018-02) and Area 5 (2019-03) with dedicated 2.7× vermilion-boxed rooftop zoom-in strips. Even at 32 KiB on CPU, <code>SafeSync-ASF+</code> preserves sharp 4-m building corners (33.7 dB / 37.2 dB) where stateless <code>WebP</code>, <code>Hyperprior</code>, and <code>LIC-TCM</code> soften thin construction edges.</em></p>
+<p><em>Fig. 4. Six-way native-resolution 32-KiB visual comparison ordered left-to-right with <code>SafeSync-ASF+ (Ours)</code> on the far-right column across SpaceNet 7 Test Area 5 (2019-12) and Area 2 (2019-01), paired with 2.7× zoomed strips (top badges: target-masked PSNR; bottom badges: full-patch zoom PSNR). On CPU, <code>SafeSync-ASF+</code> achieves 34.2 dB full zoom PSNR on Area 5 (+2.8 dB vs. 4.18-GB LIC-TCM, +4.4 dB vs. Hyperprior, +7.3 dB vs. WebP) and 38.0 dB target PSNR on Area 2 (+2.8 dB vs. LIC-TCM, +7.9 dB vs. WebP).</em></p>
 </div>
 
 ---
@@ -94,16 +94,18 @@ We also explicitly report the **operating regimes where heavy neural codecs rema
 <p><em>Fig. 5. (a) Multi-AOI onboard state scaling; (b) reuse safety violations and orbital-drift false-trigger rates; (c) state footprint vs. 32-KiB Author-OOF building F1; (d) codec-agnostic <code>TC-PCR</code> uplift across WebP, Hyperprior, and LIC-TCM on SECOND Cohort 3 at 8 KiB.</em></p>
 </div>
 
-| SECOND Cohort 3 Method (8-KiB Cap, Building Held-Out) | Base Codec Weights | Mean Payload | Held-Out $U_{30}$ $\uparrow$ | Gain vs. Standalone | Held-Out FNR $\downarrow$ | Global / Refined Later F1 $\uparrow$ |
+| SECOND Cohort 3 Method (8-KiB Cap, Building Held-Out) | Base Codec Weights | Mean Payload | Held-Out $U_{30}$ $\uparrow$ | Gain vs. Standalone | Global FNR $\downarrow$ | Global Later F1 $\uparrow$ |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| Stateless Full WebP | 0 B (+DINO task) | 7.91 KiB | 0.5380 | — | 0.1699 | 0.8332 / 0.8332 |
-| **SafeSync TC-PCR (WebP Base)** | **0 B (+DINO task)** | 7.86 KiB | **0.7117** | **+17.37 pp** ($>$ Hyperprior) | 0.1747 (**0.0997** ref.) | 0.8209 / **0.8717** |
-| Full Scale-Hyperprior | 61.1 MB | 7.36 KiB | 0.6379 | — | 0.1965 | 0.8212 / 0.8212 |
-| **SafeSync TC-PCR (Hyperprior Base)** | **61.1 MB** | 7.73 KiB | **0.7682** | **+13.03 pp** (-36.0% UMR) | 0.1776 (0.1017 ref.) | 0.8133 / 0.8635 |
-| Full LIC-TCM (35-cand. GPU SOTA) | 4,179.9 MB | **7.31 KiB** | 0.7688 | — | 0.1891 | 0.8268 / 0.8268 |
-| **SafeSync TC-PCR (LIC-TCM Base)** | **4,179.9 MB** | 7.57 KiB | **0.8336** | **+6.48 pp** (-28.0% UMR) | 0.1693 (0.1053 ref.) | 0.8237 / 0.8633 |
-| **SafeSync TC-PCR (LIC-TCM Raw)** | **4,179.9 MB** | 7.86 KiB | 0.8116 | +4.29 pp | **0.1523** | 0.8239 / — |
-| Post-Hoc Hyperprior GT Oracle | 61.1 MB | 7.80 KiB | 0.8163 | Offline GT ceiling | 0.1576 | 0.8214 / — |
+| Stateless Full WebP | 0 B (+88.2M DINO) | 7.91 KiB | 0.5380 | — | 0.1699 | **0.8332** |
+| **SafeSync TC-PCR (WebP Base)** | **0 B (+88.2M DINO)** | 7.86 KiB | **0.7117** | **+17.37 pp** ($>$ Hyperprior) | 0.1747 | 0.8209 |
+| Full Scale-Hyperprior | 61.1 MB | 7.36 KiB | 0.6379 | — | 0.1965 | 0.8212 |
+| **SafeSync TC-PCR (Hyperprior Base)** | **61.1 MB** | 7.73 KiB | **0.7682** | **+13.03 pp** (-36.0% UMR) | 0.1776 | 0.8133 |
+| Full LIC-TCM (35-cand. GPU SOTA) | 4,179.9 MB | **7.31 KiB** | 0.7688 | — | 0.1891 | 0.8268 |
+| **SafeSync TC-PCR (LIC-TCM Base)** | **4,179.9 MB** | 7.57 KiB | **0.8336** | **+6.48 pp** (-28.0% UMR) | 0.1693 | 0.8237 |
+| **SafeSync TC-PCR (LIC-TCM Raw)** | **4,179.9 MB** | 7.86 KiB | <u>0.8116</u> | +4.28 pp | **0.1523** | 0.8239 |
+| Post-Hoc Hyperprior GT Oracle | 61.1 MB | 7.80 KiB | 0.8163 | Offline GT ceiling | 0.1576 | 0.8214 |
+
+> *Denominator Integrity Note*: All numbers in the table above are computed strictly on the **full-frame global test mask** (every `TC-PCR` variant remains within the locked `-0.02` global Later-F1 tolerance vs. Full WebP while sharply lifting $U_{30}$ and lowering global FNR). As a paired **same-ROI diagnostic** (evaluated exclusively on the cells refined by `TC-PCR` vs. each standalone codec on those *exact same cells*), `TC-PCR` improves refined-cell Later F1 by `+0.05 pp` on WebP (`0.8717` vs. `0.8712`), `+0.64 pp` on Hyperprior (`0.8635` vs. `0.8571`), and `+1.02 pp` on LIC-TCM (`0.8633` vs. `0.8531`).
 
 ---
 
@@ -111,8 +113,8 @@ We also explicitly report the **operating regimes where heavy neural codecs rema
 
 Working under strict zero-training, hard byte-cap, and frozen-evaluator constraints taught us several humbling lessons. Many intuitive "improvements" actually **hurt** downstream metrics when verified on locked confirmation AOIs. We document both what worked and what failed so other researchers do not repeat the same dead ends:
 
-1. **Why our early block-piecewise `ASF` lost `-8.18 pp` to `SafeSync-ASF+` (`0.3943 -> 0.4760`)**: Our first prototype satisfied Proposition 1 with zero violations, yet trailed GPU `LIC-TCM` by `-4.31 pp`! Visual crop inspection revealed why: $16\times 16$ nearest-neighbor coarse tiling injected false staircase edges into frozen EfficientNet-B3 early conv filters, while JPEG coarse encoding quietly burned `8.40 KiB` of a `32-KiB` cap. Moving to WebP85 coarse (`1.33 KiB`), bilinear transfer $\widetilde U$, $r=7$-px feathering, and calibration-locked position-invariant JPEG 4:4:4 kept Proposition 1 untouched and resolved the bottleneck.
-2. **The hidden `2.36 MB` projection-matrix trap at $N=1$**: Storing a $24\times 12{,}288$ `float64` matrix `A` takes `2.36 MB`—*larger* than a lossless PNG history archive for a single AOI! Streaming row-orthonormal Gaussian rows in 512-coordinate chunks from a 32-bit header seed removed all `2.36 MB` of persistent matrix RAM while remaining numerically identical across 47,616 blocks (max float discrepancy $5.55\times 10^{-16}$).
+1. **Why our early block-piecewise `ASF` lost `-8.17 pp` to `SafeSync-ASF+` (`0.3943 -> 0.4760`)**: Our first prototype satisfied Proposition 1 with zero violations, yet trailed GPU `LIC-TCM` by `-4.31 pp`! Visual crop inspection revealed why: $16\times 16$ nearest-neighbor coarse tiling injected false staircase edges into frozen EfficientNet-B3 early conv filters, while JPEG coarse encoding quietly burned `8.40 KiB` of a `32-KiB` cap. Moving to WebP85 coarse (`1.33 KiB`), bilinear transfer $\widetilde U$, $r=7$-px feathering, and calibration-locked position-invariant JPEG 4:4:4 kept Proposition 1 exact on the archive and canonical render (`0 / 18,156` canonical violations, `1 / 18,156 = 0.0055%` after smooth visual post-filtering) and resolved the bottleneck.
+2. **The hidden `2.36 MB` projection-matrix trap at $N=1$**: Storing a $24\times 12{,}288$ `float64` matrix `A` takes `2.36 MB`—*larger* than a lossless PNG history archive for a single AOI! Streaming i.i.d. scaled Gaussian rows ($A_{ij}\sim\mathcal{N}(0, 1/D_0)$) in 512-coordinate chunks from a 32-bit header seed removed all `2.36 MB` of persistent matrix RAM while preserving exact $\chi_k^2$ concentration and bit-identical sketches across 47,616 blocks (max float discrepancy $5.55\times 10^{-16}$).
 3. **Three intuitive ablations that *failed* (and were rejected on evidence)**:
    - *Finer `32×32` tiling (`k=12`)*: Intuitively expected to localize smaller buildings better, but fragmented U-Net receptive fields across more seams, **dropping** dev building F1 by `-2.7` to `-3.7 pp` while doubling onboard state (`24.6 KB/AOI`).
    - *Edge-weighted block ranking*: Prioritizing high-gradient blocks increased per-block JPEG cost, **cutting** the number of transmitted blocks by `12%–18%` and losing blind 8-AOI OOF F1 across all three caps (`0.4743 / 0.4961 / 0.5168`).
@@ -121,7 +123,7 @@ Working under strict zero-training, hard byte-cap, and frozen-evaluator constrai
 5. **Why `TC-PCR` needed active-support voting**: On SECOND Cohort 3, naive full-image residual routing was outvoted by ~53 unchanged background cells. Restricting packet decisions strictly to the active changed support and explicitly rewarding 30-dB threshold crossings unlocked monotonic gains across every base codec.
 
 > **中文复盘精华（真实踩坑记录）**：
-> - **早期分块 `ASF` 坑（`-8.18 pp`）**：初版 $16\times 16$ 最近邻块拼接虽满足 0 违约，但会在复用区制造棋盘格伪边缘误导冻结 U-Net，且粗光照场 JPEG 偷走 `8.40 KiB`；改为 WebP85（`1.33 KiB`）+ 双线性平滑对齐 + 位置无关 JPEG 4:4:4 才真正打通低码率性能。
+> - **早期分块 `ASF` 坑（`-8.17 pp`）**：初版 $16\times 16$ 最近邻块拼接虽满足 0 违约，但会在复用区制造棋盘格伪边缘误导冻结 U-Net，且粗光照场 JPEG 偷走 `8.40 KiB`；改为 WebP85（`1.33 KiB`）+ 双线性平滑对齐 + 位置无关 JPEG 4:4:4 才真正打通低码率性能。
 > - **单区域 `2.36 MB` 投影矩阵坑**：若把 $24\times 12288$ 双精度矩阵常驻内存，单区域（$N=1$）比无损 PNG 还占内存；改为 32-bit 种子按 512 维流式重生成后，才实现单/多区域稳定减容 **99.09%**。
 > - **三个直觉上“应该更好”但实测翻车的改动**：(1) 细分 `32×32` 网格反而打碎 U-Net 感受野，导致验证集 F1 掉 **`-2.7 ~ -3.7 pp`** 且状态翻倍；(2) 边缘加权排序因高纹理块编码更贵，导致可传块数减少 **`12%–18%`**、盲测三档全降；(3) 地面端零训练后处理滤波（`G1–G5`）破坏了冻结评估器对原生锐利像素的分布预期。
 > - **像素指标与 4 米建筑分割的背离**：无状态编解码器重编码当轨季节色差而拿到更高全局 SSIM，却糊掉了小目标屋顶；开放世界路由中同样必须把裁决限定在**有效变化支撑集**并奖励 **30 dB 跨阈块**，才能防止大量静态背景块淹没真正的未知变化。
@@ -195,9 +197,9 @@ If you find this codebase, protocol design, or ablation analysis helpful in your
 
 ```bibtex
 @article{wu2026safesync,
-  author  = {Wu, Yonghao},
-  title   = {{SafeSync}: Zero-Footprint Certified State Synchronization and Open-World Semantic Routing for Bandwidth-Constrained {LEO} {Earth} Observation},
-  journal = {IEEE Transactions},
+  author  = {Wu, Yonghao and Wu, Jiayang and Gan, Wensheng and Yu, Philip S.},
+  title   = {{SafeSync}: Zero-Matrix Certified State Synchronization and Codec-Agnostic Open-World Routing for Bandwidth-Constrained {LEO} {Earth} Observation},
+  journal = {IEEE Transactions on Geoscience and Remote Sensing},
   year    = {2026},
   note    = {Manuscript under review; code available at https://github.com/WYH302/SafeSync}
 }

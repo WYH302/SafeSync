@@ -65,8 +65,8 @@ def main() -> None:
     asf32_f1 = float(asf_plus["by_budget"]["32768"]["oof_building_f1"])
     tcm32_f1 = float(l32["tcm"]["building_f1"])
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.16, 2.56), gridspec_kw={"width_ratios": [1.18, 1.0]})
-    fig.subplots_adjust(left=0.072, right=0.994, bottom=0.180, top=0.875, wspace=0.25)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.16, 2.38), gridspec_kw={"width_ratios": [1.18, 1.0]})
+    fig.subplots_adjust(left=0.072, right=0.994, bottom=0.188, top=0.872, wspace=0.25)
 
     # ------------------------------------------------------------------
     # Panel (a): Performance-Efficiency Pareto Frontier (SpaceNet 7, 32 KiB)
@@ -81,18 +81,18 @@ def main() -> None:
          (0.28, 0.474), "left", True),
         ("4x WebP Ref (1,495 viol.)", 0.2264, float(l32["lowres_4x_webp_12k"]["building_f1"]),
          PALETTE["lowres"], "^", 32, (0.42, 0.438), "left", False),
-        ("Full Hist. (1.35 MB)", 0.2575, float(l32["full_cache_gate30"]["building_f1"]),
+        ("Full Hist. (1.34 MiB)", 0.2575, float(l32["full_cache_gate30"]["building_f1"]),
          PALETTE["full_hist"], "P", 34, (0.45, 0.409), "left", False),
         ("Legacy ZFSS", 0.2547, float(l32["gaussian_20261029"]["building_f1"]),
-         PALETTE["safesync_sub"], "o", 30, (0.072, 0.369), "left", False),
+         PALETTE["safesync_sub"], "o", 30, (0.18, 0.362), "right", False),
         ("DCT (13.9 KB)", 0.2912, float(l32["dct_bound"]["building_f1"]),
          PALETTE["dct"], "s", 28, (0.48, 0.371), "left", False),
         ("Stateless WebP", 2.06, float(l32["full_webp"]["building_f1"]),
          PALETTE["webp"], "v", 32, (2.75, 0.278), "left", False),
         ("Hyperprior\n(61.1 MB, GPU)", 11.54, float(l32["learned_hyperprior_q1_8"]["building_f1"]),
-         PALETTE["hyperprior"], "D", 36, (3.20, 0.335), "left", False),
+         PALETTE["hyperprior"], "D", 36, (8.20, 0.338), "right", False),
         ("LIC-TCM\n(4.18 GB, GPU)", 30.88, tcm32_f1,
-         PALETTE["tcm"], "*", 62, (11.5, 0.408), "left", False),
+         PALETTE["tcm"], "*", 62, (23.0, 0.398), "center", False),
     ]
 
     for lbl, xs, ys, col, mk, sz, (tx, ty), ha, is_hero in points:
@@ -111,7 +111,7 @@ def main() -> None:
     ax1.annotate("", xy=(0.145, asf32_f1 + 0.008), xytext=(28.0, tcm32_f1 + 0.011),
                  arrowprops=dict(arrowstyle="-|>", color=PALETTE["safesync"], lw=0.90,
                                  linestyle="--", connectionstyle="arc3,rad=0.16"), zorder=6)
-    ax1.text(7.2, 0.506, "263x faster, +3.87 pp\n(0 B vs. 4.18 GB)", fontsize=6.25, fontweight="bold",
+    ax1.text(7.2, 0.506, "263x faster, +3.86 pp\n(0 B vs. 4.18 GB)", fontsize=6.25, fontweight="bold",
              color="#000000", ha="center", va="center",
              bbox=dict(boxstyle="round,pad=0.18", facecolor="white", edgecolor=PALETTE["safesync"], lw=0.50, alpha=0.96),
              zorder=9)

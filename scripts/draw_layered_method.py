@@ -179,7 +179,7 @@ def main() -> None:
     ax.text(51.8, 60.9, "SafeSync World-State Co-Construction", color=c_green, fontsize=7.4, fontweight="bold", ha="center", va="center", zorder=5)
     ax.text(51.8, 57.6,
             "ZFSS: 32-bit seed $\\rightarrow$ 0 B matrix (-99.09%)\n"
-            "ASF+: #1 OOF F1 (0.476/0.522) in 118 ms CPU\n"
+            "ASF+: #1 OOF B-F1 (0.476/0.522), 118 ms CPU\n"
             "TC-PCR: $U_{30}$=0.834 (+6.5 pp vs. 4.18G TCM)",
             color="#052E16", fontsize=6.3, ha="center", va="center", linespacing=1.22, zorder=5)
 
@@ -187,8 +187,8 @@ def main() -> None:
     card(69.6, 55.0, 29.3, 7.2, fill="#FFFFFF", edge="#CBD5E1", lw=0.85, r=0.65, shadow=False, zorder=3)
     ax.text(84.25, 61.0, "Onboard State (N = 1 Area)", color=c_navy, fontsize=7.2, fontweight="bold", ha="center", va="center", zorder=5)
     for idx, (lbl, bw, col, vtxt) in enumerate([
-        ("Cached Matrix", 11.2, "#94A3B8", "2.37 MB"),
-        ("PNG History", 6.4, "#64748B", "1.35 MB"),
+        ("Cached Matrix", 11.2, "#94A3B8", "2.36 MB"),
+        ("PNG History", 6.4, "#64748B", "1.34 MiB"),
         ("SafeSync ZFSS", 0.7, c_green, "12.3 KB (-99.1%)"),
     ]):
         by = 59.1 - idx * 1.65
@@ -207,7 +207,7 @@ def main() -> None:
     card(43.8, 0.4, 13.4, 53.1, fill="#FFFBEB", edge=c_amber_bd, lw=1.0, r=0.95)
     card(57.8, 0.4, 41.8, 53.1, fill="#F8FAFC", edge=c_teal_bd, lw=1.1, r=1.0)
 
-    badge(1.2, 50.3, 33.2, 2.5, "SPACE: LEO Sender (CPU-Only, 0 GPU)", fill=c_blue, edge=c_blue, fs=7.3)
+    badge(1.2, 50.3, 33.2, 2.5, "SPACE: LEO Sender (T1: CPU | T2: NPU/GPU)", fill=c_blue, edge=c_blue, fs=6.9)
     badge(44.4, 50.3, 12.2, 2.5, "SPACE-GROUND", fill=c_amber, edge=c_amber, fs=6.8)
     badge(58.6, 50.3, 32.8, 2.5, "GROUND: World-State Archive", fill=c_teal, edge=c_teal, fs=7.3)
 
@@ -249,7 +249,7 @@ def main() -> None:
 
     card(19.0, 37.2, 13.4, 6.7, fill=c_green_lt, edge=c_green, lw=0.75, r=0.55, shadow=False, zorder=4)
     ax.text(25.7, 42.6, "Safety Gate (Prop. 1)", color=c_green, fontsize=5.95, fontweight="bold", ha="center", va="center", zorder=5)
-    ax.text(25.7, 39.4, "$L_b \\leq \\tau \\rightarrow$ STABLE\n0 False-Stable Viol.",
+    ax.text(25.7, 39.4, "$L_b \\leq \\tau \\rightarrow$ STABLE\n0 Canonical Viol.",
             color="#052E16", fontsize=5.8, ha="center", va="center", linespacing=1.2, zorder=5)
 
     card(19.0, 29.5, 13.4, 6.8, fill=c_blue_lt, edge=c_blue, lw=0.75, r=0.55, shadow=False, zorder=4)
@@ -321,7 +321,7 @@ def main() -> None:
 
     card(75.6, 23.6, 22.6, 22.6, fill=c_green_lt, edge=c_green, lw=0.95, r=0.75, shadow=False, zorder=3)
     ax.text(86.9, 44.8, "Co-Constructed Render", color=c_green, fontsize=6.9, fontweight="bold", ha="center", va="center", zorder=5)
-    badge(76.5, 41.5, 20.8, 2.1, "$\\hat{x}_t^+ = \\mathcal{R}(H a_t + \\tilde{U} c_t)$", fill="#FFFFFF", edge=c_green, color=c_green, fs=6.25)
+    badge(76.2, 41.4, 21.4, 2.2, r"Eq.(9): $(1-W)\odot(a_t+\tilde{U}(c_t-Da_t))+W\odot a_t$", fill="#FFFFFF", edge=c_green, color=c_green, fs=5.15)
 
     img_box(patch_rgb, 76.5, 31.8, 7.6, 8.7, edge=c_green, lw=0.95)
     for bx, by in [(80.2, 37.8), (81.3, 37.1), (79.1, 34.0)]:
@@ -331,8 +331,8 @@ def main() -> None:
             "SpaceNet 7 OOF\n(ASF+ CPU #1):\n32K: 0.4760\n(+3.9 pp TCM)\n128K: 0.5216",
             color="#052E16", fontsize=5.95, fontweight="bold", ha="center", va="center", linespacing=1.22, zorder=5)
     badge(76.5, 24.5, 20.8, 5.8,
-          "0 Violations / 118,317 Blocks\n263× Faster than GPU LIC-TCM",
-          fill="#FFFFFF", edge=c_green_bd, color=c_navy, fs=6.05)
+          "0 Canonical / 1 Smooth Viol. (18.2k)\n263× Faster than GPU LIC-TCM",
+          fill="#FFFFFF", edge=c_green_bd, color=c_navy, fs=5.85)
 
     arrow((74.7, 41.2), (75.6, 39.2), color=c_blue, lw=1.15, scale=8.5)
     arrow((74.7, 30.0), (75.6, 33.8), color=c_navy, lw=1.15, scale=8.5)
@@ -402,14 +402,14 @@ def main() -> None:
     ax.text(86.15, 17.2, "SECOND 8-KiB Held-Out $U_{30}$", color=c_amber, fontsize=6.7, fontweight="bold", ha="center", va="center", zorder=5)
 
     for idx, (mlbl, uval, col) in enumerate([
-        ("WebP", 0.5380, "#64748B"),
-        ("Hyperprior", 0.6379, "#9333EA"),
-        ("LIC-TCM", 0.7688, "#D55E00"),
-        ("TC-PCR(TCM)", 0.8336, c_blue),
+        ("WebP", 0.5380, "#334155"),
+        ("Hyperprior", 0.6379, "#4D7C6F"),
+        ("LIC-TCM", 0.7688, "#B5533C"),
+        ("TC-PCR(TCM)", 0.8336, "#1B4965"),
     ]):
         by = 14.8 - idx * 2.0
         is_best = mlbl == "TC-PCR(TCM)"
-        ax.text(74.5, by, mlbl, color=c_blue if is_best else c_navy,
+        ax.text(74.5, by, mlbl, color="#1B4965" if is_best else c_navy,
                 fontsize=5.7 if is_best else 5.95, fontweight="bold" if is_best else "normal", va="center", zorder=5)
         bw = uval * 9.8
         ax.add_patch(FancyBboxPatch((82.6, by - 0.48), bw, 0.96,
@@ -418,7 +418,7 @@ def main() -> None:
         ax.text(82.9 + bw, by, f"{uval:.3f}", color=col, fontsize=5.9, fontweight="bold", va="center", zorder=5)
 
     badge(74.7, 2.5, 22.9, 5.1,
-          "#1 $U_{30}$: +6.48 pp vs. 4.18G LIC-TCM\n+17.4 pp WebP | FNR 0.152 | F1 0.872",
+          "#1 $U_{30}$: +6.48 pp vs. 4.18G LIC-TCM\n+17.4 pp WebP | Global FNR 0.152",
           fill="#FFFFFF", edge=c_amber, color=c_navy, fs=5.55)
     arrow((73.3, 10.0), (74.0, 10.0), color=c_teal, lw=1.15, scale=8.5)
 

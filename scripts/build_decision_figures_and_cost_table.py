@@ -152,7 +152,7 @@ def build_figure2_storage_vs_utility(
     cap32_png_8aoi = next(r for r in png_profile["per_cap"] if int(r["budget"]) == 32768)["sum_AOI_mean_PNG_bytes"]
     mean_png_per_aoi = cap32_png_8aoi / 8.0
 
-    fig, axes = plt.subplots(2, 2, figsize=(7.16, 3.86), constrained_layout=True)
+    fig, axes = plt.subplots(2, 2, figsize=(7.16, 3.48), constrained_layout=True)
 
     # Panel (a): Total Sender Historical State vs Monitored Areas N (1..16)
     ns = np.arange(1, 17)
@@ -190,9 +190,11 @@ def build_figure2_storage_vs_utility(
     b1 = ax.bar(xb - wb / 2, viol_pct, width=wb, color="#B5533C", edgecolor="#1F2937", linewidth=0.45, alpha=0.92, label="False-Stable Violation Rate (%)")
     b2 = ax.bar(xb + wb / 2, drift_pct, width=wb, color="#1B4965", edgecolor="#1F2937", linewidth=0.45, alpha=0.92, label="Orbital-Drift False Triggers (%)")
     for rect, v in zip(b1, viol_pct):
-        lbl = "0% (0)" if v == 0 else f"{v:.1f}%"
-        x_pos = rect.get_x() + rect.get_width() / 2 - (0.04 if v == 0 else 0.0)
-        ax.text(x_pos, v + 2.0, lbl, ha="center", fontsize=6.7, color="#000000", fontweight="bold")
+        if v == 0:
+            ax.text(rect.get_x() + rect.get_width() / 2 - 0.05, 1.8, "0% orth.\n(0.006% sm.)",
+                    ha="center", va="bottom", fontsize=5.65, color="#000000", fontweight="bold", linespacing=1.05)
+        else:
+            ax.text(rect.get_x() + rect.get_width() / 2, v + 2.0, f"{v:.1f}%", ha="center", fontsize=6.7, color="#000000", fontweight="bold")
     for rect, v in zip(b2, drift_pct):
         ax.text(rect.get_x() + rect.get_width() / 2, v + 2.0, f"{v:.1f}%", ha="center", fontsize=6.7, color="#000000", fontweight="bold")
     ax.set_xticks(xb, methods_bar, fontsize=7.4)
@@ -234,28 +236,21 @@ def build_figure2_storage_vs_utility(
     ax.grid(alpha=0.22, linewidth=0.38, color="#CBD5E1")
     ax.spines[["top", "right"]].set_visible(False)
 
-    # Panel (d): Universal Plug-and-Play TC-PCR Across All 3 Codec Tiers on SECOND (8 KiB, Building)
+    # Panel (d): Universal Plug-and-Play TC-PCR Across All 3 Codec Tiers on SECOND (8 KiB, Building — strictly GLOBAL F1)
     ax = axes[1, 1]
     brows = sec_univ["results_by_class"]["Building"]["rows"]
     ora = diag["oracle_diagnostic_h5_b8192"]["methods"]
-    rep = _index_sec_repaired(sec_repaired)
-    ref_roi_path = ROOT / "results/task_evidence/second_tcpcr_v2_knapsack_v1/refined_roi_summary.json"
-    ref_roi_map = {}
-    if ref_roi_path.is_file():
-        for r in read_json(ref_roi_path)["rows"]:
-            if r["heldout_class"] == "Building":
-                ref_roi_map[r["base_codec"]] = r
     tiers = [
-        ("WebP", "webp_standalone", "webp_tcpcr_unknown", "#334155", "v", (0.520, 0.8215), (0.612, 0.8330), "+TC-PCR (+17.4 pp)"),
-        ("Hyperprior", "hyperprior_standalone", "hyperprior_tcpcr_unknown", "#4D7C6F", "D", (0.576, 0.8100), (0.612, 0.8025), "+TC-PCR (HP, +13.0 pp)"),
-        ("LIC-TCM", "tcm_standalone", "tcm_tcpcr_unknown", "#B5533C", "*", (0.715, 0.8300), (0.708, 0.8415), "TC-PCR(TCM) #1\n0.834 (+6.5 pp)"),
+        ("WebP", "webp_standalone", "webp_tcpcr_unknown", "#334155", "v", (0.525, 0.8370), (0.618, 0.8315), "+TC-PCR (+17.4 pp)"),
+        ("Hyperprior", "hyperprior_standalone", "hyperprior_tcpcr_unknown", "#4D7C6F", "D", (0.585, 0.8165), (0.662, 0.8045), "+TC-PCR (HP, +13.0 pp)"),
+        ("LIC-TCM", "tcm_standalone", "tcm_tcpcr_unknown", "#B5533C", "*", (0.720, 0.8315), (0.718, 0.8400), "TC-PCR(TCM) #1\n0.834 (+6.5 pp)"),
     ]
     for name, k_st, k_tp, col, mk, xy_st, xy_tp, tp_lbl in tiers:
         st, tp = brows[k_st], brows[k_tp]
         is_tcm = name == "LIC-TCM"
         tp_col = "#1B4965" if is_tcm else col
-        ax.scatter(st["u30"], st["later_f1"], color=col, marker=mk, s=34, alpha=0.92, zorder=3)
-        ax.scatter(tp["u30"], tp["later_f1"], color=tp_col, marker="o", s=46 if is_tcm else 36,
+        ax.scatter(st["u30"], st["later_f1"], color=col, marker=mk, s=36, alpha=0.92, zorder=3)
+        ax.scatter(tp["u30"], tp["later_f1"], color=tp_col, marker="o", s=48 if is_tcm else 38,
                    edgecolors="#000000" if is_tcm else "white", linewidths=0.55 if is_tcm else 0.40, zorder=5)
         ax.annotate("", xy=(tp["u30"] - 0.005, tp["later_f1"]), xytext=(st["u30"] + 0.005, st["later_f1"]),
                     arrowprops=dict(arrowstyle="->", color=tp_col, lw=0.95))
@@ -265,32 +260,21 @@ def build_figure2_storage_vs_utility(
                     fontweight="bold" if is_tcm else "normal",
                     arrowprops=dict(arrowstyle="->", color=tp_col, lw=0.60, alpha=0.85))
 
-    ref_webp = ref_roi_map.get("webp", {}).get("tcpcr_v2_refined_roi_later_f1", 0.8717)
-    ref_hp = ref_roi_map.get("hyperprior", {}).get("tcpcr_v2_refined_roi_later_f1", 0.8635)
-    ref_tcm = ref_roi_map.get("tcm", {}).get("tcpcr_v2_refined_roi_later_f1", 0.8633)
-    ax.scatter(brows["webp_tcpcr_unknown"]["u30"], ref_webp, color="#5C88AA", marker="P", s=42, edgecolors="#1F2937", linewidths=0.45, zorder=6)
-    ax.scatter(brows["hyperprior_tcpcr_unknown"]["u30"], ref_hp, color="#5C88AA", marker="P", s=34, edgecolors="#1F2937", linewidths=0.40, zorder=5)
-    ax.scatter(brows["tcm_tcpcr_unknown"]["u30"], ref_tcm, color="#5C88AA", marker="P", s=34, edgecolors="#1F2937", linewidths=0.40, zorder=5)
-    ax.annotate(f"Refined ROI #1\n(WebP {ref_webp:.4f})",
-                (brows["webp_tcpcr_unknown"]["u30"], ref_webp),
-                xytext=(0.520, 0.8625), fontsize=6.2, color="#000000", fontweight="bold",
-                arrowprops=dict(arrowstyle="->", color="#5C88AA", lw=0.75))
-    ax.annotate(f"HP {ref_hp:.3f}",
-                (brows["hyperprior_tcpcr_unknown"]["u30"], ref_hp),
-                xytext=(0.742, 0.8710), fontsize=5.95, color="#000000")
-    ax.annotate(f"TCM {ref_tcm:.3f}",
-                (brows["tcm_tcpcr_unknown"]["u30"], ref_tcm),
-                xytext=(0.806, 0.8710), fontsize=5.95, color="#000000")
+    # Show locked -0.02 global Later-F1 safety floor & Hyperprior GT Oracle strictly on the same global denominator
+    f1_floor = brows["webp_standalone"]["later_f1"] - 0.02
+    ax.axhline(f1_floor, color="#B5533C", linestyle="--", linewidth=0.65, alpha=0.75, zorder=2)
+    ax.text(0.522, f1_floor - 0.0020, "Locked -0.02 F1 floor (0.813)", fontsize=5.85, color="#000000", va="top")
+
     ax.scatter(ora["oracle_hybrid_with_full_hp"]["u30"], ora["oracle_hybrid_with_full_hp"]["later_f1"],
-               color="#64748B", marker="p", s=34, edgecolors="#1F2937", linewidths=0.40, zorder=4)
-    ax.annotate("HP GT Oracle", (ora["oracle_hybrid_with_full_hp"]["u30"], ora["oracle_hybrid_with_full_hp"]["later_f1"]),
-                xytext=(0.766, 0.8035), fontsize=6.15, color="#000000",
+               color="#64748B", marker="p", s=36, edgecolors="#1F2937", linewidths=0.40, zorder=4)
+    ax.annotate("HP GT Oracle\n(0.816)", (ora["oracle_hybrid_with_full_hp"]["u30"], ora["oracle_hybrid_with_full_hp"]["later_f1"]),
+                xytext=(0.822, 0.8045), fontsize=6.0, color="#000000", ha="center",
                 arrowprops=dict(arrowstyle="->", color="#334155", lw=0.55))
 
     ax.set_xlim(0.515, 0.872)
-    ax.set_ylim(0.799, 0.884)
+    ax.set_ylim(0.802, 0.852)
     ax.set_xlabel("Held-out building 30-dB coverage $U_{30}$")
-    ax.set_ylabel("Held-out building Later F1")
+    ax.set_ylabel("Global held-out Later F1")
     ax.set_title("(d) Universal TC-PCR Over Every Codec (8 KiB)", loc="center", pad=4, fontsize=8.5, fontweight="bold", color="#000000")
     ax.grid(alpha=0.22, linewidth=0.38, color="#CBD5E1")
     ax.spines[["top", "right"]].set_visible(False)
@@ -321,12 +305,11 @@ def build_figure3_second_four_cell_and_oracle(
     points = [
         ("Cell A: Abs.+Change", cells["absolute_change"]["u30"], cells["absolute_change"]["later_f1"], cells["absolute_change"]["later_fnr"], "#8C6D46", "s"),
         ("Cell C: Res.+Change (locked)", cells["residual_change"]["u30"], cells["residual_change"]["later_f1"], cells["residual_change"]["later_fnr"], "#4D7C6F", "o"),
-        ("Cell D: Res.+Unknown (locked)", cells["residual_current"]["u30"], cells["residual_current"]["later_f1"], cells["residual_current"]["later_fnr"], "#5C88AA", "^"),
+        ("Cell D: Res.+Unknown (locked)", cells["residual_current"]["u30"], cells["residual_current"]["later_f1"], cells["residual_current"]["later_fnr"], "#64748B", "d"),
         ("Full WebP (8 KiB)", brows["webp_standalone"]["u30"], brows["webp_standalone"]["later_f1"], brows["webp_standalone"]["fnr"], "#334155", "X"),
         ("TC-PCR (WebP Base)", brows["webp_tcpcr_unknown"]["u30"], brows["webp_tcpcr_unknown"]["later_f1"], brows["webp_tcpcr_unknown"]["fnr"], "#64748B", "o"),
         ("Full Hyperprior (8 KiB)", brows["hyperprior_standalone"]["u30"], brows["hyperprior_standalone"]["later_f1"], brows["hyperprior_standalone"]["fnr"], "#4D7C6F", "h"),
         ("TC-PCR (HP Base)", brows["hyperprior_tcpcr_unknown"]["u30"], brows["hyperprior_tcpcr_unknown"]["later_f1"], brows["hyperprior_tcpcr_unknown"]["fnr"], "#5C88AA", "^"),
-        ("TC-PCR Refined ROI (WebP)", brows["webp_tcpcr_unknown"]["u30"], ref_roi_map["webp"]["tcpcr_v2_refined_roi_later_f1"], ref_roi_map["webp"]["tcpcr_v2_refined_roi_fnr"], "#1B4965", "P"),
         ("Full LIC-TCM (8 KiB)", brows["tcm_standalone"]["u30"], brows["tcm_standalone"]["later_f1"], brows["tcm_standalone"]["fnr"], "#B5533C", "p"),
         ("TC-PCR (TCM Base, #1)", brows["tcm_tcpcr_unknown"]["u30"], brows["tcm_tcpcr_unknown"]["later_f1"], brows["tcm_tcpcr_unknown"]["fnr"], "#1B4965", "*"),
         ("TC-PCR (TCM Raw, min FNR)", brows["tcm_tcpcr_unknown_raw"]["u30"], brows["tcm_tcpcr_unknown_raw"]["later_f1"], brows["tcm_tcpcr_unknown_raw"]["fnr"], "#5C88AA", "D"),
