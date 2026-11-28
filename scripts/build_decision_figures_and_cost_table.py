@@ -171,14 +171,16 @@ def build_figure2_storage_vs_utility(
     ax.plot(ns, dct_mb, label="DCT bound (0 shared mat.)", color="#7B8A9B", marker="s", markersize=2.6, linewidth=0.82)
     ax.plot(ns, lowres_mb, label="Low-res 4x WebP ref", color="#64748B", marker="^", markersize=2.7, linewidth=0.82, linestyle=":")
     ax.set_yscale("log")
-    ax.set_ylim(0.007, 2200.0)
+    ax.set_ylim(0.007, 4.0e4)
+    ax.set_yticks([1e-1, 1e1, 1e3])
     ax.set_xticks([1, 4, 8, 12, 16])
     ax.set_xlabel("Monitored geographic areas $N$")
     ax.set_ylabel("Sender historical state (MiB)")
     ax.set_title("(a) Multi-AOI Onboard State Scaling", loc="center", pad=4, fontsize=8.6, fontweight="bold", color="#000000")
     ax.grid(alpha=0.22, which="major", linewidth=0.38, color="#CBD5E1")
     ax.spines[["top", "right"]].set_visible(False)
-    ax.legend(frameon=True, facecolor="white", framealpha=0.92, edgecolor="none", fontsize=6.25, ncol=2, loc="upper left", columnspacing=0.70, handlelength=1.6)
+    ax.legend(frameon=False, fontsize=6.15, ncol=2, loc="upper left",
+              columnspacing=0.70, handlelength=1.55, labelspacing=0.26, borderaxespad=0.25)
 
     # Panel (b): Reuse Certificate Violations & Pass-to-Pass Orbital-Drift False Triggers (32 KiB)
     ax = axes[0, 1]
